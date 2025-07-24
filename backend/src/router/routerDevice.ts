@@ -6,6 +6,8 @@ import { postDevice } from "../controlers/Device/postDevice";
 import { updateDevice } from "../controlers/Device/updateDevice";
 import { getUser } from "../controlers/User/getUser";
 import { postUser } from "../controlers/User/postUser";
+import { loginUser } from "../controlers/User/loginUser";
+import { authMiddleware } from "../middleware/authMiddleware";
 
 export const routerDevice = Router();
 
@@ -17,4 +19,10 @@ routerDevice.patch("/devices/:id", patchDevice);
 
 routerDevice.get("/users", getUser);
 routerDevice.post("/users", postUser);
+routerDevice.post("/login", loginUser);
+
+// Пример защищённого роута:
+routerDevice.get("/me", authMiddleware, (req, res) => {
+  res.json({ user: req.user });
+});
 

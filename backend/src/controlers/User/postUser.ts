@@ -1,19 +1,23 @@
 import { PrismaClient } from "../../../generated/prisma";
 import { Request, Response } from "express";
 import { TRequestUser } from "../../utils/types/requestDevice";
-import crypto from "crypto";
+import bcrypt from "bcrypt";
+
 export const postUser = async (req: Request, res: Response) => {
   const { login, password, role } = <TRequestUser>req.body;
-  console.log(login,password,role);
-  
-  const hashPassword = crypto.createHash("md5").update(password).digest("hex");
+  console.log(login, password, role);
 
   try {
     if (!login || !password) {
-      res.status(500).json({ error: "не все поля указаны в json" });
+      return res.status(400).json({ error: "не все поля указаны в json" });
     }
-
     const prisma = new PrismaClient();
+    const existingUser = await prisma.user.findUnique({ where: { login } });
+    if (existingUser) {
+      await prisma.$disconnect();
+      return res.status(409).json({ error: "Пользователь уже существует" });
+    }
+    const hashPassword = await bcrypt.hash(password, 10);
     await prisma.user.create({
       data: { login: login, password: hashPassword, role: role || "user" },
     });
