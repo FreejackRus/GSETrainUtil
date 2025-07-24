@@ -1,0 +1,16 @@
+.login{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 200px;
+    gap: 20px;
+    height: 300px;
+    width: 200px;
+    &__btn-login{
+
+    }
+    &__btn-registration{
+
+    }
+}

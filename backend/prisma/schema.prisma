@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model technicalWorkLog {
+  id                Int      @id @default(autoincrement())
+  dataWork          DateTime
+  applicationNumber Int
+  typeWork          String
+  trainNumber       String
+  typeCarriage      String
+  carriageNumber    String
+  equipment         Int
+  snEquipment       String
+}
+
+model applicationNumber {
+  id                Int @id @default(autoincrement())
+  applicationNumber Int
+}
+
+model typeWork {
+  id       Int    @id @default(autoincrement())
+  typeWork String
+}
+
+model trainNumber {
+  id          Int    @id @default(autoincrement())
+  trainNumber String
+}
+
+model typeCarriage {
+  id           Int    @id @default(autoincrement())
+  typeCarriage String
+}
+
+model carriageNumber {
+  id             Int    @id @default(autoincrement())
+  carriageNumber String
+}
+
+model equipment {
+  id        Int    @id @default(autoincrement())
+  equipment String
+}
+
+model snEquipment {
+  id          Int    @id @default(autoincrement())
+  snEquipment String
+}
+
+model macAddress {
+  id Int @id @default(autoincrement())
+  macAddress String
+}
+
+model countEquipment {
+  id    Int @id @default(autoincrement())
+  count Int
+}
+
+model completedJob {
+  id           Int    @id @default(autoincrement())
+  completedJob String
+}
+
+model currentLocation {
+  id              Int    @id @default(autoincrement())
+  currentLocation String
+}
+
+model Device {
+  id     Int    @id @default(autoincrement())
+  status String
+  name   String
+  count  Int
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  login    String
+  password String
+  role     String
+}

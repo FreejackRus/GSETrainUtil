@@ -1,0 +1,14 @@
+.list-device {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+    align-items: center;
+  &__item {
+    width: 300px;
+    border: 1px solid black;
+    display: flex;
+    background: #faf7fa;
+    flex-direction: row;
+    gap: 20px;
+  }
+}
