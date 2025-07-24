@@ -15,78 +15,102 @@ datasource db {
 }
 
 model technicalWorkLog {
-  id                Int      @id @default(autoincrement())
-  dataWork          DateTime
-  applicationNumber Int
-  typeWork          String
-  trainNumber       String
-  typeCarriage      String
-  carriageNumber    String
-  equipment         Int
-  snEquipment       String
-}
+  id       Int      @id @default(autoincrement())
+  dataWork DateTime
 
-model applicationNumber {
-  id                Int @id @default(autoincrement())
   applicationNumber Int
+
+  connectionTypeWork typeWork
+  typeWorkId         Int
+
+  // connectionTrainNumber trainNumber @relation(fields: [trainNumberId], references: [id])
+  // trainNumberId         Int
+
+  // connectionTypeCarriage typeCarriage @relation(fields: [typeCarriageId], references: [id])
+  // typeCarriageId         Int
+
+  // connectionEquipmentId equipment @relation(fields: [carriageNumberId], references: [id])
+  // carriageNumberId      Int
+
+  // connectionEquipment carriageNumber @relation(fields: [equipmentId], references: [id])
+  // equipmentId         Int
+
+  // connectionSnEquipment snEquipment @relation(fields: [snEquipmentId], references: [id])
+  // snEquipmentId         Int
+
+  // connectionMacAddress macAddress @relation(fields: [macAddressId], references: [id])
+  // macAddressId         Int
+
+  // connectionCountEquipment countEquipment @relation(fields: [countEquipmentId], references: [id])
+  // countEquipmentId         Int
+
+  // connectionCompletedJob completedJob @relation(fields: [completedJobId], references: [id])
+  // completedJobId         Int         
+
+  // connectionCurrentLocation currentLocation @relation(fields: [currentLocationId], references: [id])
+  // currentLocationId         Int             
 }
 
 model typeWork {
-  id       Int    @id @default(autoincrement())
-  typeWork String
+  id                 Int                @id @default(autoincrement())
+  typeWork           String           @unique
+  // connectionTypeWork technicalWorkLog @relation(fields: [typeWorkId], references: [id])
+  typeWorkId Int
 }
+// @relation(fields: [typeWorkId], references: [id])
+// model trainNumber {
+//   id                    Int               @id @default(autoincrement())
+//   trainNumber           String
+//   connectionTrainNumber technicalWorkLog[]
+// }
 
-model trainNumber {
-  id          Int    @id @default(autoincrement())
-  trainNumber String
-}
+// model typeCarriage {
+//   id                     Int               @id @default(autoincrement())
+//   connectionTypeCarriage technicalWorkLog[]
+//   typeCarriage           String
+// }
 
-model typeCarriage {
-  id           Int    @id @default(autoincrement())
-  typeCarriage String
-}
+// model carriageNumber {
+//   id                       Int               @id @default(autoincrement())
+//   carriageNumber           String
+//   connectionCarriageNumber technicalWorkLog[]
+// }
 
-model carriageNumber {
-  id             Int    @id @default(autoincrement())
-  carriageNumber String
-}
+// model equipment {
+//   id                    Int               @id @default(autoincrement())
+//   equipment             String
+//   connectionEquipmentId technicalWorkLog[]
+// }
 
-model equipment {
-  id        Int    @id @default(autoincrement())
-  equipment String
-}
+// model snEquipment {
+//   id                    Int               @id @default(autoincrement())
+//   snEquipment           String
+//   connectionSnEquipment technicalWorkLog[]
+// }
 
-model snEquipment {
-  id          Int    @id @default(autoincrement())
-  snEquipment String
-}
+// model macAddress {
+//   id                   Int               @id @default(autoincrement())
+//   connectionMacAddress technicalWorkLog[]
+//   macAddress           String
+// }
 
-model macAddress {
-  id Int @id @default(autoincrement())
-  macAddress String
-}
+// model countEquipment {
+//   id                       Int               @id @default(autoincrement())
+//   count                    Int
+//   connectionCountEquipment technicalWorkLog[]
+// }
 
-model countEquipment {
-  id    Int @id @default(autoincrement())
-  count Int
-}
+// model completedJob {
+//   id                     Int               @id @default(autoincrement())
+//   completedJob           String
+//   connectionCompletedJob technicalWorkLog[]
+// }
 
-model completedJob {
-  id           Int    @id @default(autoincrement())
-  completedJob String
-}
-
-model currentLocation {
-  id              Int    @id @default(autoincrement())
-  currentLocation String
-}
-
-model Device {
-  id     Int    @id @default(autoincrement())
-  status String
-  name   String
-  count  Int
-}
+// model currentLocation {
+//   id                        Int               @id @default(autoincrement())
+//   currentLocation           String
+//   connectionCurrentLocation technicalWorkLog[]
+// }
 
 model User {
   id       Int    @id @default(autoincrement())
