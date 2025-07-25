@@ -1,0 +1,45 @@
+/* StepTrainNumber Component Styles */
+
+.step-train-number-title {
+  font-weight: bold !important;
+  color: #333 !important;
+}
+
+.step-train-number-avatar {
+  background-color: #667eea !important;
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.step-train-number-avatar-icon {
+  font-size: 28px !important;
+}
+
+.step-train-number-select .MuiOutlinedInput-root {
+  border-radius: 12px !important;
+}
+
+.step-train-number-select .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea !important;
+}
+
+.step-train-number-select .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea !important;
+}
+
+.step-train-number-menu-item:hover {
+  background-color: #f0f4ff !important;
+}
+
+.step-train-number-result-card {
+  background-color: #f8f9ff !important;
+}
+
+.step-train-number-result-avatar {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.step-train-number-result-title {
+  font-weight: bold !important;
+}

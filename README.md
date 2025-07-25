@@ -11,7 +11,7 @@ yarn install
 создать .env
 где mydb - название базы данных(если её нет,то она создасться)
 ```
-DATABASE_URL="postgresql://username:password@localhost:5432/mydb?schema=public"
+DATABASE_URL="postgresql://postgress:1@localhost:5432/mydb?schema=public"
 ```
 
 ```

@@ -1,0 +1,1 @@
+export { StepFinalPhoto } from './StepFinalPhoto';

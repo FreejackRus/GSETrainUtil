@@ -1,0 +1,31 @@
+/* StepFinalPhoto Component Styles */
+
+.step-final-photo-header-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+}
+
+.step-final-photo-title {
+  font-weight: bold !important;
+  color: white !important;
+}
+
+.step-final-photo-avatar {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  width: 56px !important;
+  height: 56px !important;
+}
+
+.step-final-photo-avatar-icon {
+  font-size: 32px !important;
+}
+
+.step-final-photo-subtitle {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+}
+
+.step-final-photo-description {
+  color: rgba(255, 255, 255, 0.8) !important;
+}

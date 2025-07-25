@@ -1,0 +1,41 @@
+/* StepWorkType Component Styles */
+
+.step-work-type-title {
+  font-weight: bold !important;
+  color: #333 !important;
+}
+
+.step-work-type-avatar {
+  background-color: #667eea !important;
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.step-work-type-select .MuiOutlinedInput-root {
+  border-radius: 12px !important;
+}
+
+.step-work-type-select .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea !important;
+}
+
+.step-work-type-select .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea !important;
+}
+
+.step-work-type-menu-item:hover {
+  background-color: #f0f4ff !important;
+}
+
+.step-work-type-result-card {
+  background-color: #f8f9ff !important;
+}
+
+.step-work-type-result-avatar {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.step-work-type-result-title {
+  font-weight: bold !important;
+}

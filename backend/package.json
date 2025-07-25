@@ -17,8 +17,10 @@
     "dev": "ts-node src/server.ts"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.15",
     "nodemon": "^3.1.10",
     "prisma": "^6.12.0",

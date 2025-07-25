@@ -1,0 +1,50 @@
+/* StepEngineerName Component Styles */
+
+.step-engineer-name-title {
+  font-weight: bold !important;
+  color: #333 !important;
+}
+
+.step-engineer-name-avatar {
+  background-color: #667eea !important;
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.step-engineer-name-avatar-icon {
+  font-size: 28px !important;
+}
+
+.step-engineer-name-input .MuiOutlinedInput-root {
+  border-radius: 12px !important;
+}
+
+.step-engineer-name-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea !important;
+}
+
+.step-engineer-name-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea !important;
+}
+
+.step-engineer-name-result-card {
+  background-color: #f8f9ff !important;
+}
+
+.step-engineer-name-result-avatar {
+  background-color: #667eea !important;
+  color: white !important;
+}
+
+.step-engineer-name-result-title {
+  font-weight: bold !important;
+}
+
+.step-engineer-name-hint {
+  background-color: #fff3e0 !important;
+  border: 1px solid #ffcc02 !important;
+}
+
+.step-engineer-name-hint-text {
+  color: #e65100 !important;
+}

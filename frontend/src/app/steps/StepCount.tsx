@@ -3,9 +3,11 @@ import { TextField, MenuItem } from "@mui/material";
 export const StepCount = ({
   value,
   onChange,
+  equipment,
 }: {
   value: number | string;
   onChange: (field: string, value: any) => void;
+  equipment: string;
 }) => {
   const selectedValue = value === undefined || value === null ? "1" : String(value);
   

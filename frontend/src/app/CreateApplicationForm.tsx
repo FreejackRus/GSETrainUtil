@@ -6,20 +6,43 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogActions,
   Alert,
+  Stepper,
+  Step,
+  StepLabel,
+  Card,
+  CardContent,
+  Typography,
+  LinearProgress,
+  Chip,
+  Avatar,
+  IconButton,
+  Fade,
+  Slide,
 } from "@mui/material";
+import {
+  CheckCircle,
+  RadioButtonUnchecked,
+  ArrowBack,
+  ArrowForward,
+  Save,
+  Close,
+} from "@mui/icons-material";
 import axios from "axios";
-import { StepWorkType } from "./steps/StepWorkType";
-import { StepTrainNumber } from "./steps/StepTrainNumber";
+import { 
+  StepWorkType, 
+  StepEquipment, 
+  StepEngineerName, 
+  StepFinalPhoto,
+  StepTrainNumber,
+  StepCarriageNumber
+} from "../shared/ui";
 import { StepCarriageType } from "./steps/StepCarriageType";
-import { StepCarriageNumber } from "./steps/StepCarriageNumber";
-import { StepEquipment } from "./steps/StepEquipment";
 import { StepSerialNumber } from "./steps/StepSerialNumber";
 import { StepMacAddress } from "./steps/StepMacAddress";
 import { StepCount } from "./steps/StepCount";
-import { StepEngineerName } from "./steps/StepEngineerName";
 import { StepLocation } from "./steps/StepLocation";
-import { StepFinalPhoto } from "./steps/StepFinalPhoto";
 
 const fetchOptions = async (endpoint: string) => {
   const res = await axios.get(`http://localhost:3000/api/v1/${endpoint}`, {
@@ -39,17 +62,17 @@ const fakeData = {
 };
 
 const steps = [
-  { key: "workType", label: "Тип работ" },
-  { key: "trainNumber", label: "Номер поезда" },
-  { key: "carriageType", label: "Тип вагона" },
-  { key: "carriageNumber", label: "Номер вагона" },
-  { key: "equipment", label: "Наименование оборудования" },
-  { key: "serialNumber", label: "Серийный номер" },
-  { key: "macAddress", label: "MAC-адрес (если есть)" },
-  { key: "count", label: "Количество" },
-  { key: "engineerName", label: "ФИО инженера" },
-  { key: "location", label: "Текущее место (депо/станция)" },
-  { key: "finalPhoto", label: "Общая фотография" },
+  { key: "workType", label: "Тип работ", type: "select" },
+  { key: "trainNumber", label: "Номер поезда", type: "select" },
+  { key: "carriageType", label: "Тип вагона", type: "select" },
+  { key: "carriageNumber", label: "Номер вагона", type: "input", photoField: "carriagePhoto" },
+  { key: "equipment", label: "Наименование оборудования", type: "select", photoField: "equipmentPhoto" },
+  { key: "serialNumber", label: "Серийный номер", type: "input", photoField: "serialPhoto" },
+  { key: "macAddress", label: "MAC-адрес (если есть)", type: "input", photoField: "macPhoto" },
+  { key: "count", label: "Количество", type: "input" },
+  { key: "engineerName", label: "ФИО инженера", type: "input" },
+  { key: "location", label: "Текущее место (депо/станция)", type: "select" },
+  { key: "finalPhoto", label: "Общая фотография", type: "photo" },
 ];
 
 export const CreateApplicationForm = ({
@@ -80,6 +103,7 @@ export const CreateApplicationForm = ({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   // Списки для select
   const [workTypes, setWorkTypes] = useState<string[]>([]);
@@ -145,6 +169,31 @@ export const CreateApplicationForm = ({
     }
   };
 
+  // Проверяем, есть ли прогресс в форме
+  const hasFormProgress = () => {
+    return activeStep > 0 || Object.values(form).some(value => 
+      value !== "" && value !== 1 && value !== null
+    );
+  };
+
+  // Обработка закрытия с подтверждением
+  const handleClose = () => {
+    if (hasFormProgress()) {
+      setShowExitConfirm(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmExit = () => {
+    setShowExitConfirm(false);
+    onClose();
+  };
+
+  const handleCancelExit = () => {
+    setShowExitConfirm(false);
+  };
+
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
@@ -206,14 +255,26 @@ export const CreateApplicationForm = ({
   // Универсальная валидация для этапа
   const isNextDisabled = () => {
     const step = steps[activeStep];
-    if (step.skipIf && step.skipIf(form)) return false;
-    if (step.showIf && !step.showIf(form)) return false;
+    
+    // Skip validation if step has skipIf property and it evaluates to true
+    if ('skipIf' in step && (step as any).skipIf(form)) return false;
+    if ('showIf' in step && !(step as any).showIf(form)) return false;
+    
+    // Проверяем основное поле шага
     if (step.type === "select" || step.type === "input") {
-      return !form[step.key];
+      if (!form[step.key]) return true;
     }
+    
+    // Для шагов типа "photo" проверяем только фото
     if (step.type === "photo") {
       return !form[step.key];
     }
+    
+    // Для шагов с фотографиями проверяем и основное поле, и фото
+    if (step.photoField) {
+      if (!form[step.key] || !form[step.photoField]) return true;
+    }
+    
     return false;
   };
 
@@ -289,67 +350,233 @@ export const CreateApplicationForm = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {/* Отображаем все этапы в одну строку, выделяя активный */}
-        <Box display="flex" flexWrap="wrap" gap={1}>
-          {steps.map((step, idx) => (
-            <Box
-              key={step.key}
-              px={2}
-              py={1}
-              borderRadius={2}
-              bgcolor={activeStep === idx ? "primary.main" : "grey.200"}
-              color={activeStep === idx ? "primary.contrastText" : "text.primary"}
-              fontWeight={activeStep === idx ? 700 : 400}
-              fontSize={15}
-              sx={{
-                cursor: "pointer",
-                transition: "background 0.2s",
-                border: activeStep === idx ? "2px solid #1976d2" : "1px solid #e0e0e0",
+    <>
+    <Dialog 
+      open={open} 
+      onClose={handleClose}
+      disableEscapeKeyDown={hasFormProgress()}
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+        }
+      }}
+    >
+      <DialogTitle sx={{ pb: 1 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h5" fontWeight="bold">
+            🔧 Создание заявки
+          </Typography>
+          <IconButton onClick={handleClose} sx={{ color: 'white' }}>
+            <Close />
+          </IconButton>
+        </Box>
+        
+        {/* Прогресс-бар */}
+        <Box mt={2}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+            <Typography variant="body2">
+              Шаг {activeStep + 1} из {steps.length}
+            </Typography>
+            <Chip 
+              label={`${Math.round(((activeStep + 1) / steps.length) * 100)}%`}
+              size="small"
+              sx={{ 
+                bgcolor: 'rgba(255,255,255,0.2)', 
+                color: 'white',
+                fontWeight: 'bold'
               }}
-              onClick={() => setActiveStep(idx)}
-            >
-              {step.label}
-            </Box>
-          ))}
+            />
+          </Box>
+          <LinearProgress 
+            variant="determinate" 
+            value={((activeStep + 1) / steps.length) * 100}
+            sx={{
+              height: 8,
+              borderRadius: 4,
+              bgcolor: 'rgba(255,255,255,0.2)',
+              '& .MuiLinearProgress-bar': {
+                borderRadius: 4,
+                bgcolor: '#4caf50'
+              }
+            }}
+          />
+        </Box>
+
+        {/* Навигация по шагам */}
+        <Box mt={3}>
+          <Stepper 
+            activeStep={activeStep} 
+            alternativeLabel
+            sx={{
+              '& .MuiStepLabel-label': { 
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '0.75rem'
+              },
+              '& .MuiStepLabel-label.Mui-active': { 
+                color: 'white',
+                fontWeight: 'bold'
+              },
+              '& .MuiStepLabel-label.Mui-completed': { 
+                color: '#4caf50'
+              },
+              '& .MuiStepIcon-root': {
+                color: 'rgba(255,255,255,0.3)',
+              },
+              '& .MuiStepIcon-root.Mui-active': {
+                color: '#4caf50',
+              },
+              '& .MuiStepIcon-root.Mui-completed': {
+                color: '#4caf50',
+              }
+            }}
+          >
+            {steps.map((step, index) => (
+              <Step key={step.key}>
+                <StepLabel>{step.label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
         </Box>
       </DialogTitle>
-      <DialogContent>
-        {/* Убираем вертикальный Stepper */}
-        <Box mt={2}>
-          {renderStep()}
-          <Box display="flex" justifyContent="space-between" mt={4}>
-            <Button disabled={activeStep === 0} onClick={handleBack}>
-              Назад
-            </Button>
+      
+      <DialogContent sx={{ bgcolor: 'white', color: 'black', borderRadius: '0 0 12px 12px' }}>
+        <Card 
+          elevation={0}
+          sx={{ 
+            mt: 2,
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+            borderRadius: 3
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Fade in={true} timeout={500}>
+              <Box>
+                {renderStep()}
+              </Box>
+            </Fade>
+          </CardContent>
+        </Card>
+
+        <Box display="flex" justifyContent="space-between" alignItems="center" mt={4}>
+          <Button 
+            disabled={activeStep === 0} 
+            onClick={handleBack}
+            startIcon={<ArrowBack />}
+            variant="outlined"
+            sx={{ 
+              borderRadius: 3,
+              px: 3,
+              py: 1.5,
+              borderColor: '#667eea',
+              color: '#667eea',
+              '&:hover': {
+                borderColor: '#764ba2',
+                bgcolor: 'rgba(102, 126, 234, 0.1)'
+              }
+            }}
+          >
+            Назад
+          </Button>
+          
+          <Box display="flex" gap={2} alignItems="center">
+            <Typography variant="body2" color="text.secondary">
+              {steps[activeStep].label}
+            </Typography>
             <Button
               variant="contained"
-              color="primary"
               onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
               disabled={isNextDisabled() || loading}
+              endIcon={
+                loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : activeStep === steps.length - 1 ? (
+                  <Save />
+                ) : (
+                  <ArrowForward />
+                )
+              }
+              sx={{
+                borderRadius: 3,
+                px: 4,
+                py: 1.5,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                }
+              }}
             >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : activeStep === steps.length - 1 ? (
-                "Создать"
-              ) : (
-                "Далее"
-              )}
+              {activeStep === steps.length - 1 ? "Создать заявку" : "Далее"}
             </Button>
           </Box>
-          {success && (
-            <Alert severity="success" sx={{ mt: 2 }}>
+        </Box>
+        
+        {success && (
+          <Slide direction="up" in={!!success} mountOnEnter unmountOnExit>
+            <Alert 
+              severity="success" 
+              sx={{ 
+                mt: 2,
+                borderRadius: 2,
+                '& .MuiAlert-icon': {
+                  fontSize: '1.5rem'
+                }
+              }}
+            >
               {success}
             </Alert>
-          )}
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
+          </Slide>
+        )}
+        
+        {error && (
+          <Slide direction="up" in={!!error} mountOnEnter unmountOnExit>
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mt: 2,
+                borderRadius: 2,
+                '& .MuiAlert-icon': {
+                  fontSize: '1.5rem'
+                }
+              }}
+            >
               {error}
             </Alert>
-          )}
-        </Box>
+          </Slide>
+        )}
       </DialogContent>
     </Dialog>
+
+    {/* Диалог подтверждения выхода */}
+    <Dialog
+      open={showExitConfirm}
+      onClose={handleCancelExit}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle>
+        <Typography variant="h6" fontWeight="bold">
+          ⚠️ Подтверждение выхода
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <Typography>
+          У вас есть несохраненные изменения в заявке. Вы уверены, что хотите выйти? 
+          Все введенные данные будут потеряны.
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCancelExit} variant="outlined">
+          Отмена
+        </Button>
+        <Button onClick={handleConfirmExit} variant="contained" color="error">
+          Выйти
+        </Button>
+      </DialogActions>
+    </Dialog>
+    </>
   );
 };

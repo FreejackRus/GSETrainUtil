@@ -1,0 +1,231 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Box, 
+  Button, 
+  Avatar,
+  Chip,
+  useMediaQuery,
+  IconButton,
+  Menu,
+  MenuItem,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider
+} from '@mui/material';
+import { 
+  ExitToApp as LogoutIcon,
+  AccessTime as TimeIcon,
+  CalendarToday as CalendarIcon,
+  Person as PersonIcon,
+  Menu as MenuIcon,
+  Dashboard as DashboardIcon,
+  Settings as SettingsIcon
+} from '@mui/icons-material';
+import './Header.css';
+
+interface HeaderProps {
+  role: string;
+  onLogout: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isSmallMobile = useMediaQuery('(max-width: 480px)');
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('ru-RU', {
+      weekday: isMobile ? 'short' : 'long',
+      year: 'numeric',
+      month: isMobile ? 'short' : 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('ru-RU', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: isSmallMobile ? undefined : '2-digit'
+    });
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    return role === 'admin' ? 'Администратор' : 'Инженер';
+  };
+
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+  };
+
+  const handleMobileMenuToggle = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    handleUserMenuClose();
+    onLogout();
+  };
+
+  return (
+    <>
+      <AppBar position="static" elevation={3} className="header">
+        <Toolbar className="header__toolbar">
+          {/* Левая часть - Логотип и название */}
+          <Box className="header__left">
+            {isMobile && (
+              <IconButton
+                color="inherit"
+                onClick={handleMobileMenuToggle}
+                className="header__menu-button"
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            
+            <Box className="header__logo">
+              <Box className="header__logo-icon">
+                <DashboardIcon sx={{ color: 'white', fontSize: 20 }} />
+              </Box>
+              {!isSmallMobile && (
+                <Typography className="header__title">
+                  {isMobile ? 'ГСЭ ТехноАРМ' : 'ГрандСервисЭкспресс ТехноАРМ'}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+
+          {/* Центральная часть - дата и время (только на десктопе) */}
+          {!isMobile && (
+            <Box className="header__time">
+              <TimeIcon sx={{ mr: 1, fontSize: 16 }} />
+              {formatDate(currentTime)} • {formatTime(currentTime)}
+            </Box>
+          )}
+
+          {/* Правая часть - пользователь */}
+          <Box className="header__right">
+            <Box className="header__desktop-nav">
+              <Box className="header__user-info">
+                <Avatar className="header__avatar">
+                  <PersonIcon />
+                </Avatar>
+                <Chip 
+                  label={getRoleDisplayName(role)}
+                  size="small"
+                  className={`header__role-chip header__role-chip--${role}`}
+                />
+              </Box>
+              <Button
+                color="inherit"
+                startIcon={<LogoutIcon />}
+                onClick={onLogout}
+                sx={{ 
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  }
+                }}
+              >
+                Выход
+              </Button>
+            </Box>
+            
+            {isMobile && (
+              <IconButton
+                color="inherit"
+                onClick={handleUserMenuOpen}
+              >
+                <Avatar className="header__avatar">
+                  <PersonIcon />
+                </Avatar>
+              </IconButton>
+            )}
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      {/* Мобильное меню */}
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={handleMobileMenuToggle}
+        className="header__mobile-drawer"
+      >
+        <Box className="header__drawer-header">
+          <Typography variant="h6" className="header__title">
+            ГСЭ ТехноАРМ
+          </Typography>
+        </Box>
+        <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.2)' }} />
+        <Box className="header__drawer-content">
+          <Box className="header__drawer-user">
+            <Avatar className="header__avatar">
+              <PersonIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                {getRoleDisplayName(role)}
+              </Typography>
+            </Box>
+          </Box>
+          <Typography variant="body2" className="header__drawer-time">
+            {formatDate(currentTime)}
+            <br />
+            {formatTime(currentTime)}
+          </Typography>
+          <Button
+            fullWidth
+            startIcon={<LogoutIcon />}
+            onClick={handleLogout}
+            className="header__logout-button"
+          >
+            Выход
+          </Button>
+        </Box>
+      </Drawer>
+
+      {/* Меню пользователя для мобильных */}
+      <Menu
+        anchorEl={userMenuAnchor}
+        open={Boolean(userMenuAnchor)}
+        onClose={handleUserMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <LogoutIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Выход</ListItemText>
+        </MenuItem>
+      </Menu>
+    </>
+  );
+};

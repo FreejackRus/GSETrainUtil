@@ -1,0 +1,201 @@
+.header {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
+
+.header__toolbar {
+  padding: 0 16px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.header__logo-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header__title {
+  color: white;
+  font-weight: 700;
+  font-size: 20px;
+  margin: 0;
+}
+
+.header__time {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header__user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header__avatar {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 600;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.header__role-chip {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.header__role-chip--admin {
+  background: rgba(76, 175, 80, 0.8);
+  border-color: rgba(76, 175, 80, 1);
+}
+
+.header__role-chip--engineer {
+  background: rgba(255, 152, 0, 0.8);
+  border-color: rgba(255, 152, 0, 1);
+}
+
+.header__menu-button {
+  color: white;
+  display: none;
+}
+
+.header__desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header__mobile-drawer {
+  width: 280px;
+}
+
+.header__mobile-drawer .MuiDrawer-paper {
+  width: 280px;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  color: white;
+}
+
+.header__drawer-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header__drawer-content {
+  padding: 16px;
+}
+
+.header__drawer-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.header__drawer-time {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.header__logout-button {
+  background: rgba(244, 67, 54, 0.8);
+  color: white;
+  border: 1px solid rgba(244, 67, 54, 1);
+  width: 100%;
+}
+
+.header__logout-button:hover {
+  background: rgba(244, 67, 54, 1);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .header__toolbar {
+    padding: 0 12px;
+    min-height: 56px;
+  }
+  
+  .header__title {
+    font-size: 18px;
+  }
+  
+  .header__time {
+    display: none;
+  }
+  
+  .header__desktop-nav {
+    display: none;
+  }
+  
+  .header__menu-button {
+    display: flex;
+  }
+  
+  .header__avatar {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header__toolbar {
+    padding: 0 8px;
+  }
+  
+  .header__title {
+    font-size: 16px;
+  }
+  
+  .header__logo-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .header__left {
+    gap: 8px;
+  }
+  
+  .header__right {
+    gap: 8px;
+  }
+}

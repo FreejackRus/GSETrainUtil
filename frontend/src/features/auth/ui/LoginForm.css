@@ -1,0 +1,146 @@
+.login-form-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.login-form-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.login-form-paper {
+  padding: 48px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0px 11px 15px -7px rgba(0,0,0,0.2), 
+              0px 24px 38px 3px rgba(0,0,0,0.14), 
+              0px 9px 46px 8px rgba(0,0,0,0.12);
+}
+
+.login-form-paper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1976d2, #9c27b0);
+}
+
+.login-form-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-form-logo {
+  margin-bottom: 24px;
+}
+
+.login-form-logo img {
+  max-width: 120px;
+  height: auto;
+}
+
+.login-form-title {
+  font-weight: 700;
+  color: #1565c0;
+  margin-bottom: 8px;
+}
+
+.login-form-subtitle {
+  margin-bottom: 16px;
+}
+
+.login-form-description {
+  color: #666;
+}
+
+.login-form-divider {
+  margin: 16px 0;
+}
+
+.login-form-field {
+  margin: 16px 0;
+}
+
+.login-form-field .MuiOutlinedInput-root {
+  border-radius: 8px;
+}
+
+.login-form-field .MuiOutlinedInput-root:hover fieldset {
+  border-color: #1976d2;
+}
+
+.login-form-error {
+  color: #d32f2f;
+  text-align: center;
+  margin: 16px 0;
+  padding: 12px;
+  background-color: rgba(211, 47, 47, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(211, 47, 47, 0.2);
+}
+
+.login-form-submit {
+  margin-top: 24px;
+  height: 48px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 16px;
+  background: linear-gradient(45deg, #1976d2 30%, #42a5f5 90%);
+  box-shadow: 0 3px 5px 2px rgba(25, 118, 210, 0.3);
+}
+
+.login-form-submit:hover {
+  background: linear-gradient(45deg, #1565c0 30%, #1e88e5 90%);
+  box-shadow: 0 6px 10px 4px rgba(25, 118, 210, 0.3);
+}
+
+.login-form-submit:disabled {
+  background: #ccc;
+  box-shadow: none;
+}
+
+.login-form-footer {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.login-form-footer-text {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 600px) {
+  .login-form-paper {
+    padding: 24px;
+    margin: 16px;
+  }
+  
+  .login-form-logo img {
+    max-width: 100px;
+  }
+  
+  .login-form-title {
+    font-size: 1.5rem;
+  }
+  
+  .login-form-subtitle {
+    font-size: 1.1rem;
+  }
+}

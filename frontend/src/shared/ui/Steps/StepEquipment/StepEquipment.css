@@ -1,0 +1,41 @@
+/* StepEquipment Component Styles */
+
+.step-equipment-title {
+  font-weight: bold !important;
+  color: #333 !important;
+}
+
+.step-equipment-avatar {
+  background-color: #667eea !important;
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.step-equipment-select .MuiOutlinedInput-root {
+  border-radius: 12px !important;
+}
+
+.step-equipment-select .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea !important;
+}
+
+.step-equipment-select .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea !important;
+}
+
+.step-equipment-menu-item:hover {
+  background-color: #f0f4ff !important;
+}
+
+.step-equipment-result-card {
+  background-color: #f8f9ff !important;
+}
+
+.step-equipment-result-avatar {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.step-equipment-result-title {
+  font-weight: bold !important;
+}

@@ -1,4 +1,5 @@
-import { Box, TextField, Button, Avatar } from "@mui/material";
+import { Box, TextField } from "@mui/material";
+import { PhotoUpload } from "../../shared/ui";
 
 export const StepMacAddress = ({
   value,
@@ -17,21 +18,26 @@ export const StepMacAddress = ({
       value={value}
       onChange={(e) => onChange("macAddress", e.target.value)}
       fullWidth
-      sx={{ mb: 2 }}
+      sx={{ 
+        mb: 2,
+        '& .MuiOutlinedInput-root': {
+          borderRadius: 3,
+          '&:hover fieldset': {
+            borderColor: '#667eea',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#667eea',
+          }
+        }
+      }}
     />
-    <Button variant="outlined" component="label" fullWidth sx={{ mb: 1 }}>
-      Загрузить фото MAC-адреса
-      <input type="file" accept="image/*" hidden onChange={onPhotoChange("macPhoto")} />
-    </Button>
-    {photo && (
-      <Box display="flex" justifyContent="center" mt={1}>
-        <Avatar
-          variant="rounded"
-          src={URL.createObjectURL(photo)}
-          alt="Фото MAC-адреса"
-          sx={{ width: 120, height: 90 }}
-        />
-      </Box>
-    )}
+    
+    <PhotoUpload
+      photo={photo}
+      onPhotoChange={onPhotoChange("macPhoto")}
+      label="Фотография MAC-адреса"
+      description="Сфотографируйте MAC-адрес на наклейке оборудования (если доступен)"
+      required={false}
+    />
   </Box>
 );

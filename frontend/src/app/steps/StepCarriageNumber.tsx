@@ -1,4 +1,5 @@
-import { Box, TextField, Button, Avatar } from "@mui/material";
+import { Box, TextField } from "@mui/material";
+import { PhotoUpload } from "../../shared/ui";
 
 export const StepCarriageNumber = ({
   value,
@@ -17,21 +18,26 @@ export const StepCarriageNumber = ({
       value={value}
       onChange={(e) => onChange("carriageNumber", e.target.value)}
       fullWidth
-      sx={{ mb: 2 }}
+      sx={{ 
+        mb: 2,
+        '& .MuiOutlinedInput-root': {
+          borderRadius: 3,
+          '&:hover fieldset': {
+            borderColor: '#667eea',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#667eea',
+          }
+        }
+      }}
     />
-    <Button variant="outlined" component="label" fullWidth sx={{ mb: 1 }}>
-      Загрузить фото номера вагона
-      <input type="file" accept="image/*" hidden onChange={onPhotoChange("carriagePhoto")} />
-    </Button>
-    {photo && (
-      <Box display="flex" justifyContent="center" mt={1}>
-        <Avatar
-          variant="rounded"
-          src={URL.createObjectURL(photo)}
-          alt="Фото номера вагона"
-          sx={{ width: 120, height: 90 }}
-        />
-      </Box>
-    )}
+    
+    <PhotoUpload
+      photo={photo}
+      onPhotoChange={onPhotoChange("carriagePhoto")}
+      label="Фотография номера вагона"
+      description="Сфотографируйте четко видимый номер вагона для идентификации"
+      required={true}
+    />
   </Box>
 );

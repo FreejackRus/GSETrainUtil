@@ -1,4 +1,25 @@
-import { Box, TextField, Button, MenuItem, Avatar } from "@mui/material";
+import { 
+  Box, 
+  TextField, 
+  MenuItem, 
+  Avatar, 
+  Typography, 
+  Card, 
+  CardContent
+} from "@mui/material";
+import { 
+  Computer, 
+  Router, 
+  Cable
+} from "@mui/icons-material";
+import { PhotoUpload } from "../../shared/ui";
+
+const equipmentIcons: { [key: string]: React.ReactElement } = {
+  "пром. комп.": <Computer />,
+  "маршрутизатор": <Router />,
+  "коммутатор": <Computer />,
+  "коннектор": <Cable />,
+};
 
 export const StepEquipment = ({
   value,
@@ -20,27 +41,63 @@ export const StepEquipment = ({
       value={value}
       onChange={(e) => onChange("equipment", e.target.value)}
       fullWidth
-      sx={{ mb: 2 }}
+      sx={{
+        mb: 2,
+        '& .MuiOutlinedInput-root': {
+          borderRadius: 3,
+          '&:hover fieldset': {
+            borderColor: '#667eea',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#667eea',
+          }
+        }
+      }}
     >
       {options.map((type) => (
-        <MenuItem key={type} value={type}>
-          {type}
+        <MenuItem key={type} value={type} sx={{ py: 1.5 }}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Avatar 
+              sx={{ 
+                width: 32, 
+                height: 32,
+                bgcolor: '#667eea'
+              }}
+            >
+              {equipmentIcons[type] || <Computer />}
+            </Avatar>
+            <Typography>{type}</Typography>
+          </Box>
         </MenuItem>
       ))}
     </TextField>
-    <Button variant="outlined" component="label" fullWidth sx={{ mb: 1 }}>
-      Загрузить фото оборудования
-      <input type="file" accept="image/*" hidden onChange={onPhotoChange("equipmentPhoto")} />
-    </Button>
-    {photo && (
-      <Box display="flex" justifyContent="center" mt={1}>
-        <Avatar
-          variant="rounded"
-          src={URL.createObjectURL(photo)}
-          alt="Фото оборудования"
-          sx={{ width: 120, height: 90 }}
-        />
-      </Box>
+
+    {value && (
+      <Card sx={{ mb: 2, borderRadius: 3, bgcolor: '#f8f9ff' }}>
+        <CardContent sx={{ p: 2 }}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Avatar sx={{ bgcolor: '#667eea' }}>
+              {equipmentIcons[value] || <Computer />}
+            </Avatar>
+            <Box>
+              <Typography variant="subtitle1" fontWeight="bold">
+                {value}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Выбранное оборудование
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
     )}
+
+    <PhotoUpload
+      photo={photo}
+      onPhotoChange={onPhotoChange("equipmentPhoto")}
+      label="Фотография оборудования"
+      description="Загрузите четкое фото оборудования для идентификации"
+      required={true}
+    />
   </Box>
 );

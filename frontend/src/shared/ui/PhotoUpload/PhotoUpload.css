@@ -1,0 +1,102 @@
+.photo-upload-container {
+  padding: 24px;
+  margin-top: 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
+  border: 2px dashed #667eea;
+}
+
+.photo-upload-content {
+  text-align: center;
+}
+
+.photo-upload-avatar {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px auto;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.photo-upload-avatar .MuiSvgIcon-root {
+  font-size: 30px;
+}
+
+.photo-upload-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.photo-upload-required {
+  color: #f44336;
+}
+
+.photo-upload-description {
+  margin-bottom: 16px;
+}
+
+.photo-upload-button {
+  border-radius: 12px;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.photo-upload-button:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.photo-upload-preview {
+  margin-top: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.photo-upload-preview-content {
+  padding: 16px;
+}
+
+.photo-upload-success {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.photo-upload-success-icon {
+  color: #4caf50;
+  font-size: 24px;
+}
+
+.photo-upload-success-text {
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+.photo-upload-image-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.photo-upload-image {
+  width: 200px;
+  height: 150px;
+  border: 3px solid #667eea;
+}
+
+.photo-upload-chips {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.photo-upload-chip-name {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  font-weight: bold;
+}
+
+.photo-upload-chip-size {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  font-weight: bold;
+}

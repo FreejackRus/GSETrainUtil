@@ -90,7 +90,7 @@ model Device {
 
 model User {
   id       Int    @id @default(autoincrement())
-  login    String
+  login    String @unique
   password String
   role     String
 }

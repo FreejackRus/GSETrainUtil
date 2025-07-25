@@ -1,4 +1,5 @@
-import { Router } from "express";
+/// <reference path="../types/express.d.ts" />
+import { Router, Request, Response } from "express";
 import { deleteDevice } from "../controlers/Device/deleteDevice";
 import { getDevice } from "../controlers/Device/getDevice";
 import { patchDevice } from "../controlers/Device/patchDevice";
@@ -22,7 +23,7 @@ routerDevice.post("/users", postUser);
 routerDevice.post("/login", loginUser);
 
 // Пример защищённого роута:
-routerDevice.get("/me", authMiddleware, (req, res) => {
+routerDevice.get("/me", authMiddleware, (req: Request, res: Response) => {
   res.json({ user: req.user });
 });
 
