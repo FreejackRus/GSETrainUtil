@@ -52,9 +52,10 @@ export const StepMacAddress: React.FC<StepMacAddressProps> = ({
       />
       
       <PhotoUpload
+        photo={photo}
+        onPhotoChange={onPhotoChange('macPhoto')}
         label="Фотография MAC-адреса"
-        file={photo}
-        onChange={onPhotoChange('macPhoto')}
+        description="Сделайте фото MAC-адреса оборудования"
         required={!!value}
       />
     </Box>

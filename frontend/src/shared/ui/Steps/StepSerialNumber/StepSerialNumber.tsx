@@ -45,10 +45,11 @@ export const StepSerialNumber: React.FC<StepSerialNumberProps> = ({
       />
       
       <PhotoUpload
+        photo={photo}
+        onPhotoChange={onPhotoChange('serialPhoto')}
         label="Фотография серийного номера"
-        file={photo}
-        onChange={onPhotoChange('serialPhoto')}
-        required
+        description="Сделайте фото серийного номера оборудования"
+        required={true}
       />
     </Box>
   );

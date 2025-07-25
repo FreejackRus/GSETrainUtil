@@ -37,12 +37,12 @@ import {
   StepFinalPhoto,
   StepTrainNumber,
   StepCarriageNumber
-} from "../../../shared/ui";
-import { StepCarriageType } from "../../../shared/ui/Steps/StepCarriageType";
-import { StepSerialNumber } from "../../../shared/ui/Steps/StepSerialNumber";
-import { StepMacAddress } from "../../../shared/ui/Steps/StepMacAddress";
-import { StepCount } from "../../../shared/ui/Steps/StepCount";
-import { StepLocation } from "../../../shared/ui/Steps/StepLocation";
+} from "../shared/ui";
+import { StepCarriageType } from "../shared/ui/Steps/StepCarriageType";
+import { StepSerialNumber } from "../shared/ui/Steps/StepSerialNumber";
+import { StepMacAddress } from "../shared/ui/Steps/StepMacAddress";
+import { StepCount } from "../shared/ui/Steps/StepCount";
+import { StepLocation } from "../shared/ui/Steps/StepLocation";
 
 const fetchOptions = async (endpoint: string) => {
   const res = await axios.get(`http://localhost:3000/api/v1/${endpoint}`, {
@@ -342,7 +342,7 @@ export const CreateApplicationForm = ({
         );
       case 10:
         return (
-          <StepFinalPhoto photo={form.finalPhoto} onPhotoChange={handlePhotoChange('finalPhoto')} />
+          <StepFinalPhoto value={form.finalPhoto} onPhotoChange={(e) => handlePhotoChange('finalPhoto')(e)} />
         );
       default:
         return null;
