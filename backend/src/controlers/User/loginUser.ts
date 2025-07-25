@@ -18,15 +18,8 @@ export const loginUser = async (req: Request, res: Response) => {
   if (!user) {
     return res.status(401).json({ error: "Неверный логин или пароль" });
   }
-  const hash = bcrypt.hash("engineer", 1);
-  console.log(hash.then((data)=> console.log(data)));
   
   const isMatch = await bcrypt.compare(password, user.password);
-  console.log(isMatch);
-  console.log(Array(user.password));
-  console.log(Array(password));
-  console.log(user.password===password);
-  
   
   if (!isMatch) {
     return res.status(401).json({ error: "Неверный логин или пароль" });

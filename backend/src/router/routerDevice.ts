@@ -9,6 +9,7 @@ import { getUser } from "../controlers/User/getUser";
 import { postUser } from "../controlers/User/postUser";
 import { loginUser } from "../controlers/User/loginUser";
 import { authMiddleware } from "../middleware/authMiddleware";
+import { getTypeWork } from "../controlers/typeWork/getTypeWork";
 
 export const routerDevice = Router();
 
@@ -21,6 +22,9 @@ routerDevice.patch("/devices/:id", patchDevice);
 routerDevice.get("/users", getUser);
 routerDevice.post("/users", postUser);
 routerDevice.post("/login", loginUser);
+
+routerDevice.get("/typeWork", getTypeWork);
+
 
 // Пример защищённого роута:
 routerDevice.get("/me", authMiddleware, (req: Request, res: Response) => {
