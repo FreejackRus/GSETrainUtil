@@ -10,13 +10,17 @@ export const loginUser = async (req: Request, res: Response) => {
   if (!login || !password) {
     return res.status(400).json({ error: "Не все поля указаны" });
   }
+  
   const prisma = new PrismaClient();
   const user = await prisma.user.findUnique({ where: { login } });
+  
   await prisma.$disconnect();
   if (!user) {
     return res.status(401).json({ error: "Неверный логин или пароль" });
   }
+  
   const isMatch = await bcrypt.compare(password, user.password);
+  
   if (!isMatch) {
     return res.status(401).json({ error: "Неверный логин или пароль" });
   }

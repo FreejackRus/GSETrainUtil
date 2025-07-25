@@ -98,13 +98,15 @@ model currentLocation {
 
 model User {
   id             Int                        @id @default(autoincrement())
-  login          String
+  login          String   @unique
   password       String
-  role           Role                       @default(admin)
+  role           String
   connectionUser requestsTechnicalWorkLog[]
 }
 
-enum Role {
-  admin
-  engineer
+model Device {
+  id     Int    @id @default(autoincrement())
+  status String
+  name   String
+  count  Int
 }

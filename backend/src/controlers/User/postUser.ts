@@ -12,7 +12,11 @@ export const postUser = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "не все поля указаны в json" });
     }
     const prisma = new PrismaClient();
-    const existingUser = await prisma.user.findUnique({ where: { login } });
+    const existingUser = await prisma.user.findUnique({
+      where:{
+        login:login
+      },
+    });
     if (existingUser) {
       await prisma.$disconnect();
       return res.status(409).json({ error: "Пользователь уже существует" });
