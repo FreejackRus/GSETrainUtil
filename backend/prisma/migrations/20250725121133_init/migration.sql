@@ -11,6 +11,8 @@ CREATE TABLE "requestsTechnicalWorkLog" (
     "countEquipment" INTEGER NOT NULL,
     "completedJobId" INTEGER NOT NULL,
     "currentLocationId" INTEGER NOT NULL,
+    "stepPhotos" TEXT[],
+    "finalPhoto" TEXT NOT NULL,
     "userId" INTEGER NOT NULL,
 
     CONSTRAINT "requestsTechnicalWorkLog_pkey" PRIMARY KEY ("id")
@@ -27,7 +29,7 @@ CREATE TABLE "typeWagons" (
 -- CreateTable
 CREATE TABLE "numberWagons" (
     "id" SERIAL NOT NULL,
-    "numberWagon" INTEGER NOT NULL,
+    "numberWagon" TEXT NOT NULL,
 
     CONSTRAINT "numberWagons_pkey" PRIMARY KEY ("id")
 );
@@ -42,6 +44,7 @@ CREATE TABLE "equipment" (
     "lastService" TIMESTAMP(3) NOT NULL,
     "typeWagonsId" INTEGER NOT NULL,
     "numberWagonId" INTEGER NOT NULL,
+    "photo" TEXT NOT NULL,
 
     CONSTRAINT "equipment_pkey" PRIMARY KEY ("id")
 );

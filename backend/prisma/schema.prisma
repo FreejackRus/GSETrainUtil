@@ -35,10 +35,10 @@ model requestsTechnicalWorkLog {
   connectionCurrentLocation currentLocation @relation(fields: [currentLocationId], references: [id])
   currentLocationId         Int
 
-  stepPhotos     String[]
-  finalPhoto     String
-  
-  connectionUser User     @relation(fields: [userId], references: [id])
+  stepPhotos String[]
+  finalPhoto String
+
+  connectionUser User @relation(fields: [userId], references: [id])
   userId         Int
 }
 
@@ -50,7 +50,7 @@ model typeWagons {
 
 model numberWagons {
   id                    Int         @id @default(autoincrement())
-  numberWagon           Int
+  numberWagon           String
   connectionNumberWagon equipment[]
 }
 
@@ -69,6 +69,7 @@ model equipment {
   numberWagonId         Int
 
   connectionEquipment requestsTechnicalWorkLog[]
+  photo               String
 }
 
 model typeWork {
