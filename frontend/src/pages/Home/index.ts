@@ -1,1 +1,1 @@
-export {Home} from "./ui/Home.tsx"
+export { HomePage as Home } from '../../widgets/HomePage';

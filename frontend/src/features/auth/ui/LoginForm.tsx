@@ -25,10 +25,37 @@ export const LoginForm = ({ onLogin }: { onLogin: (token: string, role: string) 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState({
+    username: "",
+    password: ""
+  });
+
+  const validateForm = () => {
+    const errors = {
+      username: "",
+      password: ""
+    };
+
+    if (!username.trim()) {
+      errors.username = "Пожалуйста, введите логин";
+    }
+
+    if (!password.trim()) {
+      errors.password = "Пожалуйста, введите пароль";
+    }
+
+    setValidationErrors(errors);
+    return !errors.username && !errors.password;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setValidationErrors({ username: "", password: "" });
+    
+    if (!validateForm()) {
+      return;
+    }
     
     try {
       const response = await fetch("http://localhost:3000/api/v1/login", {
@@ -64,10 +91,7 @@ export const LoginForm = ({ onLogin }: { onLogin: (token: string, role: string) 
             {/* Логотип и заголовок */}
             <Box className="login-form-header">
               <Box className="login-form-logo">
-                <img 
-                  src="/logo_peremena.svg" 
-                  alt="GSE Train Logo" 
-                />
+                <img src="/logo_peremena.png" alt="PEREMENA" width={160} height={48} />
               </Box>
               <Typography 
                 variant="h4" 
@@ -100,8 +124,14 @@ export const LoginForm = ({ onLogin }: { onLogin: (token: string, role: string) 
                 variant="outlined"
                 fullWidth
                 value={username}
-                onChange={e => setUsername(e.target.value)}
-                required
+                onChange={e => {
+                  setUsername(e.target.value);
+                  if (validationErrors.username) {
+                    setValidationErrors(prev => ({ ...prev, username: "" }));
+                  }
+                }}
+                error={!!validationErrors.username}
+                helperText={validationErrors.username}
                 autoFocus
                 className="login-form-field"
                 InputProps={{
@@ -120,8 +150,14 @@ export const LoginForm = ({ onLogin }: { onLogin: (token: string, role: string) 
                 variant="outlined"
                 fullWidth
                 value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
+                onChange={e => {
+                  setPassword(e.target.value);
+                  if (validationErrors.password) {
+                    setValidationErrors(prev => ({ ...prev, password: "" }));
+                  }
+                }}
+                error={!!validationErrors.password}
+                helperText={validationErrors.password}
                 className="login-form-field"
                 InputProps={{
                   startAdornment: (
@@ -132,7 +168,7 @@ export const LoginForm = ({ onLogin }: { onLogin: (token: string, role: string) 
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label="toggle password visibility"
+                        aria-label="переключить видимость пароля"
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
                       >

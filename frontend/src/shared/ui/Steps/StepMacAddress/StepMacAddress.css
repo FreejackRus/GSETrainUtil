@@ -1,0 +1,9 @@
+.step-mac-address__title {
+  font-weight: 600 !important;
+  color: #1976d2 !important;
+}
+
+.step-mac-address__input {
+  background-color: #f8f9fa !important;
+  border-color: #1976d2 !important;
+}

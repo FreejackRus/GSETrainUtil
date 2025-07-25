@@ -104,14 +104,12 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
             )}
             
             <Box className="header__logo">
-              <Box className="header__logo-icon">
-                <DashboardIcon sx={{ color: 'white', fontSize: 20 }} />
-              </Box>
-              {!isSmallMobile && (
-                <Typography className="header__title">
-                  {isMobile ? 'ГСЭ ТехноАРМ' : 'ГрандСервисЭкспресс ТехноАРМ'}
-                </Typography>
-              )}
+              <img 
+                src="/logo_peremena.png" 
+                alt="PEREMENA" 
+                width={isMobile ? 120 : 160} 
+                height={isMobile ? 30 : 40}
+              />
             </Box>
           </Box>
 

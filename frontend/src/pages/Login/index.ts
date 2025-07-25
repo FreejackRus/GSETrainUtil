@@ -1,1 +1,1 @@
-export{ Login } from "./ui/Login";
+export { LoginForm as Login } from '../../features/auth';

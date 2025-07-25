@@ -1,0 +1,14 @@
+.step-carriage-type__title {
+  font-weight: 600 !important;
+  color: #1976d2 !important;
+}
+
+.step-carriage-type__label {
+  font-weight: 500 !important;
+  color: #1976d2 !important;
+}
+
+.step-carriage-type__select {
+  background-color: #f8f9fa !important;
+  border-color: #1976d2 !important;
+}
