@@ -14,83 +14,97 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model technicalWorkLog {
-  id                Int      @id @default(autoincrement())
-  dataWork          DateTime
+model requestsTechnicalWorkLog {
+  id Int @id @default(autoincrement())
+
   applicationNumber Int
-  typeWork          String
-  trainNumber       String
-  typeCarriage      String
-  carriageNumber    String
-  equipment         Int
-  snEquipment       String
+
+  connectionTypeWork typeWork @relation(fields: [typeWorkId], references: [id])
+  typeWorkId         Int
+
+  connectionTrainNumber trainNumber @relation(fields: [trainNumberId], references: [id])
+  trainNumberId         Int
+
+  connectionEquipment equipment @relation(fields: [equipmentId], references: [id])
+  equipmentId         Int
+
+  countEquipment         Int
+  connectionCompletedJob completedJob @relation(fields: [completedJobId], references: [id])
+  completedJobId         Int
+
+  connectionCurrentLocation currentLocation @relation(fields: [currentLocationId], references: [id])
+  currentLocationId         Int
+
+  stepPhotos String[]
+  finalPhoto String
+
+  connectionUser User @relation(fields: [userId], references: [id])
+  userId         Int
 }
 
-model applicationNumber {
-  id                Int @id @default(autoincrement())
-  applicationNumber Int
+model typeWagons {
+  id                   Int         @id @default(autoincrement())
+  typeWagon            String
+  connectionTypeWagons equipment[]
 }
 
-model typeWork {
-  id       Int    @id @default(autoincrement())
-  typeWork String
-}
-
-model trainNumber {
-  id          Int    @id @default(autoincrement())
-  trainNumber String
-}
-
-model typeCarriage {
-  id           Int    @id @default(autoincrement())
-  typeCarriage String
-}
-
-model carriageNumber {
-  id             Int    @id @default(autoincrement())
-  carriageNumber String
+model numberWagons {
+  id                    Int         @id @default(autoincrement())
+  numberWagon           String
+  connectionNumberWagon equipment[]
 }
 
 model equipment {
-  id        Int    @id @default(autoincrement())
-  equipment String
+  id          Int      @id @default(autoincrement())
+  type        String
+  snNumber    String?
+  mac         String?
+  status      String
+  lastService DateTime
+
+  connectionTypeWagons typeWagons @relation(fields: [typeWagonsId], references: [id])
+  typeWagonsId         Int
+
+  connectionNumberWagon numberWagons @relation(fields: [numberWagonId], references: [id])
+  numberWagonId         Int
+
+  connectionEquipment requestsTechnicalWorkLog[]
+  photo               String
 }
 
-model snEquipment {
-  id          Int    @id @default(autoincrement())
-  snEquipment String
+model typeWork {
+  id                 Int                        @id @default(autoincrement())
+  typeWork           String                     @unique
+  connectionTypeWork requestsTechnicalWorkLog[]
 }
 
-model macAddress {
-  id Int @id @default(autoincrement())
-  macAddress String
-}
-
-model countEquipment {
-  id    Int @id @default(autoincrement())
-  count Int
+model trainNumber {
+  id                    Int                        @id @default(autoincrement())
+  trainNumber           String                     @unique
+  connectionTrainNumber requestsTechnicalWorkLog[]
 }
 
 model completedJob {
-  id           Int    @id @default(autoincrement())
-  completedJob String
+  id                     Int                        @id @default(autoincrement())
+  completedJob           String                     @unique
+  connectionCompletedJob requestsTechnicalWorkLog[]
 }
 
 model currentLocation {
-  id              Int    @id @default(autoincrement())
-  currentLocation String
-}
-
-model Device {
-  id     Int    @id @default(autoincrement())
-  status String
-  name   String
-  count  Int
+  id                        Int                        @id @default(autoincrement())
+  currentLocation           String                     @unique
+  connectionCurrentLocation requestsTechnicalWorkLog[]
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  login    String @unique
-  password String
-  role     String
+  id             Int                        @id @default(autoincrement())
+  login          String
+  password       String
+  role           Role                       @default(admin)
+  connectionUser requestsTechnicalWorkLog[]
+}
+
+enum Role {
+  admin
+  engineer
 }
