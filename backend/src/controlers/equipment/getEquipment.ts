@@ -1,11 +1,11 @@
 import { PrismaClient } from "../../../generated/prisma";
 import { Request, Response } from "express";
 
-export const getTrainNumber = async (req: Request, res: Response) => {
+export const getEquipment = async (req: Request, res: Response) => {
   try {
     const prisma = new PrismaClient();
   
-    const getTypeWork = await prisma.trainNumber.findMany();
+    const getTypeWork = await prisma.equipment.findMany();
 
     await prisma.$disconnect();
     res.status(200).json(getTypeWork);
