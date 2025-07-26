@@ -1,0 +1,1 @@
+export { AdminPanelPage as AdminPanel } from '../../widgets/AdminPanelPage';

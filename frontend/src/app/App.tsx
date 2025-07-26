@@ -239,25 +239,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ 
-        minHeight: '100vh', 
-        backgroundColor: 'background.default',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        <Header role={role || ''} onLogout={handleLogout} />
-        <Box sx={{ 
-          flex: 1,
-          pt: { xs: 1, md: 2 },
-          pb: { xs: 2, md: 3 }
-        }}>
-          {role === "admin" ? (
-            <AppRouter />
-          ) : (
-            <CreateApplicationButton />
-          )}
-        </Box>
-      </Box>
+      <AppRouter role={role || ''} onLogout={handleLogout} />
     </ThemeProvider>
   );
 }

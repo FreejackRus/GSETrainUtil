@@ -1,0 +1,1 @@
+export { StepEquipmentWithPhoto } from './StepEquipmentWithPhoto';

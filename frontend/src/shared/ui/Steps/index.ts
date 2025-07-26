@@ -1,6 +1,11 @@
-export { StepEngineerName } from './StepEngineerName';
-export { StepWorkType } from './StepWorkType';
-export { StepEquipment } from './StepEquipment';
-export { StepFinalPhoto } from './StepFinalPhoto';
-export { StepTrainNumber } from './StepTrainNumber';
-export { StepCarriageNumber } from './StepCarriageNumber';
+export { StepWorkType } from './StepWorkType/StepWorkType';
+export { StepTrainNumber } from './StepTrainNumber/StepTrainNumber';
+export { StepCarriageType } from './StepCarriageType/StepCarriageType';
+export { StepCarriageNumber } from './StepCarriageNumber/StepCarriageNumber';
+export { StepEquipmentWithPhoto } from './StepEquipmentWithPhoto/StepEquipmentWithPhoto';
+export { StepSerialNumber } from './StepSerialNumber/StepSerialNumber';
+export { StepMacAddress } from './StepMacAddress/StepMacAddress';
+export { StepCount } from './StepCount/StepCount';
+export { StepWorkCompleted } from './StepWorkCompleted/StepWorkCompleted';
+export { StepFinalPhoto } from './StepFinalPhoto/StepFinalPhoto';
+export { StepLocation } from './StepLocation/StepLocation';

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Typography, 
@@ -19,15 +19,48 @@ import {
   DevicesOther as DevicesIcon,
   TrendingUp as TrendingUpIcon,
   Security as SecurityIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  People as PeopleIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router';
 import { Button as CustomButton } from "../../../shared/ui";
 import { Button } from "@mui/material";
 import { DeviceList } from '../../../features';
+import { deviceApi } from '../../../entities/device';
 import './HomePage.css';
 
 export const HomePage = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const navigate = useNavigate();
+  const [deviceCount, setDeviceCount] = useState(0);
+
+  useEffect(() => {
+    const fetchDeviceCount = async () => {
+      try {
+        const response = await deviceApi.getDevices();
+        setDeviceCount(response.data.length);
+      } catch (error) {
+        console.error('Error fetching device count:', error);
+        setDeviceCount(0);
+      }
+    };
+
+    fetchDeviceCount();
+  }, []);
+
+  const handleUserManagement = () => {
+    navigate('/admin');
+  };
+
+  const handleRefresh = async () => {
+    try {
+      const response = await deviceApi.getDevices();
+      setDeviceCount(response.data.length);
+      console.log('Data refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    }
+  };
 
   return (
     <Container maxWidth="xl" className="home-page">
@@ -157,7 +190,7 @@ export const HomePage = () => {
                       variant="h4" 
                       className="home-page__stat-number"
                     >
-                      12
+                      {deviceCount}
                     </Typography>
                   </Box>
                 </CardContent>
@@ -181,13 +214,20 @@ export const HomePage = () => {
               </Box>
               <Box className="home-page__button-container">
                 <Button 
+                  startIcon={<PeopleIcon />}
+                  variant="contained"
+                  color="secondary"
+                  className="home-page__user-management-button"
+                  onClick={handleUserManagement}
+                  sx={{ mr: 2 }}
+                >
+                  Управление пользователями
+                </Button>
+                <Button 
                   startIcon={<RefreshIcon />}
                   variant="contained"
                   className="home-page__refresh-button"
-                  onClick={() => {
-                    // TODO: Implement refresh functionality
-                    console.log('Refresh clicked');
-                  }}
+                  onClick={handleRefresh}
                 >
                   Обновить данные
                 </Button>

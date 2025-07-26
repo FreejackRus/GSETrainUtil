@@ -18,12 +18,17 @@ model requestsTechnicalWorkLog {
   id Int @id @default(autoincrement())
 
   applicationNumber Int
+  applicationDate   DateTime @default(now())
 
   connectionTypeWork typeWork @relation(fields: [typeWorkId], references: [id])
   typeWorkId         Int
 
   connectionTrainNumber trainNumber @relation(fields: [trainNumberId], references: [id])
   trainNumberId         Int
+
+  carriageNumber String
+  serialNumber   String? // Серийный номер оборудования
+  macAddress     String? // MAC-адрес оборудования
 
   connectionEquipment equipment @relation(fields: [equipmentId], references: [id])
   equipmentId         Int
@@ -35,8 +40,13 @@ model requestsTechnicalWorkLog {
   connectionCurrentLocation currentLocation @relation(fields: [currentLocationId], references: [id])
   currentLocationId         Int
 
-  stepPhotos String[]
-  finalPhoto String
+  // Пути к изображениям согласно структуре папок
+  carriagePhoto    String? // фото вагона
+  equipmentPhoto   String? // фото оборудования
+  serialPhoto      String? // фото серийного номера
+  macPhoto         String? // фото MAC-адреса
+  generalPhoto     String? // общее фото оборудования
+  finalPhoto       String? // финальное фото работ
 
   connectionUser User @relation(fields: [userId], references: [id])
   userId         Int

@@ -1,20 +1,24 @@
 import React from 'react';
 import { Box, TextField, Typography, Alert } from '@mui/material';
 import { PhotoUpload } from '../../PhotoUpload';
+import { ApplicationFormData } from '../../../entities/application/model/types';
 import './StepMacAddress.css';
 
 interface StepMacAddressProps {
-  value: string;
-  photo: File | null;
-  onChange: (field: string, value: string) => void;
-  onPhotoChange: (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+  formData: ApplicationFormData;
+  onFormDataChange: (data: Partial<ApplicationFormData>) => void;
+  applicationData: {
+    requestNumber: string;
+    applicationDate: string;
+    trainNumber: string;
+    equipment: string;
+  };
 }
 
 export const StepMacAddress: React.FC<StepMacAddressProps> = ({
-  value,
-  photo,
-  onChange,
-  onPhotoChange
+  formData,
+  onFormDataChange,
+  applicationData,
 }) => {
   const formatMacAddress = (input: string) => {
     // Удаляем все символы кроме букв и цифр
@@ -26,7 +30,11 @@ export const StepMacAddress: React.FC<StepMacAddressProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatMacAddress(e.target.value);
-    onChange('macAddress', formatted);
+    onFormDataChange({ macAddress: formatted });
+  };
+
+  const handlePhotoChange = (file: File | null) => {
+    onFormDataChange({ macPhoto: file });
   };
 
   return (
@@ -43,7 +51,7 @@ export const StepMacAddress: React.FC<StepMacAddressProps> = ({
       <TextField
         fullWidth
         label="MAC-адрес"
-        value={value}
+        value={formData.macAddress || ''}
         onChange={handleChange}
         placeholder="00:00:00:00:00:00"
         className="step-mac-address__input"
@@ -52,11 +60,11 @@ export const StepMacAddress: React.FC<StepMacAddressProps> = ({
       />
       
       <PhotoUpload
-        photo={photo}
-        onPhotoChange={onPhotoChange('macPhoto')}
+        photo={formData.macPhoto || null}
+        onPhotoChange={handlePhotoChange}
         label="Фотография MAC-адреса"
         description="Сделайте фото MAC-адреса оборудования"
-        required={!!value}
+        required={!!formData.macAddress}
       />
     </Box>
   );

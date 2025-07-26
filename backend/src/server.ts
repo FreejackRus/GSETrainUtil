@@ -1,6 +1,7 @@
 import express, { Request, Response, Router } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import path from "path";
 import { routerDevice } from "./router/routerDevice";
 
 const app = express();
@@ -10,9 +11,12 @@ app.use(bodyParser.json());
 
 app.use(
   cors({
-    origin: ["http://localhost:5174", "http://localhost:5175", "http://localhost:5173"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"],
   })
 );
+
+// Middleware для обслуживания статических файлов (изображений)
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.use("/api/v1", routerDevice);
 

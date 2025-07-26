@@ -29,51 +29,31 @@ import {
   Save,
   Close,
 } from "@mui/icons-material";
-import axios from "axios";
+
+import { 
+  type ApplicationFormData,
+  applicationApi,
+  type Application
+} from "../../../entities/application";
+import { 
+  referenceApi,
+  APPLICATION_STEPS,
+  INITIAL_FORM_DATA,
+  FALLBACK_DATA
+} from "../../../shared";
 import { 
   StepWorkType, 
-  StepEquipment, 
-  StepEngineerName, 
+  StepEquipmentWithPhoto,
+  StepWorkCompleted, 
   StepFinalPhoto,
   StepTrainNumber,
-  StepCarriageNumber
+  StepCarriageNumber,
+  StepCarriageType,
+  StepSerialNumber,
+  StepMacAddress,
+  StepCount,
+  StepLocation
 } from "../../../shared/ui";
-import { StepCarriageType } from "../../../shared/ui/Steps/StepCarriageType";
-import { StepSerialNumber } from "../../../shared/ui/Steps/StepSerialNumber";
-import { StepMacAddress } from "../../../shared/ui/Steps/StepMacAddress";
-import { StepCount } from "../../../shared/ui/Steps/StepCount";
-import { StepLocation } from "../../../shared/ui/Steps/StepLocation";
-
-const fetchOptions = async (endpoint: string) => {
-  const res = await axios.get(`http://localhost:3000/api/v1/${endpoint}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  return res.data;
-};
-
-const fakeData = {
-  workTypes: ["монтаж", "замена", "диагностика", "ремонт"],
-  trainNumbers: ["001", "002", "003"],
-  carriageTypes: ["купе", "плацкарт", "СВ"],
-  equipmentTypes: ["пром. комп.", "маршрутизатор", "коммутатор", "коннектор"],
-  locations: ["Депо Москва", "Станция Тверь", "Станция Сочи"],
-};
-
-const steps = [
-  { key: "workType", label: "Тип работ", type: "select" },
-  { key: "trainNumber", label: "Номер поезда", type: "select" },
-  { key: "carriageType", label: "Тип вагона", type: "select" },
-  { key: "carriageNumber", label: "Номер вагона", type: "input", photoField: "carriagePhoto" },
-  { key: "equipment", label: "Наименование оборудования", type: "select", photoField: "equipmentPhoto" },
-  { key: "serialNumber", label: "Серийный номер", type: "input", photoField: "serialPhoto" },
-  { key: "macAddress", label: "MAC-адрес (если есть)", type: "input", photoField: "macPhoto" },
-  { key: "count", label: "Количество", type: "input" },
-  { key: "engineerName", label: "ФИО инженера", type: "input" },
-  { key: "location", label: "Текущее место (депо/станция)", type: "select" },
-  { key: "finalPhoto", label: "Общая фотография", type: "photo" },
-];
 
 export const CreateApplicationForm = ({
   open,
@@ -83,23 +63,7 @@ export const CreateApplicationForm = ({
   onClose: () => void;
 }) => {
   const [activeStep, setActiveStep] = useState(0);
-  const [form, setForm] = useState<any>({
-    workType: "",
-    trainNumber: "",
-    carriageType: "",
-    carriageNumber: "",
-    equipment: "",
-    serialNumber: "",
-    macAddress: "",
-    count: 1,
-    engineerName: "",
-    location: "",
-    carriagePhoto: null,
-    equipmentPhoto: null,
-    serialPhoto: null,
-    macPhoto: null,
-    finalPhoto: null,
-  });
+  const [form, setForm] = useState<ApplicationFormData>(INITIAL_FORM_DATA);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -135,22 +99,37 @@ export const CreateApplicationForm = ({
     setSuccess(null);
     setError(null);
 
-    // Получаем списки из БД, если не пришли — используем фейковые
-    fetchOptions("typeWork")
-      .then((data) => setWorkTypes(data.map((d: any) => d.typeWork)))
-      .catch(() => setWorkTypes(fakeData.workTypes));
-    fetchOptions("trainNumber")
-      .then((data) => setTrainNumbers(data.map((d: any) => d.trainNumber)))
-      .catch(() => setTrainNumbers(fakeData.trainNumbers));
-    fetchOptions("typeCarriage")
-      .then((data) => setCarriageTypes(data.map((d: any) => d.typeCarriage)))
-      .catch(() => setCarriageTypes(fakeData.carriageTypes));
-    fetchOptions("equipment")
-      .then((data) => setEquipmentTypes(data.map((d: any) => d.equipment)))
-      .catch(() => setEquipmentTypes(fakeData.equipmentTypes));
-    fetchOptions("currentLocation")
-      .then((data) => setLocations(data.map((d: any) => d.currentLocation)))
-      .catch(() => setLocations(fakeData.locations));
+    // Получаем списки из БД, если не пришли — используем fallback данные
+    referenceApi.getAllReferences()
+      .then((data) => {
+        console.log('API Response:', data);
+        if (data && Object.keys(data).length > 0) {
+          console.log('Using API data');
+          setWorkTypes(data.typeWork || FALLBACK_DATA.workTypes);
+          setTrainNumbers(data.trainNumber || FALLBACK_DATA.trainNumbers);
+          setCarriageTypes(data.typeWagon || FALLBACK_DATA.carriageTypes);
+          setEquipmentTypes(data.equipment || FALLBACK_DATA.equipmentTypes);
+          setLocations(data.currentLocation || FALLBACK_DATA.locations);
+        } else {
+          console.log('Using fallback data - empty response');
+          // Используем fallback данные если ответ пустой
+          setWorkTypes(FALLBACK_DATA.workTypes);
+          setTrainNumbers(FALLBACK_DATA.trainNumbers);
+          setCarriageTypes(FALLBACK_DATA.carriageTypes);
+          setEquipmentTypes(FALLBACK_DATA.equipmentTypes);
+          setLocations(FALLBACK_DATA.locations);
+        }
+      })
+      .catch((error) => {
+        console.log('API Error:', error);
+        console.log('Using fallback data - error');
+        // Используем fallback данные в случае ошибки
+        setWorkTypes(FALLBACK_DATA.workTypes);
+        setTrainNumbers(FALLBACK_DATA.trainNumbers);
+        setCarriageTypes(FALLBACK_DATA.carriageTypes);
+        setEquipmentTypes(FALLBACK_DATA.equipmentTypes);
+        setLocations(FALLBACK_DATA.locations);
+      });
   }, [open]);
 
   const handleChange = (field: string, value: any) => {
@@ -158,15 +137,6 @@ export const CreateApplicationForm = ({
       ...prev,
       [field]: value,
     }));
-  };
-
-  const handlePhotoChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setForm((prev: any) => ({
-        ...prev,
-        [field]: e.target.files![0],
-      }));
-    }
   };
 
   // Проверяем, есть ли прогресс в форме
@@ -202,51 +172,55 @@ export const CreateApplicationForm = ({
     setSuccess(null);
     setError(null);
     try {
-      // Для примера отправляем только текстовые данные, фото не отправляются
-      const data = {
-        workType: form.workType,
-        trainNumber: form.trainNumber,
-        carriageType: form.carriageType,
-        carriageNumber: form.carriageNumber,
-        equipment: form.equipment,
-        serialNumber: form.serialNumber,
-        macAddress: form.macAddress,
-        count: form.count,
-        engineerName: form.engineerName,
-        location: form.location,
-        // carriagePhoto: form.carriagePhoto,
-        // equipmentPhoto: form.equipmentPhoto,
-        // serialPhoto: form.serialPhoto,
-        // macPhoto: form.macPhoto,
-        // finalPhoto: form.finalPhoto,
-      };
-      await axios.post("http://localhost:3000/api/v1/devices", data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const formData = new FormData();
+      
+      // Добавляем текстовые поля
+      formData.append("workType", form.workType);
+      formData.append("trainNumber", form.trainNumber);
+      formData.append("carriageType", form.carriageType);
+      formData.append("carriageNumber", form.carriageNumber);
+      formData.append("equipment", form.equipment);
+      formData.append("serialNumber", form.serialNumber);
+      formData.append("macAddress", form.macAddress || '');
+      formData.append("count", form.count.toString());
+      formData.append("engineerName", form.engineerName);
+      formData.append("location", form.location);
+
+      // Добавляем файлы
+      if (form.carriagePhoto) formData.append("carriagePhoto", form.carriagePhoto);
+      if (form.equipmentPhoto) formData.append("equipmentPhoto", form.equipmentPhoto);
+      if (form.serialPhoto) formData.append("serialPhoto", form.serialPhoto);
+      if (form.macPhoto) formData.append("macPhoto", form.macPhoto);
+      if (form.finalPhoto) formData.append("finalPhoto", form.finalPhoto);
+
+      await applicationApi.create({
+         workType: form.workType,
+         trainNumber: form.trainNumber,
+         carriageType: form.carriageType,
+         carriageNumber: form.carriageNumber,
+         equipment: form.equipment,
+         serialNumber: form.serialNumber,
+         macAddress: form.macAddress || '',
+         count: form.count,
+         workCompleted: form.workCompleted,
+         location: form.location,
+         carriagePhoto: form.carriagePhoto,
+         equipmentPhoto: form.equipmentPhoto,
+         serialPhoto: form.serialPhoto,
+         macPhoto: form.macPhoto,
+         finalPhoto: form.finalPhoto
+       });
       setSuccess("Заявка успешно создана!");
-      setActiveStep(0);
-      setForm({
-        workType: "",
-        trainNumber: "",
-        carriageType: "",
-        carriageNumber: "",
-        equipment: "",
-        serialNumber: "",
-        macAddress: "",
-        count: 1,
-        engineerName: "",
-        location: "",
-        carriagePhoto: null,
-        equipmentPhoto: null,
-        serialPhoto: null,
-        macPhoto: null,
-        finalPhoto: null,
-      });
-      onClose();
-    } catch (e) {
-      setError("Ошибка при создании заявки");
+      setError(null);
+      
+      // Сброс формы после успешной отправки
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+    } catch (error) {
+      console.error("Error creating application:", error);
+      setError("Ошибка при создании заявки. Попробуйте еще раз.");
+      setSuccess(null);
     } finally {
       setLoading(false);
     }
@@ -254,7 +228,7 @@ export const CreateApplicationForm = ({
 
   // Универсальная валидация для этапа
   const isNextDisabled = () => {
-    const step = steps[activeStep];
+    const step = APPLICATION_STEPS[activeStep];
     
     // Skip validation if step has skipIf property and it evaluates to true
     if ('skipIf' in step && (step as any).skipIf(form)) return false;
@@ -272,13 +246,20 @@ export const CreateApplicationForm = ({
     
     // Для шагов с фотографиями проверяем и основное поле, и фото
     if (step.photoField) {
-      if (!form[step.key] || !form[step.photoField]) return true;
+      if (!form[step.key as keyof ApplicationFormData] || !form[step.photoField as keyof ApplicationFormData]) return true;
     }
     
     return false;
   };
 
   const renderStep = () => {
+    const applicationData = {
+      requestNumber: `REQ${Date.now()}`,
+      applicationDate: form.applicationDate,
+      trainNumber: form.trainNumber,
+      equipment: form.equipment
+    };
+
     switch (activeStep) {
       case 0:
         return <StepWorkType value={form.workType} onChange={handleChange} options={workTypes} />;
@@ -289,39 +270,34 @@ export const CreateApplicationForm = ({
       case 3:
         return (
           <StepCarriageNumber
-            value={form.carriageNumber}
-            photo={form.carriagePhoto}
-            onChange={handleChange}
-            onPhotoChange={handlePhotoChange}
+            formData={form}
+            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
+            applicationData={applicationData}
           />
         );
       case 4:
         return (
-          <StepEquipment
-            value={form.equipment}
-            photo={form.equipmentPhoto}
-            onChange={handleChange}
-            onPhotoChange={handlePhotoChange}
-            options={equipmentTypes}
+          <StepEquipmentWithPhoto
+            formData={form}
+            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
+            applicationData={applicationData}
+            equipmentOptions={equipmentTypes}
           />
         );
       case 5:
         return (
           <StepSerialNumber
-            value={form.serialNumber}
-            photo={form.serialPhoto}
-            onChange={handleChange}
-            onPhotoChange={handlePhotoChange}
-            equipment={form.equipment}
+            formData={form}
+            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
+            applicationData={applicationData}
           />
         );
       case 6:
         return (
           <StepMacAddress
-            value={form.macAddress}
-            photo={form.macPhoto}
-            onChange={handleChange}
-            onPhotoChange={handlePhotoChange}
+            formData={form}
+            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
+            applicationData={applicationData}
           />
         );
       case 7:
@@ -333,16 +309,20 @@ export const CreateApplicationForm = ({
           />
         );
       case 8:
-        return (
-          <StepEngineerName value={form.engineerName} onChange={handleChange} />
-        );
+          return (
+            <StepWorkCompleted value={form.workCompleted} onChange={handleChange} />
+          );
       case 9:
         return (
           <StepLocation value={form.location} onChange={handleChange} options={locations} />
         );
       case 10:
         return (
-          <StepFinalPhoto photo={form.finalPhoto} onPhotoChange={handlePhotoChange('finalPhoto')} />
+          <StepFinalPhoto 
+            formData={form}
+            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
+            applicationData={applicationData}
+          />
         );
       default:
         return null;
@@ -379,10 +359,10 @@ export const CreateApplicationForm = ({
         <Box mt={2}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
             <Typography variant="body2">
-              Шаг {activeStep + 1} из {steps.length}
+              Шаг {activeStep + 1} из {APPLICATION_STEPS.length}
             </Typography>
             <Chip 
-              label={`${Math.round(((activeStep + 1) / steps.length) * 100)}%`}
+              label={`${Math.round(((activeStep + 1) / APPLICATION_STEPS.length) * 100)}%`}
               size="small"
               sx={{ 
                 bgcolor: 'rgba(255,255,255,0.2)', 
@@ -393,7 +373,7 @@ export const CreateApplicationForm = ({
           </Box>
           <LinearProgress 
             variant="determinate" 
-            value={((activeStep + 1) / steps.length) * 100}
+            value={((activeStep + 1) / APPLICATION_STEPS.length) * 100}
             sx={{
               height: 8,
               borderRadius: 4,
@@ -434,7 +414,7 @@ export const CreateApplicationForm = ({
               }
             }}
           >
-            {steps.map((step, index) => (
+            {APPLICATION_STEPS.map((step, index) => (
               <Step key={step.key}>
                 <StepLabel>{step.label}</StepLabel>
               </Step>
@@ -443,7 +423,7 @@ export const CreateApplicationForm = ({
         </Box>
       </DialogTitle>
       
-      <DialogContent sx={{ bgcolor: 'white', color: 'black', borderRadius: '0 0 12px 12px' }}>
+      <DialogContent sx={{ bgcolor: 'white', color: 'black' }}>
         <Card 
           elevation={0}
           sx={{ 
@@ -460,59 +440,6 @@ export const CreateApplicationForm = ({
             </Fade>
           </CardContent>
         </Card>
-
-        <Box display="flex" justifyContent="space-between" alignItems="center" mt={4}>
-          <Button 
-            disabled={activeStep === 0} 
-            onClick={handleBack}
-            startIcon={<ArrowBack />}
-            variant="outlined"
-            sx={{ 
-              borderRadius: 3,
-              px: 3,
-              py: 1.5,
-              borderColor: '#667eea',
-              color: '#667eea',
-              '&:hover': {
-                borderColor: '#764ba2',
-                bgcolor: 'rgba(102, 126, 234, 0.1)'
-              }
-            }}
-          >
-            Назад
-          </Button>
-          
-          <Box display="flex" gap={2} alignItems="center">
-            <Typography variant="body2" color="text.secondary">
-              {steps[activeStep].label}
-            </Typography>
-            <Button
-              variant="contained"
-              onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
-              disabled={isNextDisabled() || loading}
-              endIcon={
-                loading ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : activeStep === steps.length - 1 ? (
-                  <Save />
-                ) : (
-                  <ArrowForward />
-                )
-              }
-              sx={{
-                borderRadius: 3,
-                px: 4,
-                py: 1.5,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                }
-              }}
-            >
-              {activeStep === steps.length - 1 ? "Создать заявку" : "Далее"}
-            </Button>
-          </Box>
-        </Box>
         
         {success && (
           <Slide direction="up" in={!!success} mountOnEnter unmountOnExit>
@@ -548,6 +475,61 @@ export const CreateApplicationForm = ({
           </Slide>
         )}
       </DialogContent>
+      
+      <DialogActions sx={{ bgcolor: 'white', borderRadius: '0 0 12px 12px', p: 3 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
+          <Button 
+            disabled={activeStep === 0} 
+            onClick={handleBack}
+            startIcon={<ArrowBack />}
+            variant="outlined"
+            sx={{ 
+              borderRadius: 3,
+              px: 3,
+              py: 1.5,
+              borderColor: '#667eea',
+              color: '#667eea',
+              '&:hover': {
+                borderColor: '#764ba2',
+                bgcolor: 'rgba(102, 126, 234, 0.1)'
+              }
+            }}
+          >
+            Назад
+          </Button>
+          
+          <Box display="flex" gap={2} alignItems="center">
+            <Typography variant="body2" color="text.secondary">
+              {APPLICATION_STEPS[activeStep].label}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={activeStep === APPLICATION_STEPS.length - 1 ? handleSubmit : handleNext}
+              disabled={isNextDisabled() || loading}
+              endIcon={
+                loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : activeStep === APPLICATION_STEPS.length - 1 ? (
+                  <Save />
+                ) : (
+                  <ArrowForward />
+                )
+              }
+              sx={{
+                borderRadius: 3,
+                px: 4,
+                py: 1.5,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                }
+              }}
+            >
+              {activeStep === APPLICATION_STEPS.length - 1 ? "Создать заявку" : "Далее"}
+            </Button>
+          </Box>
+        </Box>
+      </DialogActions>
     </Dialog>
 
     {/* Диалог подтверждения выхода */}

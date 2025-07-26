@@ -1,19 +1,14 @@
 import { TextField, MenuItem, Box, Typography, Avatar, Card, CardContent } from "@mui/material";
 import { Memory, CheckCircle } from "@mui/icons-material";
-import { PhotoUpload } from "../../PhotoUpload";
 import "./StepEquipment.css";
 
 export const StepEquipment = ({
   value,
-  photo,
   onChange,
-  onPhotoChange,
   options,
 }: {
   value: string;
-  photo?: File | null;
   onChange: (field: string, value: any) => void;
-  onPhotoChange?: (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => void;
   options: string[];
 }) => (
   <Box>
@@ -64,18 +59,6 @@ export const StepEquipment = ({
           </Box>
         </CardContent>
       </Card>
-    )}
-
-    {value && onPhotoChange && (
-      <Box sx={{ mt: 3 }}>
-        <PhotoUpload
-          photo={photo}
-          onPhotoChange={onPhotoChange("equipmentPhoto")}
-          label="Фотография оборудования"
-          description="Сделайте фото выбранного оборудования"
-          required={true}
-        />
-      </Box>
     )}
   </Box>
 );

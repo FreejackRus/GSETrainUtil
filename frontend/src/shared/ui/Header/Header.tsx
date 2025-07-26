@@ -12,8 +12,6 @@ import {
   Menu,
   MenuItem,
   Drawer,
-  List,
-  ListItem,
   ListItemIcon,
   ListItemText,
   Divider
@@ -21,11 +19,8 @@ import {
 import { 
   ExitToApp as LogoutIcon,
   AccessTime as TimeIcon,
-  CalendarToday as CalendarIcon,
   Person as PersonIcon,
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  Settings as SettingsIcon
+  Menu as MenuIcon
 } from '@mui/icons-material';
 import './Header.css';
 
@@ -40,7 +35,6 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isSmallMobile = useMediaQuery('(max-width: 480px)');
-
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -86,6 +80,8 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
     handleUserMenuClose();
     onLogout();
   };
+
+
 
   return (
     <>

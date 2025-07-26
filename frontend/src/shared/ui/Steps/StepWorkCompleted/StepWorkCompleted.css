@@ -1,0 +1,54 @@
+.step-work-completed-title {
+  color: #2e7d32;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-work-completed-avatar {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  width: 48px;
+  height: 48px;
+}
+
+.step-work-completed-avatar-icon {
+  color: white;
+  font-size: 24px;
+}
+
+.step-work-completed-select {
+  border-radius: 12px;
+}
+
+.step-work-completed-select .MuiOutlinedInput-root {
+  border-radius: 12px;
+}
+
+.step-work-completed-result-card {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%);
+  border: 1px solid #c8e6c9;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+}
+
+.step-work-completed-result-avatar {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  width: 40px;
+  height: 40px;
+}
+
+.step-work-completed-result-title {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.step-work-completed-hint {
+  background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%);
+  border: 1px solid #ffcc02;
+  border-radius: 12px;
+}
+
+.step-work-completed-hint-text {
+  color: #e65100;
+  font-size: 0.875rem;
+}
