@@ -164,7 +164,6 @@ function createAct(
   doc.setFontSize(12);
   doc.setFont("Font", "bold");
   doc.text("Подрядчик:", startX, startY);
-
   doc.line(startX, startY + 8, startX + blockWidth * 0.37, startY + 8);
   doc.line(
     startX + blockWidth * 0.4,
@@ -172,14 +171,12 @@ function createAct(
     startX + blockWidth * 0.9,
     startY + 8
   );
-
   doc.setFont("Font", "italic");
   doc.text(
     "(должность) (наименование организации)",
     startX,
     startY + 5 + lineHeight
   );
-
   doc.line(
     startX,
     startY + heightLine + lineHeight,
@@ -194,7 +191,6 @@ function createAct(
     startY + heightLine + lineHeight
   );
   doc.text(")", startX + blockWidth * 0.9, startY + heightLine + lineHeight);
-
   doc.setFont("Font", "normal");
   doc.text("(подпись)", startX, startY + 2 + lineHeight + 5 + 7 + lineHeight);
   doc.text(
@@ -208,7 +204,6 @@ function createAct(
 
   doc.setFont("Font", "bold");
   doc.text("Заказчик:", secondBlockX, startY);
-
   doc.line(
     secondBlockX,
     startY + 8,
@@ -221,14 +216,12 @@ function createAct(
     secondBlockX + blockWidth * 0.9,
     startY + 8
   );
-
   doc.setFont("Font", "italic");
   doc.text(
     "(должность) (наименование организации)",
     secondBlockX,
     startY + 5 + lineHeight
   );
-
   doc.line(
     secondBlockX,
     startY + heightLine + lineHeight,
@@ -251,7 +244,6 @@ function createAct(
     secondBlockX + blockWidth * 0.9,
     startY + heightLine + lineHeight
   );
-
   doc.setFont("Font", "normal");
   doc.text(
     "(подпись)",
