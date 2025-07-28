@@ -81,12 +81,15 @@ function createAct(
       fillColor: [255, 255, 255],
       textColor: [0, 0, 0],
       font: "Font",
+      fontStyle: "normal",
       lineWidth: 0.1,
       lineColor: 0,
     },
     styles: {
-      fontSize: 10,
+      fontSize: 12,
       font: "Font",
+      textColor: [0, 0, 0],
+      fontStyle: "normal",
       lineWidth: 0.1,
       lineColor: 0,
     },
@@ -99,6 +102,9 @@ function createAct(
     margin: { left: marginLeft, right: marginRight },
     tableLineColor: 0,
     tableLineWidth: 0.1,
+    alternateRowStyles: {
+      fillColor: [255, 255, 255], // отключаем серый фон на нечётных строках
+    },
   });
 
   doc.text(
@@ -122,12 +128,15 @@ function createAct(
       fillColor: [255, 255, 255],
       textColor: [0, 0, 0],
       font: "Font",
+      fontStyle: "normal",
       lineWidth: 0.1,
       lineColor: 0,
     },
     styles: {
-      fontSize: 10,
+      fontSize: 12,
+      textColor: [0, 0, 0],
       font: "Font",
+      fontStyle: "normal",
       lineWidth: 0.1,
       lineColor: 0,
     },
@@ -140,6 +149,9 @@ function createAct(
     margin: { left: marginLeft, right: marginRight },
     tableLineColor: 0,
     tableLineWidth: 0.1,
+    alternateRowStyles: {
+      fillColor: [255, 255, 255], // отключаем серый фон на нечётных строках
+    },
   });
 
   const startX = 20;
@@ -154,19 +166,42 @@ function createAct(
   doc.text("Подрядчик:", startX, startY);
 
   doc.line(startX, startY + 8, startX + blockWidth * 0.37, startY + 8);
-  doc.line(startX + blockWidth * 0.4, startY + 8, startX + blockWidth * 0.9, startY + 8);
+  doc.line(
+    startX + blockWidth * 0.4,
+    startY + 8,
+    startX + blockWidth * 0.9,
+    startY + 8
+  );
 
   doc.setFont("Font", "italic");
-  doc.text("(должность) (наименование организации)", startX, startY + 5 + lineHeight);
+  doc.text(
+    "(должность) (наименование организации)",
+    startX,
+    startY + 5 + lineHeight
+  );
 
-  doc.line(startX, startY + heightLine + lineHeight, startX + blockWidth * 0.39, startY + heightLine + lineHeight);
+  doc.line(
+    startX,
+    startY + heightLine + lineHeight,
+    startX + blockWidth * 0.39,
+    startY + heightLine + lineHeight
+  );
   doc.text("(", startX + blockWidth * 0.39, startY + heightLine + lineHeight);
-  doc.line(startX + blockWidth * 0.4, startY + heightLine + lineHeight, startX + blockWidth * 0.9, startY + heightLine + lineHeight);
+  doc.line(
+    startX + blockWidth * 0.4,
+    startY + heightLine + lineHeight,
+    startX + blockWidth * 0.9,
+    startY + heightLine + lineHeight
+  );
   doc.text(")", startX + blockWidth * 0.9, startY + heightLine + lineHeight);
 
   doc.setFont("Font", "normal");
   doc.text("(подпись)", startX, startY + 2 + lineHeight + 5 + 7 + lineHeight);
-  doc.text("(Ф.И.О.)", startX + blockWidth * 0.5, startY + 2 + lineHeight + 5 + 7 + lineHeight);
+  doc.text(
+    "(Ф.И.О.)",
+    startX + blockWidth * 0.5,
+    startY + 2 + lineHeight + 5 + 7 + lineHeight
+  );
 
   // Заказчик
   const secondBlockX = startX + blockWidth + 8;
@@ -174,20 +209,60 @@ function createAct(
   doc.setFont("Font", "bold");
   doc.text("Заказчик:", secondBlockX, startY);
 
-  doc.line(secondBlockX, startY + 8, secondBlockX + blockWidth * 0.37, startY + 8);
-  doc.line(secondBlockX + blockWidth * 0.4, startY + 8, secondBlockX + blockWidth * 0.9, startY + 8);
+  doc.line(
+    secondBlockX,
+    startY + 8,
+    secondBlockX + blockWidth * 0.37,
+    startY + 8
+  );
+  doc.line(
+    secondBlockX + blockWidth * 0.4,
+    startY + 8,
+    secondBlockX + blockWidth * 0.9,
+    startY + 8
+  );
 
   doc.setFont("Font", "italic");
-  doc.text("(должность) (наименование организации)", secondBlockX, startY + 5 + lineHeight);
+  doc.text(
+    "(должность) (наименование организации)",
+    secondBlockX,
+    startY + 5 + lineHeight
+  );
 
-  doc.line(secondBlockX, startY + heightLine + lineHeight, secondBlockX + blockWidth * 0.39, startY + heightLine + lineHeight);
-  doc.text("(", secondBlockX + blockWidth * 0.39, startY + heightLine + lineHeight);
-  doc.line(secondBlockX + blockWidth * 0.4, startY + heightLine + lineHeight, secondBlockX + blockWidth * 0.9, startY + heightLine + lineHeight);
-  doc.text(")", secondBlockX + blockWidth * 0.9, startY + heightLine + lineHeight);
+  doc.line(
+    secondBlockX,
+    startY + heightLine + lineHeight,
+    secondBlockX + blockWidth * 0.39,
+    startY + heightLine + lineHeight
+  );
+  doc.text(
+    "(",
+    secondBlockX + blockWidth * 0.39,
+    startY + heightLine + lineHeight
+  );
+  doc.line(
+    secondBlockX + blockWidth * 0.4,
+    startY + heightLine + lineHeight,
+    secondBlockX + blockWidth * 0.9,
+    startY + heightLine + lineHeight
+  );
+  doc.text(
+    ")",
+    secondBlockX + blockWidth * 0.9,
+    startY + heightLine + lineHeight
+  );
 
   doc.setFont("Font", "normal");
-  doc.text("(подпись)", secondBlockX, startY + 2 + lineHeight + 5 + 7 + lineHeight);
-  doc.text("(Ф.И.О.)", secondBlockX + blockWidth * 0.5, startY + 2 + lineHeight + 5 + 7 + lineHeight);
+  doc.text(
+    "(подпись)",
+    secondBlockX,
+    startY + 2 + lineHeight + 5 + 7 + lineHeight
+  );
+  doc.text(
+    "(Ф.И.О.)",
+    secondBlockX + blockWidth * 0.5,
+    startY + 2 + lineHeight + 5 + 7 + lineHeight
+  );
 
   if (!isLast) {
     doc.addPage();
