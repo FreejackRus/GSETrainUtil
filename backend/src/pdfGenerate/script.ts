@@ -1,63 +1,42 @@
-import { jsPDF } from "jspdf";
-import fs from "fs";
-import path from "path";
-import {
-  fontBoldData,
-  fontBoldItalicData,
-  fontItalicData,
-  fontRegularData,
-  nameTimesNewRomanBd,
-  nameTimesNewRomanBdItalic,
-  nameTimesNewRomanItalic,
-  nameTimesNewRomanRegular,
-} from "./utils/config";
+import { Request, Response } from "express";
+import { PrismaClient } from "../../generated/prisma";
 
-const doc = new jsPDF();
+const getRequestsTechnicalWorkLog = async () => {
+  try {
+    const prisma = new PrismaClient();
 
-doc.addFileToVFS(nameTimesNewRomanRegular, fontRegularData.toString("base64"));
-doc.addFont(nameTimesNewRomanRegular, "Font", "normal");
-doc.addFileToVFS(nameTimesNewRomanBd, fontBoldData.toString("base64"));
-doc.addFont(nameTimesNewRomanBd, "Font", "bold");
-doc.addFileToVFS(nameTimesNewRomanItalic, fontItalicData.toString("base64"));
-doc.addFont(nameTimesNewRomanItalic, "Font", "italic");
-doc.addFileToVFS(
-  nameTimesNewRomanBdItalic,
-  fontBoldItalicData.toString("base64")
-);
-doc.addFont(nameTimesNewRomanBdItalic, "Font", "italicBold");
-
-doc.setFont("Font", "normal");
-doc.setFontSize(12);
-doc.text(
-  "Пример текста на русском языке с использованием шрифта Times New Roman.",
-  15,
-  20
-);
-
-doc.setFont("Font", "bold");
-doc.setFontSize(12);
-doc.text(
-  "Пример текста на русском языке с использованием шрифта Times New Roman.",
-  15,
-  40
-);
-
-doc.setFont("Font", "italic");
-doc.setFontSize(12);
-doc.text(
-  "Пример текста на русском языке с использованием шрифта Times New Roman.",
-  15,
-  60
-);
-
-doc.setFont("Font", "italicBold");
-doc.setFontSize(12);
-doc.text(
-  "Пример текста на русском языке с использованием шрифта Times New Roman.",
-  15,
-  80
-);
-
-doc.save("russian_times_new_roman.pdf");
-
-console.log("PDF успешно создан!");
+    const getRequestsTechnicalWorkLog =
+      await prisma.requestsTechnicalWorkLog.findMany({
+        include: {
+          connectionCurrentLocation: true,
+          connectionEquipment: {
+            include: {
+              connectionNumberWagon: true,
+              connectionTypeWagons: true,
+            },
+          },
+          connectionTrainNumber: true,
+          connectionTypeWork: true,
+        },
+      });
+    await prisma.$disconnect();
+    return getRequestsTechnicalWorkLog;
+  } catch (e) {
+    console.log(e);
+  }
+};
+getRequestsTechnicalWorkLog().then((data) => {
+  const transform = data?.map((item) => ({
+    id: item.id,
+    applicationNumber: item.applicationNumber,
+    typeWork: item.connectionTypeWork.typeWork,
+    trainNumber: item.connectionTrainNumber.trainNumber,
+    equipment: {
+      type: item.connectionEquipment.type,
+      snNumber: item.connectionEquipment.snNumber || null,
+      mac: item.connectionEquipment.mac || null,
+      numberWagon: item.connectionEquipment.connectionNumberWagon.numberWagon,
+    },
+  }));
+  console.log(transform);
+});
