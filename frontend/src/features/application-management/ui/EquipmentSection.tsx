@@ -292,8 +292,8 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             <Grid item xs={12} md={hasMac ? 4 : 6}>
               <PhotoUpload
                 label="Фото оборудования"
-                value={item.equipmentPhoto}
-                onChange={(file) => updateEquipment(index, 'equipmentPhoto', file)}
+                photo={item.equipmentPhoto}
+                onPhotoChange={(file) => updateEquipment(index, 'equipmentPhoto', file)}
                 required
               />
             </Grid>
@@ -302,8 +302,8 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             <Grid item xs={12} md={hasMac ? 4 : 6}>
               <PhotoUpload
                 label="Фото серийного номера"
-                value={item.serialPhoto}
-                onChange={(file) => updateEquipment(index, 'serialPhoto', file)}
+                photo={item.serialPhoto}
+                onPhotoChange={(file) => updateEquipment(index, 'serialPhoto', file)}
                 required
               />
             </Grid>
@@ -313,8 +313,8 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
               <Grid item xs={12} md={4}>
                 <PhotoUpload
                   label="Фото MAC-адреса"
-                  value={item.macPhoto}
-                  onChange={(file) => updateEquipment(index, 'macPhoto', file)}
+                  photo={item.macPhoto}
+                  onPhotoChange={(file) => updateEquipment(index, 'macPhoto', file)}
                   required
                 />
               </Grid>
