@@ -220,12 +220,21 @@ export const CreateApplicationForm = ({
         return !form.carriageNumber || !form.carriagePhoto;
       case "equipment":
         return form.equipment.length === 0 || 
-               form.equipment.some(item => 
-                 !item.equipmentType || 
-                 !item.equipmentPhoto || 
-                 !item.serialPhoto || 
-                 !item.macPhoto
-               );
+               form.equipment.some(item => {
+                 // Базовая валидация
+                 if (!item.equipmentType || !item.equipmentPhoto || !item.serialPhoto) {
+                   return true;
+                 }
+                 
+                 // MAC адрес обязателен только для точек доступа и маршрутизаторов
+                 const needsMac = item.equipmentType.toLowerCase().includes('точка доступа') || 
+                                  item.equipmentType.toLowerCase().includes('маршрутизатор');
+                 if (needsMac && (!item.macAddress || !item.macPhoto)) {
+                   return true;
+                 }
+                 
+                 return false;
+               });
       case "workCompleted":
         return !form.workCompleted;
       case "location":
