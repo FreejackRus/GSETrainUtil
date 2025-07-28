@@ -20,21 +20,26 @@ export interface Application {
   finalPhoto?: File | null;
 }
 
+// Интерфейс для одного элемента оборудования в форме
+export interface EquipmentFormItem {
+  equipmentType: string;
+  serialNumber: string;
+  macAddress: string;
+  count: number;
+  equipmentPhoto?: File | null;
+  serialPhoto?: File | null;
+  macPhoto?: File | null;
+}
+
 export interface ApplicationFormData {
   workType: string;
   trainNumber: string;
   carriageType: string;
   carriageNumber: string;
-  equipment: string;
-  serialNumber: string;
-  macAddress: string;
-  count: number;
+  equipment: EquipmentFormItem[]; // Массив оборудования
   workCompleted: string;
   location: string;
   carriagePhoto?: File | null;
-  equipmentPhoto?: File | null;
-  serialPhoto?: File | null;
-  macPhoto?: File | null;
   generalPhoto?: File | null;
   finalPhoto?: File | null;
 }
