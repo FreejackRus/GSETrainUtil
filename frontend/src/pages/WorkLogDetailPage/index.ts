@@ -1,0 +1,1 @@
+export { WorkLogDetailPage } from './ui/WorkLogDetailPage';

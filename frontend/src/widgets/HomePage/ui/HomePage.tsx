@@ -20,12 +20,13 @@ import {
   TrendingUp as TrendingUpIcon,
   Security as SecurityIcon,
   Refresh as RefreshIcon,
-  People as PeopleIcon
+  People as PeopleIcon,
+  Train as TrainIcon,
+  Assignment as AssignmentIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { Button as CustomButton } from "../../../shared/ui";
 import { Button } from "@mui/material";
-import { DeviceList } from '../../../features';
 import { deviceApi } from '../../../entities/device';
 import './HomePage.css';
 
@@ -38,7 +39,15 @@ export const HomePage = () => {
     const fetchDeviceCount = async () => {
       try {
         const response = await deviceApi.getDevices();
-        setDeviceCount(response.data.length);
+        // Безопасная проверка структуры данных
+        if (response && response.data && response.data.devices && Array.isArray(response.data.devices)) {
+          setDeviceCount(response.data.devices.length);
+        } else if (response && response.devices && Array.isArray(response.devices)) {
+          setDeviceCount(response.devices.length);
+        } else {
+          console.warn('Неожиданная структура данных:', response);
+          setDeviceCount(0);
+        }
       } catch (error) {
         console.error('Error fetching device count:', error);
         setDeviceCount(0);
@@ -52,13 +61,30 @@ export const HomePage = () => {
     navigate('/admin');
   };
 
+  const handleCarriages = () => {
+    navigate('/carriages');
+  };
+
+  const handleWorkLog = () => {
+    navigate('/work-log');
+  };
+
   const handleRefresh = async () => {
     try {
       const response = await deviceApi.getDevices();
-      setDeviceCount(response.data.length);
+      // Безопасная проверка структуры данных
+      if (response && response.data && response.data.devices && Array.isArray(response.data.devices)) {
+        setDeviceCount(response.data.devices.length);
+      } else if (response && response.devices && Array.isArray(response.devices)) {
+        setDeviceCount(response.devices.length);
+      } else {
+        console.warn('Неожиданная структура данных:', response);
+        setDeviceCount(0);
+      }
       console.log('Data refreshed successfully');
     } catch (error) {
       console.error('Error refreshing data:', error);
+      setDeviceCount(0);
     }
   };
 
@@ -203,13 +229,13 @@ export const HomePage = () => {
             <Box className="home-page__content-header">
               <Box className="home-page__content-title-section">
                 <Avatar className="home-page__content-avatar">
-                  <DevicesIcon />
+                  <TrainIcon />
                 </Avatar>
                 <Typography 
                   variant="h5" 
                   className="home-page__content-title"
                 >
-                  Управление устройствами
+                  Управление системой
                 </Typography>
               </Box>
               <Box className="home-page__button-container">
@@ -233,7 +259,69 @@ export const HomePage = () => {
                 </Button>
               </Box>
             </Box>
-            <DeviceList />
+            
+            {/* Новые кнопки для вагонов и журнала работ */}
+            <Box className="home-page__main-actions">
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Card
+                    elevation={4}
+                    className="home-page__action-card home-page__action-card--carriages"
+                    onClick={handleCarriages}
+                    sx={{ cursor: 'pointer', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}
+                  >
+                    <CardContent className="home-page__action-content">
+                      <Avatar className="home-page__action-avatar home-page__action-avatar--carriages">
+                        <TrainIcon sx={{ fontSize: 32 }} />
+                      </Avatar>
+                      <Box className="home-page__action-info">
+                        <Typography 
+                          variant="h5" 
+                          className="home-page__action-title"
+                        >
+                          Просмотр вагонов
+                        </Typography>
+                        <Typography 
+                          variant="body1" 
+                          className="home-page__action-description"
+                        >
+                          Просмотр списка вагонов и установленного в них оборудования
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <Card
+                    elevation={4}
+                    className="home-page__action-card home-page__action-card--worklog"
+                    onClick={handleWorkLog}
+                    sx={{ cursor: 'pointer', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}
+                  >
+                    <CardContent className="home-page__action-content">
+                      <Avatar className="home-page__action-avatar home-page__action-avatar--worklog">
+                        <AssignmentIcon sx={{ fontSize: 32 }} />
+                      </Avatar>
+                      <Box className="home-page__action-info">
+                        <Typography 
+                          variant="h5" 
+                          className="home-page__action-title"
+                        >
+                          Журнал работ
+                        </Typography>
+                        <Typography 
+                          variant="body1" 
+                          className="home-page__action-description"
+                        >
+                          История выполненных технических работ и обслуживания
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Box>
           </Paper>
         </Box>
       </Fade>

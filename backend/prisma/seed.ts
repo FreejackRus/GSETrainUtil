@@ -1,15 +1,20 @@
 import { PrismaClient } from '../generated/prisma'
+import bcrypt from 'bcrypt'
 
 const prisma = new PrismaClient()
 
 async function main() {
+  // Хешируем пароли
+  const adminPasswordHash = await bcrypt.hash('admin', 10)
+  const engineerPasswordHash = await bcrypt.hash('engineer', 10)
+
   // Создаем администратора
   const admin = await prisma.user.upsert({
     where: { login: 'admin' },
     update: {},
     create: {
       login: 'admin',
-      password: 'admin123', // В реальном проекте пароль должен быть захеширован
+      password: adminPasswordHash,
       role: 'admin'
     }
   })
@@ -20,7 +25,7 @@ async function main() {
     update: {},
     create: {
       login: 'engineer',
-      password: 'engineer123', // В реальном проекте пароль должен быть захеширован
+      password: engineerPasswordHash,
       role: 'engineer'
     }
   })

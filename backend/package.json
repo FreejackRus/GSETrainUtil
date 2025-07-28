@@ -7,17 +7,21 @@
     "@prisma/client": "^6.12.0",
     "@prisma/extension-accelerate": "^2.0.2",
     "@types/multer": "^2.0.0",
+    "@types/xlsx": "^0.0.35",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "react-router-dom": "^7.7.1",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "dev": "ts-node src/server.ts",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "import-excel": "ts-node src/utils/importExcelData.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

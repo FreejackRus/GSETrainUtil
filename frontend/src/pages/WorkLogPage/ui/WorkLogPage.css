@@ -1,0 +1,337 @@
+/* Основные стили для страницы журнала работ */
+.work-log-page {
+  padding: 24px 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Стили для карточек */
+.work-log-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.work-log-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для заголовка */
+.work-log-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+.work-log-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="90" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  pointer-events: none;
+}
+
+/* Стили для статистических карточек */
+.stats-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+}
+
+/* Стили для панели управления */
+.control-panel {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Стили для кнопок переключения вида */
+.view-toggle {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.view-toggle .MuiToggleButton-root {
+  border: none;
+  border-radius: 6px;
+  margin: 0 2px;
+}
+
+.view-toggle .MuiToggleButton-root.Mui-selected {
+  background: #1976d2;
+  color: white;
+}
+
+/* Стили для прогресс-бара */
+.progress-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.progress-bar .MuiLinearProgress-bar {
+  border-radius: 4px;
+}
+
+/* Стили для чипов */
+.status-chip {
+  font-weight: 600;
+  border-radius: 8px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.work-type-chip {
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+/* Стили для аватаров */
+.user-avatar {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  font-weight: 600;
+}
+
+/* Стили для иконок */
+.icon-small {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Стили для пустого состояния */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  color: rgba(0, 0, 0, 0.3);
+  margin-bottom: 16px;
+}
+
+/* Стили для диалога фотографий */
+.photo-dialog .MuiDialog-paper {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.photo-dialog .MuiDialogTitle-root {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
+}
+
+.photo-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.photo-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.photo-card img {
+  transition: all 0.3s ease;
+}
+
+.photo-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Стили для меню действий */
+.action-menu .MuiPaper-root {
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Стили для загрузки */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Стили для кнопок */
+.action-button {
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-weight: 600;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.primary-button {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+}
+
+.success-button {
+  background: linear-gradient(45deg, #4caf50, #45a049);
+  color: white;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .work-log-page {
+    padding: 16px 0;
+  }
+  
+  .work-log-header {
+    margin-bottom: 16px;
+  }
+  
+  .control-panel {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .stats-card {
+    padding: 16px;
+  }
+  
+  .work-log-card {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .work-log-page {
+    padding: 12px 0;
+  }
+  
+  .stats-card {
+    padding: 12px;
+  }
+  
+  .control-panel {
+    padding: 12px;
+  }
+}
+
+/* Стили для скроллбара */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #5a6fd8, #6a4190);
+}
+
+/* Стили для фокуса */
+.MuiButton-root:focus,
+.MuiIconButton-root:focus,
+.MuiTextField-root:focus-within {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Стили для тёмной темы */
+@media (prefers-color-scheme: dark) {
+  .work-log-page {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  }
+  
+  .work-log-card {
+    background: linear-gradient(145deg, #2d2d2d 0%, #3a3a3a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .control-panel {
+    background: #2d2d2d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .empty-state {
+    background: #2d2d2d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .loading-container {
+    background: #2d2d2d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}

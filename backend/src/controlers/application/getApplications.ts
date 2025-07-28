@@ -1,30 +1,11 @@
-import { PrismaClient } from "../../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 
 export const getApplications = async (req: Request, res: Response) => {
   try {
     const prisma = new PrismaClient();
     
-    const applications = await prisma.requestsTechnicalWorkLog.findMany({
-      include: {
-        connectionTypeWork: true,
-        connectionTrainNumber: true,
-        connectionEquipment: {
-          include: {
-            connectionTypeWagons: true,
-            connectionNumberWagon: true
-          }
-        },
-        connectionCompletedJob: true,
-        connectionCurrentLocation: true,
-        connectionUser: {
-          select: {
-            id: true,
-            login: true,
-            role: true
-          }
-        }
-      },
+    const applications = await prisma.requests.findMany({
       orderBy: {
         applicationDate: 'desc'
       }
@@ -51,28 +32,9 @@ export const getApplicationById = async (req: Request, res: Response) => {
     const prisma = new PrismaClient();
     const { id } = req.params;
     
-    const application = await prisma.requestsTechnicalWorkLog.findUnique({
+    const application = await prisma.requests.findUnique({
       where: {
         id: parseInt(id)
-      },
-      include: {
-        connectionTypeWork: true,
-        connectionTrainNumber: true,
-        connectionEquipment: {
-          include: {
-            connectionTypeWagons: true,
-            connectionNumberWagon: true
-          }
-        },
-        connectionCompletedJob: true,
-        connectionCurrentLocation: true,
-        connectionUser: {
-          select: {
-            id: true,
-            login: true,
-            role: true
-          }
-        }
       }
     });
 

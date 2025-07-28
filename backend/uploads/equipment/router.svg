@@ -1,0 +1,29 @@
+<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Router body -->
+  <rect x="20" y="40" width="160" height="80" rx="8" ry="8" fill="#2c3e50" stroke="#34495e" stroke-width="2"/>
+  
+  <!-- Front panel -->
+  <rect x="25" y="45" width="150" height="70" rx="4" ry="4" fill="#34495e"/>
+  
+  <!-- LED indicators -->
+  <circle cx="40" cy="60" r="3" fill="#27ae60"/>
+  <circle cx="55" cy="60" r="3" fill="#27ae60"/>
+  <circle cx="70" cy="60" r="3" fill="#f39c12"/>
+  <circle cx="85" cy="60" r="3" fill="#e74c3c"/>
+  
+  <!-- Ethernet ports -->
+  <rect x="30" y="80" width="12" height="8" rx="1" fill="#1a1a1a"/>
+  <rect x="45" y="80" width="12" height="8" rx="1" fill="#1a1a1a"/>
+  <rect x="60" y="80" width="12" height="8" rx="1" fill="#1a1a1a"/>
+  <rect x="75" y="80" width="12" height="8" rx="1" fill="#1a1a1a"/>
+  
+  <!-- Antennas -->
+  <rect x="15" y="20" width="3" height="25" fill="#7f8c8d"/>
+  <rect x="182" y="20" width="3" height="25" fill="#7f8c8d"/>
+  
+  <!-- Brand label -->
+  <text x="100" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#bdc3c7">ROUTER</text>
+  
+  <!-- Model number -->
+  <text x="100" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#95a5a6">RT-2024</text>
+</svg>

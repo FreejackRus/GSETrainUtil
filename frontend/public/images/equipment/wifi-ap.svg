@@ -1,0 +1,55 @@
+<svg width="180" height="140" viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg">
+  <!-- Access Point body -->
+  <ellipse cx="90" cy="70" rx="80" ry="60" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="2"/>
+  
+  <!-- Inner circle -->
+  <ellipse cx="90" cy="70" rx="65" ry="45" fill="#ffffff" stroke="#95a5a6" stroke-width="1"/>
+  
+  <!-- Center hub -->
+  <circle cx="90" cy="70" r="15" fill="#34495e"/>
+  
+  <!-- LED indicator -->
+  <circle cx="90" cy="70" r="3" fill="#27ae60"/>
+  
+  <!-- WiFi signal rings -->
+  <circle cx="90" cy="70" r="25" fill="none" stroke="#3498db" stroke-width="2" opacity="0.6"/>
+  <circle cx="90" cy="70" r="35" fill="none" stroke="#3498db" stroke-width="1.5" opacity="0.4"/>
+  <circle cx="90" cy="70" r="45" fill="none" stroke="#3498db" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Antenna connectors -->
+  <rect x="85" y="15" width="10" height="8" rx="2" fill="#7f8c8d"/>
+  <rect x="85" y="117" width="10" height="8" rx="2" fill="#7f8c8d"/>
+  
+  <!-- Side antennas -->
+  <rect x="15" y="65" width="8" height="10" rx="2" fill="#7f8c8d"/>
+  <rect x="157" y="65" width="8" height="10" rx="2" fill="#7f8c8d"/>
+  
+  <!-- Brand logo area -->
+  <rect x="70" y="90" width="40" height="12" rx="2" fill="#2c3e50"/>
+  <text x="90" y="98" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#ecf0f1">WiFi AP</text>
+  
+  <!-- Status indicators -->
+  <circle cx="75" cy="50" r="2" fill="#27ae60"/>
+  <circle cx="85" cy="50" r="2" fill="#3498db"/>
+  <circle cx="95" cy="50" r="2" fill="#f39c12"/>
+  <circle cx="105" cy="50" r="2" fill="#95a5a6"/>
+  
+  <!-- Ethernet port -->
+  <rect x="85" y="105" width="10" height="6" rx="1" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
+  
+  <!-- Mounting holes -->
+  <circle cx="30" cy="30" r="3" fill="none" stroke="#95a5a6" stroke-width="1"/>
+  <circle cx="150" cy="30" r="3" fill="none" stroke="#95a5a6" stroke-width="1"/>
+  <circle cx="30" cy="110" r="3" fill="none" stroke="#95a5a6" stroke-width="1"/>
+  <circle cx="150" cy="110" r="3" fill="none" stroke="#95a5a6" stroke-width="1"/>
+  
+  <!-- Ventilation grilles -->
+  <g stroke="#bdc3c7" stroke-width="0.5" opacity="0.5">
+    <line x1="50" y1="35" x2="50" y2="45"/>
+    <line x1="55" y1="35" x2="55" y2="45"/>
+    <line x1="60" y1="35" x2="60" y2="45"/>
+    <line x1="120" y1="35" x2="120" y2="45"/>
+    <line x1="125" y1="35" x2="125" y2="45"/>
+    <line x1="130" y1="35" x2="130" y2="45"/>
+  </g>
+</svg>

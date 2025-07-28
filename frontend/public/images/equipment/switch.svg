@@ -1,0 +1,62 @@
+<svg width="200" height="120" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Switch body -->
+  <rect x="10" y="30" width="180" height="60" rx="6" fill="#2c3e50" stroke="#34495e" stroke-width="2"/>
+  
+  <!-- Front panel -->
+  <rect x="15" y="35" width="170" height="50" rx="3" fill="#34495e"/>
+  
+  <!-- Power LED -->
+  <circle cx="25" cy="45" r="2" fill="#27ae60"/>
+  <text x="32" y="48" font-family="Arial, sans-serif" font-size="6" fill="#ecf0f1">PWR</text>
+  
+  <!-- Status LEDs -->
+  <circle cx="25" cy="55" r="2" fill="#3498db"/>
+  <text x="32" y="58" font-family="Arial, sans-serif" font-size="6" fill="#ecf0f1">STS</text>
+  
+  <!-- Port LEDs row 1 -->
+  <circle cx="60" cy="45" r="1.5" fill="#27ae60"/>
+  <circle cx="75" cy="45" r="1.5" fill="#27ae60"/>
+  <circle cx="90" cy="45" r="1.5" fill="#f39c12"/>
+  <circle cx="105" cy="45" r="1.5" fill="#e74c3c"/>
+  <circle cx="120" cy="45" r="1.5" fill="#27ae60"/>
+  <circle cx="135" cy="45" r="1.5" fill="#27ae60"/>
+  <circle cx="150" cy="45" r="1.5" fill="#95a5a6"/>
+  <circle cx="165" cy="45" r="1.5" fill="#95a5a6"/>
+  
+  <!-- Ethernet ports row 1 -->
+  <rect x="55" y="55" width="8" height="6" rx="1" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <rect x="70" y="55" width="8" height="6" rx="1" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <rect x="85" y="55" width="8" height="6" rx="1" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <rect x="100" y="55" width="8" height="6" rx="1" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <rect x="115" y="55" width="8" height="6" rx="1" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <rect x="130" y="55" width="8" height="6" rx="1" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <rect x="145" y="55" width="8" height="6" rx="1" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <rect x="160" y="55" width="8" height="6" rx="1" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  
+  <!-- Port numbers -->
+  <text x="59" y="70" font-family="Arial, sans-serif" font-size="5" fill="#ecf0f1">1</text>
+  <text x="74" y="70" font-family="Arial, sans-serif" font-size="5" fill="#ecf0f1">2</text>
+  <text x="89" y="70" font-family="Arial, sans-serif" font-size="5" fill="#ecf0f1">3</text>
+  <text x="104" y="70" font-family="Arial, sans-serif" font-size="5" fill="#ecf0f1">4</text>
+  <text x="119" y="70" font-family="Arial, sans-serif" font-size="5" fill="#ecf0f1">5</text>
+  <text x="134" y="70" font-family="Arial, sans-serif" font-size="5" fill="#ecf0f1">6</text>
+  <text x="149" y="70" font-family="Arial, sans-serif" font-size="5" fill="#ecf0f1">7</text>
+  <text x="164" y="70" font-family="Arial, sans-serif" font-size="5" fill="#ecf0f1">8</text>
+  
+  <!-- Brand label -->
+  <rect x="15" y="75" width="40" height="8" rx="1" fill="#ecf0f1"/>
+  <text x="35" y="81" text-anchor="middle" font-family="Arial, sans-serif" font-size="6" fill="#2c3e50">SWITCH</text>
+  
+  <!-- Model number -->
+  <text x="170" y="81" font-family="Arial, sans-serif" font-size="5" fill="#95a5a6">24P</text>
+  
+  <!-- Ventilation holes -->
+  <g fill="#7f8c8d" opacity="0.3">
+    <circle cx="175" cy="40" r="1"/>
+    <circle cx="180" cy="40" r="1"/>
+    <circle cx="175" cy="45" r="1"/>
+    <circle cx="180" cy="45" r="1"/>
+    <circle cx="175" cy="50" r="1"/>
+    <circle cx="180" cy="50" r="1"/>
+  </g>
+</svg>

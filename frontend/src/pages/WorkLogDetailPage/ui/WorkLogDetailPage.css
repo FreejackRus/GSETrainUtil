@@ -1,0 +1,322 @@
+.work-log-detail-page {
+  padding: 24px 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.detail-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.detail-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 0;
+}
+
+.detail-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+.back-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-4px);
+}
+
+.request-avatar {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  font-size: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.detail-title {
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.detail-subtitle {
+  opacity: 0.9;
+  margin: 4px 0 0 0;
+  font-weight: 500;
+}
+
+.status-chip {
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+}
+
+.edit-fab, .save-fab, .cancel-fab {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.edit-fab:hover, .save-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.cancel-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.detail-section {
+  margin-bottom: 24px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.detail-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 24px 24px 16px 24px;
+}
+
+.section-title svg {
+  color: #667eea;
+}
+
+.detail-section .MuiDivider-root {
+  margin: 0 24px 16px 24px;
+  background: linear-gradient(90deg, #667eea, transparent);
+}
+
+.detail-section > .MuiGrid-container,
+.detail-section > .MuiBox-root:not(.section-title) {
+  padding: 0 24px 24px 24px;
+}
+
+.info-item {
+  margin-bottom: 16px;
+}
+
+.info-item .MuiTypography-subtitle2 {
+  font-weight: 600;
+  color: #7f8c8d;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.info-item .MuiTypography-body1 {
+  font-weight: 500;
+  color: #2c3e50;
+  word-break: break-word;
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.photo-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.photo-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.photo-card .MuiCardMedia-root {
+  transition: all 0.3s ease;
+}
+
+.photo-card:hover .MuiCardMedia-root {
+  transform: scale(1.05);
+}
+
+.photo-dialog .MuiDialog-paper {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+}
+
+.photo-dialog .MuiDialogTitle-root {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 700;
+}
+
+.photo-dialog .MuiDialogTitle-root svg {
+  color: white;
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.detail-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.detail-section:nth-child(1) { animation-delay: 0.1s; }
+.detail-section:nth-child(2) { animation-delay: 0.2s; }
+.detail-section:nth-child(3) { animation-delay: 0.3s; }
+.detail-section:nth-child(4) { animation-delay: 0.4s; }
+
+/* Состояния загрузки */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .work-log-detail-page {
+    padding: 16px 0;
+  }
+
+  .detail-header {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .request-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .detail-title {
+    font-size: 1.5rem;
+  }
+
+  .detail-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .detail-section {
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    margin: 16px 16px 12px 16px;
+    font-size: 1.1rem;
+  }
+
+  .detail-section .MuiDivider-root {
+    margin: 0 16px 12px 16px;
+  }
+
+  .detail-section > .MuiGrid-container,
+  .detail-section > .MuiBox-root:not(.section-title) {
+    padding: 0 16px 16px 16px;
+  }
+
+  .edit-fab, .save-fab, .cancel-fab {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-header .MuiBox-root:first-child {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .detail-header .MuiBox-root:first-child > .MuiBox-root:first-child {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .photo-card {
+    margin-bottom: 8px;
+  }
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+  .work-log-detail-page {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+
+  .detail-section {
+    background: rgba(30, 30, 30, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .section-title {
+    color: #e0e0e0;
+  }
+
+  .info-item .MuiTypography-subtitle2 {
+    color: #b0b0b0;
+  }
+
+  .info-item .MuiTypography-body1 {
+    color: #e0e0e0;
+  }
+
+  .photo-card {
+    background: rgba(40, 40, 40, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .photo-dialog .MuiDialog-paper {
+    background: rgba(30, 30, 30, 0.95);
+  }
+}

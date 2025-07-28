@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 
 export const createApplication = async (req: Request, res: Response) => {
@@ -7,56 +7,63 @@ export const createApplication = async (req: Request, res: Response) => {
     
     const {
       applicationNumber,
-      typeWorkId,
-      trainNumberId,
+      applicationDate,
+      typeWork,
+      trainNumber,
+      carriageType,
       carriageNumber,
-      equipmentId,
-      countEquipment,
-      completedJobId,
-      currentLocationId,
+      equipment, // Массив оборудования с деталями
+      completedJob,
+      currentLocation,
       carriagePhoto,
-      equipmentPhoto,
-      serialPhoto,
-      macPhoto,
       generalPhoto,
       finalPhoto,
-      userId
+      userId,
+      userName,
+      userRole
     } = req.body;
 
     // Валидация обязательных полей
-    if (!applicationNumber || !typeWorkId || !trainNumberId || !carriageNumber || 
-        !equipmentId || !countEquipment || !completedJobId || !currentLocationId || !userId) {
+    if (!applicationNumber || !typeWork || !trainNumber || !carriageNumber || 
+        !completedJob || !currentLocation || !userId) {
       return res.status(400).json({
         success: false,
         message: "Не все обязательные поля заполнены"
       });
     }
 
-    const newApplication = await prisma.requestsTechnicalWorkLog.create({
+    // Создаем заявку с оборудованием
+    const newApplication = await prisma.requests.create({
       data: {
         applicationNumber: parseInt(applicationNumber),
-        typeWorkId: parseInt(typeWorkId),
-        trainNumberId: parseInt(trainNumberId),
+        applicationDate: applicationDate ? new Date(applicationDate) : new Date(),
+        typeWork: typeWork,
+        trainNumber: trainNumber,
+        carriageType: carriageType || "default",
         carriageNumber,
-        equipmentId: parseInt(equipmentId),
-        countEquipment: parseInt(countEquipment),
-        completedJobId: parseInt(completedJobId),
-        currentLocationId: parseInt(currentLocationId),
+        completedJob: completedJob,
+        currentLocation: currentLocation,
         carriagePhoto,
-        equipmentPhoto,
-        serialPhoto,
-        macPhoto,
         generalPhoto,
         finalPhoto,
-        userId: parseInt(userId)
+        userId: parseInt(userId),
+        userName: userName || "default",
+        userRole: userRole || "default",
+        // Создаем связанное оборудование
+        requestEquipment: {
+          create: equipment && Array.isArray(equipment) ? equipment.map((eq: any) => ({
+            equipmentType: eq.equipmentType || eq.type,
+            serialNumber: eq.serialNumber,
+            macAddress: eq.macAddress,
+            countEquipment: eq.countEquipment || eq.count || 1,
+            equipmentPhoto: eq.equipmentPhoto,
+            serialPhoto: eq.serialPhoto,
+            macPhoto: eq.macPhoto
+          })) : []
+        }
       },
       include: {
-        connectionTypeWork: true,
-        connectionTrainNumber: true,
-        connectionEquipment: true,
-        connectionCompletedJob: true,
-        connectionCurrentLocation: true,
-        connectionUser: true
+        requestEquipment: true
       }
     });
 
