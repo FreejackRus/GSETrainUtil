@@ -2,7 +2,10 @@ import React from 'react';
 import { TextField, MenuItem, Box, Typography, Avatar, Card, CardContent, Divider } from "@mui/material";
 import { Memory, CheckCircle, CameraAlt } from "@mui/icons-material";
 import { PhotoUpload } from "../../PhotoUpload/PhotoUpload";
-import { ApplicationFormData } from '../../../entities/application/model/types';
+interface ApplicationFormData {
+  equipment?: string;
+  equipmentPhoto?: File | null;
+}
 import "./StepEquipmentWithPhoto.css";
 
 interface StepEquipmentWithPhotoProps {
@@ -54,8 +57,8 @@ export const StepEquipmentWithPhoto: React.FC<StepEquipmentWithPhotoProps> = ({
             fullWidth
             className="step-equipment-select"
           >
-            {(equipmentOptions || []).map((equipment) => (
-              <MenuItem key={equipment} value={equipment} className="step-equipment-menu-item">
+            {(equipmentOptions || []).map((equipment, index) => (
+              <MenuItem key={`${equipment}-${index}`} value={equipment} className="step-equipment-menu-item">
                 {equipment}
               </MenuItem>
             ))}

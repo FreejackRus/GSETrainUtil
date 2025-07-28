@@ -5,7 +5,7 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
   { key: "trainNumber", label: "Номер поезда", type: "select" },
   { key: "carriageType", label: "Тип вагона", type: "select" },
   { key: "carriageNumber", label: "Номер вагона", type: "input", photoField: "carriagePhoto" },
-  { key: "equipment", label: "Наименование и фото оборудования", type: "equipment_with_photo" },
+  { key: "equipment", label: "Наименование и фото оборудования", type: "select", photoField: "equipmentPhoto" },
   { key: "serialNumber", label: "Серийный номер", type: "input", photoField: "serialPhoto" },
   { key: "macAddress", label: "MAC-адрес (если есть)", type: "input", photoField: "macPhoto" },
   { key: "count", label: "Количество", type: "input" },
@@ -15,19 +15,17 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
 ];
 
 export const INITIAL_FORM_DATA: ApplicationFormData = {
-  id: 0,
-  applicationNumber: 0,
-  applicationDate: new Date().toISOString().split('T')[0],
-  typeWorkId: 0,
-  trainNumberId: 0,
+  workType: '',
+  trainNumber: '',
+  carriageType: '',
   carriageNumber: '',
+  equipment: '',
   serialNumber: '',
   macAddress: '',
-  equipmentId: 0,
-  countEquipment: 1,
-  completedJobId: 0,
-  currentLocationId: 0,
-  userId: 0,
+  count: 1,
+  workCompleted: '',
+  location: '',
+  applicationDate: new Date().toISOString().split('T')[0],
   
   // Пути к изображениям
   carriagePhoto: null,

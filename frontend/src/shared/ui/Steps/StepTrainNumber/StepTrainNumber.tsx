@@ -27,14 +27,14 @@ export const StepTrainNumber = ({
         <TextField
           select
           label="Номер поезда"
-          value={value}
+          value={value || ''}
           onChange={(e) => onChange("trainNumber", e.target.value)}
           fullWidth
           variant="outlined"
           className="step-train-number-select"
         >
-          {options.map((number) => (
-            <MenuItem key={number} value={number} className="step-train-number-menu-item">
+          {options.map((number, index) => (
+            <MenuItem key={`${number}-${index}`} value={number} className="step-train-number-menu-item">
               {number}
             </MenuItem>
           ))}

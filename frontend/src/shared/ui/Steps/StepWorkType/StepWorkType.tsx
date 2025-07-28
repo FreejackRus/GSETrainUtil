@@ -27,13 +27,13 @@ export const StepWorkType = ({
         <TextField
           select
           label="Тип работ"
-          value={value}
+          value={value || ''}
           onChange={(e) => onChange("workType", e.target.value)}
           fullWidth
           className="step-work-type-select"
         >
-          {options.map((type) => (
-            <MenuItem key={type} value={type} className="step-work-type-menu-item">
+          {options.map((type, index) => (
+            <MenuItem key={`${type}-${index}`} value={type} className="step-work-type-menu-item">
               {type}
             </MenuItem>
           ))}

@@ -65,7 +65,7 @@ export const StepWorkCompleted = ({
         <Box flex={1}>
           <FormControl fullWidth variant="outlined">
             <Select
-              value={value}
+              value={value || ''}
               onChange={(e) => onChange("workCompleted", e.target.value)}
               displayEmpty
               className="step-work-completed-select"

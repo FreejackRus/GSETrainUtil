@@ -22,13 +22,13 @@ export const StepCarriageType: React.FC<StepCarriageTypeProps> = ({
       <FormControl fullWidth sx={{ mt: 3 }}>
         <InputLabel className="step-carriage-type__label">Тип вагона</InputLabel>
         <Select
-          value={value}
+          value={value || ''}
           onChange={(e) => onChange('carriageType', e.target.value)}
           label="Тип вагона"
           className="step-carriage-type__select"
         >
-          {options.map((option) => (
-            <MenuItem key={option} value={option}>
+          {options.map((option, index) => (
+            <MenuItem key={`${option}-${index}`} value={option}>
               {option}
             </MenuItem>
           ))}
