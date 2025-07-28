@@ -69,7 +69,10 @@ export const CreateApplicationForm = ({
   useEffect(() => {
     if (!open) return;
     setActiveStep(0);
-    setForm(INITIAL_FORM_DATA);
+    setForm({
+      ...INITIAL_FORM_DATA,
+      equipment: INITIAL_FORM_DATA.equipment || [] // Ensure equipment is always an array
+    });
     setSuccess(null);
     setError(null);
 
@@ -120,7 +123,7 @@ export const CreateApplicationForm = ({
            form.trainNumber !== "" || 
            form.carriageType !== "" || 
            form.carriageNumber !== "" || 
-           form.equipment.length > 0 || 
+           (form.equipment && form.equipment.length > 0) || 
            form.workCompleted !== "" || 
            form.location !== "" ||
            form.carriagePhoto !== null ||
@@ -159,7 +162,7 @@ export const CreateApplicationForm = ({
       const applicationDate = new Date().toISOString();
       
       // Формируем массив оборудования из формы
-      const equipment = form.equipment.map(item => ({
+      const equipment = (form.equipment || []).map(item => ({
         equipmentType: item.equipmentType,
         serialNumber: item.serialNumber || '',
         macAddress: item.macAddress || '',
@@ -221,7 +224,7 @@ export const CreateApplicationForm = ({
       case "carriageNumber":
         return !form.carriageNumber || !form.carriagePhoto;
       case "equipment":
-        return form.equipment.length === 0 || 
+        return !form.equipment || form.equipment.length === 0 || 
                form.equipment.some(item => {
                  // Базовая валидация
                  if (!item.equipmentType || !item.equipmentPhoto || !item.serialPhoto) {
@@ -270,7 +273,7 @@ export const CreateApplicationForm = ({
               workCompleted: form.workCompleted,
               location: form.location,
               finalPhoto: form.finalPhoto || null,
-              equipment: form.equipment.map(eq => eq.equipmentType).join(', ')
+              equipment: (form.equipment || []).map(eq => eq.equipmentType).join(', ')
             }}
           />
         );
@@ -294,7 +297,7 @@ export const CreateApplicationForm = ({
               workCompleted: form.workCompleted,
               location: form.location,
               finalPhoto: form.finalPhoto || null,
-              equipment: form.equipment.map(eq => eq.equipmentType).join(', ')
+              equipment: (form.equipment || []).map(eq => eq.equipmentType).join(', ')
             }}
           />
         );
