@@ -33,12 +33,13 @@ import {
 import { 
   type ApplicationFormData,
   applicationApi,
-  type Application
+  type Application,
+  type CreateApplicationRequest
 } from "../../../entities/application";
+import { INITIAL_FORM_DATA } from "../../../shared/config";
 import { 
   referenceApi,
   APPLICATION_STEPS,
-  INITIAL_FORM_DATA,
   FALLBACK_DATA
 } from "../../../shared";
 import { 
@@ -172,44 +173,43 @@ export const CreateApplicationForm = ({
     setSuccess(null);
     setError(null);
     try {
-      const formData = new FormData();
+      // Генерируем номер заявки и дату
+      const applicationNumber = Date.now();
+      const applicationDate = new Date().toISOString();
       
-      // Добавляем текстовые поля
-      formData.append("workType", form.workType);
-      formData.append("trainNumber", form.trainNumber);
-      formData.append("carriageType", form.carriageType);
-      formData.append("carriageNumber", form.carriageNumber);
-      formData.append("equipment", form.equipment);
-      formData.append("serialNumber", form.serialNumber);
-      formData.append("macAddress", form.macAddress || '');
-      formData.append("count", form.count.toString());
-      formData.append("engineerName", form.engineerName);
-      formData.append("location", form.location);
+      // Формируем массив оборудования
+      const equipment = [{
+        equipmentType: form.equipment,
+        serialNumber: form.serialNumber || '',
+        macAddress: form.macAddress || '',
+        countEquipment: form.count,
+        equipmentPhoto: form.equipmentPhoto ? form.equipmentPhoto.name : null,
+        serialPhoto: form.serialPhoto ? form.serialPhoto.name : null,
+        macPhoto: form.macPhoto ? form.macPhoto.name : null
+      }];
 
-      // Добавляем файлы
-      if (form.carriagePhoto) formData.append("carriagePhoto", form.carriagePhoto);
-      if (form.equipmentPhoto) formData.append("equipmentPhoto", form.equipmentPhoto);
-      if (form.serialPhoto) formData.append("serialPhoto", form.serialPhoto);
-      if (form.macPhoto) formData.append("macPhoto", form.macPhoto);
-      if (form.finalPhoto) formData.append("finalPhoto", form.finalPhoto);
+      // Подготавливаем данные в формате, ожидаемом бэкендом
+      const requestData: CreateApplicationRequest = {
+        applicationNumber,
+        applicationDate,
+        typeWork: form.workType,
+        trainNumber: form.trainNumber,
+        carriageType: form.carriageType,
+        carriageNumber: form.carriageNumber,
+        equipment,
+        completedJob: form.workCompleted,
+        currentLocation: form.location,
+        carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
+        generalPhoto: form.equipmentPhoto ? form.equipmentPhoto.name : null,
+        finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
+        userId: 1, // TODO: получать из контекста пользователя
+        userName: "Инженер", // TODO: получать из контекста пользователя
+        userRole: "engineer" // TODO: получать из контекста пользователя
+      };
 
-      await applicationApi.create({
-         workType: form.workType,
-         trainNumber: form.trainNumber,
-         carriageType: form.carriageType,
-         carriageNumber: form.carriageNumber,
-         equipment: form.equipment,
-         serialNumber: form.serialNumber,
-         macAddress: form.macAddress || '',
-         count: form.count,
-         workCompleted: form.workCompleted,
-         location: form.location,
-         carriagePhoto: form.carriagePhoto,
-         equipmentPhoto: form.equipmentPhoto,
-         serialPhoto: form.serialPhoto,
-         macPhoto: form.macPhoto,
-         finalPhoto: form.finalPhoto
-       });
+      console.log('Отправляемые данные:', requestData);
+
+      await applicationApi.create(requestData);
       setSuccess("Заявка успешно создана!");
       setError(null);
       

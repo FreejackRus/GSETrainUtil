@@ -1,9 +1,8 @@
 import { apiClient } from '../../../shared/api';
-import type { Application } from '../model/types';
-import type { ApplicationFormData } from '../model/types';
+import type { Application, CreateApplicationRequest } from '../model/types';
 
 export const applicationApi = {
-  create: async (data: ApplicationFormData): Promise<Application> => {
+  create: async (data: CreateApplicationRequest): Promise<Application> => {
     const response = await apiClient.post('/applications', data);
     return response.data;
   },
@@ -18,7 +17,7 @@ export const applicationApi = {
     return response.data;
   },
 
-  update: async (id: string, data: Partial<ApplicationFormData>): Promise<Application> => {
+  update: async (id: string, data: Partial<CreateApplicationRequest>): Promise<Application> => {
     const response = await apiClient.put(`/applications/${id}`, data);
     return response.data;
   },

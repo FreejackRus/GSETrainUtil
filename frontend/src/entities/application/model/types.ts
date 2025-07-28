@@ -1,12 +1,14 @@
 export interface Application {
-  id?: string;
+  id: string;
+  applicationNumber: number;
+  applicationDate: string;
   workType: string;
   trainNumber: string;
   carriageType: string;
   carriageNumber: string;
   equipment: string;
-  serialNumber?: string; // Серийный номер оборудования
-  macAddress?: string; // MAC-адрес оборудования
+  serialNumber: string;
+  macAddress: string;
   count: number;
   workCompleted: string;
   location: string;
@@ -14,22 +16,65 @@ export interface Application {
   equipmentPhoto?: File | null;
   serialPhoto?: File | null;
   macPhoto?: File | null;
-  generalPhoto?: File | null; // Общее фото оборудования
+  generalPhoto?: File | null;
   finalPhoto?: File | null;
-  applicationDate?: string; // Дата заявки для структуры папок
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-export type ApplicationFormData = Application;
-
-export interface ApplicationStep {
-  key: string;
-  label: string;
-  type: "select" | "input" | "photo";
-  photoField?: string;
-  required?: boolean;
+export interface ApplicationFormData {
+  workType: string;
+  trainNumber: string;
+  carriageType: string;
+  carriageNumber: string;
+  equipment: string;
+  serialNumber: string;
+  macAddress: string;
+  count: number;
+  workCompleted: string;
+  location: string;
+  carriagePhoto?: File | null;
+  equipmentPhoto?: File | null;
+  serialPhoto?: File | null;
+  macPhoto?: File | null;
+  generalPhoto?: File | null;
+  finalPhoto?: File | null;
 }
+
+// Интерфейс для создания заявки (соответствует бэкенду)
+export interface CreateApplicationRequest {
+  applicationNumber: number;
+  applicationDate: string;
+  typeWork: string;
+  trainNumber: string;
+  carriageType: string;
+  carriageNumber: string;
+  equipment: Array<{
+    equipmentType: string;
+    serialNumber: string;
+    macAddress: string;
+    countEquipment: number;
+    equipmentPhoto?: string | null;
+    serialPhoto?: string | null;
+    macPhoto?: string | null;
+  }>;
+  completedJob: string;
+  currentLocation: string;
+  carriagePhoto?: string | null;
+  generalPhoto?: string | null;
+  finalPhoto?: string | null;
+  userId: number;
+  userName: string;
+  userRole: string;
+}
+
+export type ApplicationStep = 
+  | 'workType'
+  | 'trainNumber'
+  | 'carriageType'
+  | 'equipmentWithPhoto'
+  | 'serialNumber'
+  | 'macAddress'
+  | 'workCompleted'
+  | 'location';
 
 // Типы для вагонов
 export interface CarriageEquipment {
