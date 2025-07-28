@@ -29,9 +29,9 @@ import {
 
 import { APPLICATION_STEPS, FALLBACK_DATA } from "../../../shared/config";
 import { INITIAL_FORM_DATA } from "../../../shared/config";
-import { applicationApi, CreateApplicationRequest, ApplicationFormData, EquipmentFormItem } from "../../../entities/application";
+import { applicationApi } from "../../../entities/application";
+import type { CreateApplicationRequest, ApplicationFormData, EquipmentFormItem } from "../../../entities/application";
 import { referenceApi } from "../../../shared/api/reference";
-import { ConfirmDialog } from "../../../shared/ui";
 import { EquipmentSection } from "./EquipmentSection";
 import {
   StepWorkType,
@@ -51,6 +51,8 @@ export const CreateApplicationForm = ({
   onClose: () => void;
 }) => {
   const [activeStep, setActiveStep] = useState(0);
+  const currentStep = APPLICATION_STEPS[activeStep];
+  const currentStepKey = currentStep?.key;
   const [form, setForm] = useState<ApplicationFormData>(INITIAL_FORM_DATA);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -247,15 +249,13 @@ export const CreateApplicationForm = ({
   };
 
   const renderStep = () => {
-    const step = APPLICATION_STEPS[activeStep];
-    
-    switch (step.key) {
+    switch (currentStepKey) {
       case "workType":
-        return <StepWorkType value={form.workType} onChange={handleChange} options={workTypes} />;
+        return <StepWorkType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
       case "trainNumber":
-        return <StepTrainNumber value={form.trainNumber} onChange={handleChange} options={trainNumbers} />;
+        return <StepTrainNumber formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
       case "carriageType":
-        return <StepCarriageType value={form.carriageType} onChange={handleChange} options={carriageTypes} />;
+        return <StepCarriageType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
       case "carriageNumber":
         return (
           <StepCarriageNumber
@@ -266,26 +266,20 @@ export const CreateApplicationForm = ({
               trainNumber: form.trainNumber,
               carriageType: form.carriageType,
               carriageNumber: form.carriageNumber,
-              carriagePhoto: form.carriagePhoto,
+              carriagePhoto: form.carriagePhoto || null,
               workCompleted: form.workCompleted,
               location: form.location,
-              finalPhoto: form.finalPhoto,
-              equipment: form.equipment
+              finalPhoto: form.finalPhoto || null,
+              equipment: form.equipment.map(eq => eq.equipmentType).join(', ')
             }}
           />
         );
       case "equipment":
-        return (
-          <EquipmentSection
-            equipment={form.equipment}
-            onChange={(equipment) => setForm(prev => ({ ...prev, equipment }))}
-            equipmentTypes={equipmentTypes}
-          />
-        );
+        return <EquipmentSection formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
       case "workCompleted":
-        return <StepWorkCompleted value={form.workCompleted} onChange={handleChange} />;
+        return <StepWorkCompleted formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
       case "location":
-        return <StepLocation value={form.location} onChange={handleChange} options={locations} />;
+        return <StepLocation formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
       case "finalPhoto":
         return (
           <StepFinalPhoto 
@@ -296,16 +290,16 @@ export const CreateApplicationForm = ({
               trainNumber: form.trainNumber,
               carriageType: form.carriageType,
               carriageNumber: form.carriageNumber,
-              carriagePhoto: form.carriagePhoto,
+              carriagePhoto: form.carriagePhoto || null,
               workCompleted: form.workCompleted,
               location: form.location,
-              finalPhoto: form.finalPhoto,
-              equipment: form.equipment
+              finalPhoto: form.finalPhoto || null,
+              equipment: form.equipment.map(eq => eq.equipmentType).join(', ')
             }}
           />
         );
       default:
-        return null;
+        return <div>Неизвестный шаг</div>;
     }
   };
 

@@ -71,7 +71,15 @@ export interface CreateApplicationRequest {
   userRole: string;
 }
 
-export type ApplicationStep = 
+// Интерфейс для шага формы заявки
+export interface ApplicationStep {
+  key: string;
+  label: string;
+  type: 'select' | 'input' | 'equipment' | 'photo';
+  photoField?: string;
+}
+
+export type ApplicationStepKey = 
   | 'workType'
   | 'trainNumber'
   | 'carriageType'
