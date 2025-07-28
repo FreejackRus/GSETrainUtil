@@ -30,7 +30,7 @@ import {
 import { APPLICATION_STEPS, FALLBACK_DATA } from "../../../shared/config";
 import { INITIAL_FORM_DATA } from "../../../shared/config";
 import { applicationApi } from "../../../entities/application";
-import type { CreateApplicationRequest, ApplicationFormData, EquipmentFormItem } from "../../../entities/application";
+import type { CreateApplicationRequest, ApplicationFormData } from "../../../entities/application";
 import { referenceApi } from "../../../shared/api/reference";
 import { EquipmentSection } from "./EquipmentSection";
 import {
@@ -63,7 +63,6 @@ export const CreateApplicationForm = ({
   const [workTypes, setWorkTypes] = useState<string[]>([]);
   const [trainNumbers, setTrainNumbers] = useState<string[]>([]);
   const [carriageTypes, setCarriageTypes] = useState<string[]>([]);
-  const [equipmentTypes, setEquipmentTypes] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>([]);
 
   useEffect(() => {
@@ -85,7 +84,6 @@ export const CreateApplicationForm = ({
           setWorkTypes(data.typeWork || FALLBACK_DATA.workTypes);
           setTrainNumbers(data.trainNumber || FALLBACK_DATA.trainNumbers);
           setCarriageTypes(data.typeWagon || FALLBACK_DATA.carriageTypes);
-          setEquipmentTypes(data.equipment || FALLBACK_DATA.equipmentTypes);
           setLocations(data.currentLocation || FALLBACK_DATA.locations);
         } else {
           console.log('Using fallback data - empty response');
@@ -93,7 +91,6 @@ export const CreateApplicationForm = ({
           setWorkTypes(FALLBACK_DATA.workTypes);
           setTrainNumbers(FALLBACK_DATA.trainNumbers);
           setCarriageTypes(FALLBACK_DATA.carriageTypes);
-          setEquipmentTypes(FALLBACK_DATA.equipmentTypes);
           setLocations(FALLBACK_DATA.locations);
         }
       })
@@ -104,13 +101,12 @@ export const CreateApplicationForm = ({
         setWorkTypes(FALLBACK_DATA.workTypes);
         setTrainNumbers(FALLBACK_DATA.trainNumbers);
         setCarriageTypes(FALLBACK_DATA.carriageTypes);
-        setEquipmentTypes(FALLBACK_DATA.equipmentTypes);
         setLocations(FALLBACK_DATA.locations);
       });
   }, [open]);
 
-  const handleChange = (field: string, value: any) => {
-    setForm((prev: any) => ({
+  const handleChange = (field: string, value: string | number | File | null) => {
+    setForm((prev: ApplicationFormData) => ({
       ...prev,
       [field]: value,
     }));
@@ -157,8 +153,8 @@ export const CreateApplicationForm = ({
     setSuccess(null);
     setError(null);
     try {
-      // Генерируем номер заявки и дату
-      const applicationNumber = Date.now();
+      // Генерируем номер заявки как случайное число в диапазоне INT4
+      const applicationNumber = Math.floor(Math.random() * 2000000000) + 1000000; // От 1,000,000 до 2,000,000,000
       const applicationDate = new Date().toISOString();
       
       // Формируем массив оборудования из формы
@@ -254,49 +250,77 @@ export const CreateApplicationForm = ({
   const renderStep = () => {
     switch (currentStepKey) {
       case "workType":
-        return <StepWorkType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return (
+          <StepWorkType 
+            value={form.workType}
+            onChange={handleChange}
+            options={workTypes}
+          />
+        );
       case "trainNumber":
-        return <StepTrainNumber formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return (
+          <StepTrainNumber 
+            value={form.trainNumber}
+            onChange={handleChange}
+            options={trainNumbers}
+          />
+        );
       case "carriageType":
-        return <StepCarriageType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return (
+          <StepCarriageType 
+            value={form.carriageType}
+            onChange={handleChange}
+            options={carriageTypes}
+          />
+        );
       case "carriageNumber":
         return (
           <StepCarriageNumber
-            formData={form}
+            formData={{
+              ...form,
+              carriagePhoto: form.carriagePhoto || null
+            }}
             onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
             applicationData={{
-              workType: form.workType,
+              requestNumber: `REQ-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`,
+              applicationDate: new Date().toISOString(),
               trainNumber: form.trainNumber,
-              carriageType: form.carriageType,
-              carriageNumber: form.carriageNumber,
-              carriagePhoto: form.carriagePhoto || null,
-              workCompleted: form.workCompleted,
-              location: form.location,
-              finalPhoto: form.finalPhoto || null,
               equipment: (form.equipment || []).map(eq => eq.equipmentType).join(', ')
             }}
           />
         );
       case "equipment":
-        return <EquipmentSection formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return (
+          <EquipmentSection 
+            equipment={form.equipment || []}
+            equipmentTypes={[]}
+            onChange={(equipment) => setForm(prev => ({ ...prev, equipment }))}
+          />
+        );
       case "workCompleted":
-        return <StepWorkCompleted formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return (
+          <StepWorkCompleted 
+            value={form.workCompleted}
+            onChange={handleChange}
+          />
+        );
       case "location":
-        return <StepLocation formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return (
+          <StepLocation 
+            value={form.location}
+            onChange={handleChange}
+            options={locations}
+          />
+        );
       case "finalPhoto":
         return (
           <StepFinalPhoto 
             formData={form}
             onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
             applicationData={{
-              workType: form.workType,
+              requestNumber: `REQ-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`,
+              applicationDate: new Date().toISOString(),
               trainNumber: form.trainNumber,
-              carriageType: form.carriageType,
-              carriageNumber: form.carriageNumber,
-              carriagePhoto: form.carriagePhoto || null,
-              workCompleted: form.workCompleted,
-              location: form.location,
-              finalPhoto: form.finalPhoto || null,
               equipment: (form.equipment || []).map(eq => eq.equipmentType).join(', ')
             }}
           />
@@ -391,7 +415,7 @@ export const CreateApplicationForm = ({
               }
             }}
           >
-            {APPLICATION_STEPS.map((step, index) => (
+            {APPLICATION_STEPS.map((step) => (
               <Step key={step.key}>
                 <StepLabel>{step.label}</StepLabel>
               </Step>
