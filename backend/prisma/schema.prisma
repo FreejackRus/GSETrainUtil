@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,53 +13,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model requestsTechnicalWorkLog {
-  id Int @id @default(autoincrement())
-
-  applicationNumber Int
+model requests {
+  id                Int      @id @default(autoincrement())
+  applicationNumber Int      @unique
   applicationDate   DateTime @default(now())
+  typeWork          String
+  trainNumber       String
+  carriageType      String
+  carriageNumber    String
+  completedJob      String
+  currentLocation   String
+  
+  // Пути к фотографиям
+  carriagePhoto     String?
+  generalPhoto      String?
+  finalPhoto        String?
+  
+  // Информация о пользователе
+  userId            Int
+  userName          String
+  userRole          String
+  
+  // Массив ID установленного оборудования
+  equipment         Int[]    @default([])
+  
+  // Связь с оборудованием (оставляем для совместимости)
+  requestEquipment  requestEquipment[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
 
-  connectionTypeWork typeWork @relation(fields: [typeWorkId], references: [id])
-  typeWorkId         Int
-
-  connectionTrainNumber trainNumber @relation(fields: [trainNumberId], references: [id])
-  trainNumberId         Int
-
-  carriageNumber String
-  serialNumber   String? // Серийный номер оборудования
-  macAddress     String? // MAC-адрес оборудования
-
-  connectionEquipment equipment @relation(fields: [equipmentId], references: [id])
-  equipmentId         Int
-
-  countEquipment         Int
-  connectionCompletedJob completedJob @relation(fields: [completedJobId], references: [id])
-  completedJobId         Int
-
-  connectionCurrentLocation currentLocation @relation(fields: [currentLocationId], references: [id])
-  currentLocationId         Int
-
-  // Пути к изображениям согласно структуре папок
-  carriagePhoto    String? // фото вагона
-  equipmentPhoto   String? // фото оборудования
-  serialPhoto      String? // фото серийного номера
-  macPhoto         String? // фото MAC-адреса
-  generalPhoto     String? // общее фото оборудования
-  finalPhoto       String? // финальное фото работ
-
-  connectionUser User @relation(fields: [userId], references: [id])
-  userId         Int
+model requestEquipment {
+  id               Int      @id @default(autoincrement())
+  requestId        Int
+  equipmentType    String
+  serialNumber     String?
+  macAddress       String?
+  countEquipment   Int      @default(1)
+  
+  // Пути к фотографиям оборудования
+  equipmentPhoto   String?
+  serialPhoto      String?
+  macPhoto         String?
+  
+  // Связи
+  request          requests @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model typeWagons {
   id                   Int         @id @default(autoincrement())
-  typeWagon            String
+  typeWagon            String      @unique
   connectionTypeWagons equipment[]
 }
 
 model numberWagons {
   id                    Int         @id @default(autoincrement())
-  numberWagon           String
+  numberWagon           String      @unique
   connectionNumberWagon equipment[]
 }
 
@@ -78,32 +90,27 @@ model equipment {
   connectionNumberWagon numberWagons @relation(fields: [numberWagonId], references: [id])
   numberWagonId         Int
 
-  connectionEquipment requestsTechnicalWorkLog[]
   photo               String
 }
 
 model typeWork {
   id                 Int                        @id @default(autoincrement())
   typeWork           String                     @unique
-  connectionTypeWork requestsTechnicalWorkLog[]
 }
 
 model trainNumber {
   id                    Int                        @id @default(autoincrement())
   trainNumber           String                     @unique
-  connectionTrainNumber requestsTechnicalWorkLog[]
 }
 
 model completedJob {
   id                     Int                        @id @default(autoincrement())
   completedJob           String                     @unique
-  connectionCompletedJob requestsTechnicalWorkLog[]
 }
 
 model currentLocation {
   id                        Int                        @id @default(autoincrement())
   currentLocation           String                     @unique
-  connectionCurrentLocation requestsTechnicalWorkLog[]
 }
 
 model User {
@@ -111,12 +118,4 @@ model User {
   login          String   @unique
   password       String
   role           String
-  connectionUser requestsTechnicalWorkLog[]
-}
-
-model Device {
-  id     Int    @id @default(autoincrement())
-  status String
-  name   String
-  count  Int
 }

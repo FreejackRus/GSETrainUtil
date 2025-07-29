@@ -325,3 +325,120 @@
     justify-content: center;
   }
 }
+
+/* Стили для новых карточек действий */
+.home-page__main-actions {
+  padding: 0 24px 24px 24px;
+}
+
+.home-page__action-card {
+  border-radius: 16px !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+}
+
+.home-page__action-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.home-page__action-card--carriages {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white;
+}
+
+.home-page__action-card--worklog {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+  color: white;
+}
+
+.home-page__action-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+  padding: 24px !important;
+  height: 100%;
+}
+
+.home-page__action-avatar {
+  width: 70px !important;
+  height: 70px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.home-page__action-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.home-page__action-title {
+  font-weight: 600 !important;
+  font-size: 1.4rem !important;
+  margin-bottom: 8px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.home-page__action-description {
+  opacity: 0.9 !important;
+  font-size: 1rem !important;
+  line-height: 1.5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивность для карточек действий */
+@media (max-width: 768px) {
+  .home-page__main-actions {
+    padding: 0 16px 16px 16px;
+  }
+
+  .home-page__action-content {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 16px !important;
+    padding: 20px !important;
+  }
+
+  .home-page__action-avatar {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .home-page__action-info {
+    align-items: center;
+  }
+
+  .home-page__action-title {
+    font-size: 1.2rem !important;
+  }
+
+  .home-page__action-description {
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-page__action-content {
+    padding: 16px !important;
+  }
+
+  .home-page__action-avatar {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .home-page__action-title {
+    font-size: 1.1rem !important;
+  }
+
+  .home-page__action-description {
+    font-size: 0.85rem !important;
+  }
+}

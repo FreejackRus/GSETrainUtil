@@ -1,0 +1,14 @@
+{
+  "name": "import-excel-data",
+  "version": "1.0.0",
+  "description": "Импорт данных из Excel в базу данных",
+  "main": "dist/utils/importExcelData.js",
+  "scripts": {
+    "import": "ts-node src/utils/importExcelData.ts",
+    "build": "tsc",
+    "import:compiled": "node dist/utils/importExcelData.js"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}

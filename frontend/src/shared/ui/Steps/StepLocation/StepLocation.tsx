@@ -26,13 +26,13 @@ export const StepLocation: React.FC<StepLocationProps> = ({
       <FormControl fullWidth sx={{ mt: 3 }}>
         <InputLabel className="step-location__label">Депо/Станция</InputLabel>
         <Select
-          value={value}
+          value={value || ''}
           onChange={(e) => onChange('location', e.target.value)}
           label="Депо/Станция"
           className="step-location__select"
         >
-          {options.map((option) => (
-            <MenuItem key={option} value={option}>
+          {options.map((option, index) => (
+            <MenuItem key={`${option}-${index}`} value={option}>
               {option}
             </MenuItem>
           ))}

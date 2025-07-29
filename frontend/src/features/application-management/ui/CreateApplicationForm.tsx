@@ -1,58 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Box,
-  Button,
-  CircularProgress,
   Dialog,
-  DialogContent,
   DialogTitle,
+  DialogContent,
   DialogActions,
-  Alert,
+  Button,
   Stepper,
   Step,
   StepLabel,
+  Box,
+  Typography,
+  Alert,
+  CircularProgress,
   Card,
   CardContent,
-  Typography,
   LinearProgress,
   Chip,
-  Avatar,
   IconButton,
   Fade,
   Slide,
 } from "@mui/material";
 import {
-  CheckCircle,
-  RadioButtonUnchecked,
   ArrowBack,
   ArrowForward,
   Save,
   Close,
 } from "@mui/icons-material";
 
-import { 
-  type ApplicationFormData,
-  applicationApi,
-  type Application
-} from "../../../entities/application";
-import { 
-  referenceApi,
-  APPLICATION_STEPS,
-  INITIAL_FORM_DATA,
-  FALLBACK_DATA
-} from "../../../shared";
-import { 
-  StepWorkType, 
-  StepEquipmentWithPhoto,
-  StepWorkCompleted, 
-  StepFinalPhoto,
+import { APPLICATION_STEPS, FALLBACK_DATA } from "../../../shared/config";
+import { INITIAL_FORM_DATA } from "../../../shared/config";
+import { applicationApi } from "../../../entities/application";
+import type { CreateApplicationRequest, ApplicationFormData, EquipmentFormItem } from "../../../entities/application";
+import { referenceApi } from "../../../shared/api/reference";
+import { EquipmentSection } from "./EquipmentSection";
+import {
+  StepWorkType,
   StepTrainNumber,
   StepCarriageNumber,
   StepCarriageType,
-  StepSerialNumber,
-  StepMacAddress,
-  StepCount,
-  StepLocation
+  StepLocation,
+  StepWorkCompleted, 
+  StepFinalPhoto
 } from "../../../shared/ui";
 
 export const CreateApplicationForm = ({
@@ -63,6 +51,8 @@ export const CreateApplicationForm = ({
   onClose: () => void;
 }) => {
   const [activeStep, setActiveStep] = useState(0);
+  const currentStep = APPLICATION_STEPS[activeStep];
+  const currentStepKey = currentStep?.key;
   const [form, setForm] = useState<ApplicationFormData>(INITIAL_FORM_DATA);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -80,21 +70,8 @@ export const CreateApplicationForm = ({
     if (!open) return;
     setActiveStep(0);
     setForm({
-      workType: "",
-      trainNumber: "",
-      carriageType: "",
-      carriageNumber: "",
-      equipment: "",
-      serialNumber: "",
-      macAddress: "",
-      count: 1,
-      engineerName: "",
-      location: "",
-      carriagePhoto: null,
-      equipmentPhoto: null,
-      serialPhoto: null,
-      macPhoto: null,
-      finalPhoto: null,
+      ...INITIAL_FORM_DATA,
+      equipment: INITIAL_FORM_DATA.equipment || [] // Ensure equipment is always an array
     });
     setSuccess(null);
     setError(null);
@@ -141,9 +118,17 @@ export const CreateApplicationForm = ({
 
   // Проверяем, есть ли прогресс в форме
   const hasFormProgress = () => {
-    return activeStep > 0 || Object.values(form).some(value => 
-      value !== "" && value !== 1 && value !== null
-    );
+    return activeStep > 0 || 
+           form.workType !== "" || 
+           form.trainNumber !== "" || 
+           form.carriageType !== "" || 
+           form.carriageNumber !== "" || 
+           (form.equipment && form.equipment.length > 0) || 
+           form.workCompleted !== "" || 
+           form.location !== "" ||
+           form.carriagePhoto !== null ||
+           form.generalPhoto !== null ||
+           form.finalPhoto !== null;
   };
 
   // Обработка закрытия с подтверждением
@@ -172,44 +157,43 @@ export const CreateApplicationForm = ({
     setSuccess(null);
     setError(null);
     try {
-      const formData = new FormData();
+      // Генерируем номер заявки и дату
+      const applicationNumber = Date.now();
+      const applicationDate = new Date().toISOString();
       
-      // Добавляем текстовые поля
-      formData.append("workType", form.workType);
-      formData.append("trainNumber", form.trainNumber);
-      formData.append("carriageType", form.carriageType);
-      formData.append("carriageNumber", form.carriageNumber);
-      formData.append("equipment", form.equipment);
-      formData.append("serialNumber", form.serialNumber);
-      formData.append("macAddress", form.macAddress || '');
-      formData.append("count", form.count.toString());
-      formData.append("engineerName", form.engineerName);
-      formData.append("location", form.location);
+      // Формируем массив оборудования из формы
+      const equipment = (form.equipment || []).map(item => ({
+        equipmentType: item.equipmentType,
+        serialNumber: item.serialNumber || '',
+        macAddress: item.macAddress || '',
+        countEquipment: item.count,
+        equipmentPhoto: item.equipmentPhoto ? item.equipmentPhoto.name : null,
+        serialPhoto: item.serialPhoto ? item.serialPhoto.name : null,
+        macPhoto: item.macPhoto ? item.macPhoto.name : null
+      }));
 
-      // Добавляем файлы
-      if (form.carriagePhoto) formData.append("carriagePhoto", form.carriagePhoto);
-      if (form.equipmentPhoto) formData.append("equipmentPhoto", form.equipmentPhoto);
-      if (form.serialPhoto) formData.append("serialPhoto", form.serialPhoto);
-      if (form.macPhoto) formData.append("macPhoto", form.macPhoto);
-      if (form.finalPhoto) formData.append("finalPhoto", form.finalPhoto);
+      // Подготавливаем данные в формате, ожидаемом бэкендом
+      const requestData: CreateApplicationRequest = {
+        applicationNumber,
+        applicationDate,
+        typeWork: form.workType,
+        trainNumber: form.trainNumber,
+        carriageType: form.carriageType,
+        carriageNumber: form.carriageNumber,
+        equipment,
+        completedJob: form.workCompleted,
+        currentLocation: form.location,
+        carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
+        generalPhoto: form.generalPhoto ? form.generalPhoto.name : null,
+        finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
+        userId: 1, // TODO: получать из контекста пользователя
+        userName: "Инженер", // TODO: получать из контекста пользователя
+        userRole: "engineer" // TODO: получать из контекста пользователя
+      };
 
-      await applicationApi.create({
-         workType: form.workType,
-         trainNumber: form.trainNumber,
-         carriageType: form.carriageType,
-         carriageNumber: form.carriageNumber,
-         equipment: form.equipment,
-         serialNumber: form.serialNumber,
-         macAddress: form.macAddress || '',
-         count: form.count,
-         workCompleted: form.workCompleted,
-         location: form.location,
-         carriagePhoto: form.carriagePhoto,
-         equipmentPhoto: form.equipmentPhoto,
-         serialPhoto: form.serialPhoto,
-         macPhoto: form.macPhoto,
-         finalPhoto: form.finalPhoto
-       });
+      console.log('Отправляемые данные:', requestData);
+
+      await applicationApi.create(requestData);
       setSuccess("Заявка успешно создана!");
       setError(null);
       
@@ -230,102 +214,95 @@ export const CreateApplicationForm = ({
   const isNextDisabled = () => {
     const step = APPLICATION_STEPS[activeStep];
     
-    // Skip validation if step has skipIf property and it evaluates to true
-    if ('skipIf' in step && (step as any).skipIf(form)) return false;
-    if ('showIf' in step && !(step as any).showIf(form)) return false;
-    
-    // Проверяем основное поле шага
-    if (step.type === "select" || step.type === "input") {
-      if (!form[step.key]) return true;
+    switch (step.key) {
+      case "workType":
+        return !form.workType;
+      case "trainNumber":
+        return !form.trainNumber;
+      case "carriageType":
+        return !form.carriageType;
+      case "carriageNumber":
+        return !form.carriageNumber || !form.carriagePhoto;
+      case "equipment":
+        return !form.equipment || form.equipment.length === 0 || 
+               form.equipment.some(item => {
+                 // Базовая валидация
+                 if (!item.equipmentType || !item.equipmentPhoto || !item.serialPhoto) {
+                   return true;
+                 }
+                 
+                 // MAC адрес обязателен только для точек доступа и маршрутизаторов
+                 const needsMac = item.equipmentType.toLowerCase().includes('точка доступа') || 
+                                  item.equipmentType.toLowerCase().includes('маршрутизатор');
+                 if (needsMac && (!item.macAddress || !item.macPhoto)) {
+                   return true;
+                 }
+                 
+                 return false;
+               });
+      case "workCompleted":
+        return !form.workCompleted;
+      case "location":
+        return !form.location;
+      case "finalPhoto":
+        return !form.finalPhoto;
+      default:
+        return false;
     }
-    
-    // Для шагов типа "photo" проверяем только фото
-    if (step.type === "photo") {
-      return !form[step.key];
-    }
-    
-    // Для шагов с фотографиями проверяем и основное поле, и фото
-    if (step.photoField) {
-      if (!form[step.key as keyof ApplicationFormData] || !form[step.photoField as keyof ApplicationFormData]) return true;
-    }
-    
-    return false;
   };
 
   const renderStep = () => {
-    const applicationData = {
-      requestNumber: `REQ${Date.now()}`,
-      applicationDate: form.applicationDate,
-      trainNumber: form.trainNumber,
-      equipment: form.equipment
-    };
-
-    switch (activeStep) {
-      case 0:
-        return <StepWorkType value={form.workType} onChange={handleChange} options={workTypes} />;
-      case 1:
-        return <StepTrainNumber value={form.trainNumber} onChange={handleChange} options={trainNumbers} />;
-      case 2:
-        return <StepCarriageType value={form.carriageType} onChange={handleChange} options={carriageTypes} />;
-      case 3:
+    switch (currentStepKey) {
+      case "workType":
+        return <StepWorkType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+      case "trainNumber":
+        return <StepTrainNumber formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+      case "carriageType":
+        return <StepCarriageType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+      case "carriageNumber":
         return (
           <StepCarriageNumber
             formData={form}
             onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-            applicationData={applicationData}
+            applicationData={{
+              workType: form.workType,
+              trainNumber: form.trainNumber,
+              carriageType: form.carriageType,
+              carriageNumber: form.carriageNumber,
+              carriagePhoto: form.carriagePhoto || null,
+              workCompleted: form.workCompleted,
+              location: form.location,
+              finalPhoto: form.finalPhoto || null,
+              equipment: (form.equipment || []).map(eq => eq.equipmentType).join(', ')
+            }}
           />
         );
-      case 4:
-        return (
-          <StepEquipmentWithPhoto
-            formData={form}
-            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-            applicationData={applicationData}
-            equipmentOptions={equipmentTypes}
-          />
-        );
-      case 5:
-        return (
-          <StepSerialNumber
-            formData={form}
-            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-            applicationData={applicationData}
-          />
-        );
-      case 6:
-        return (
-          <StepMacAddress
-            formData={form}
-            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-            applicationData={applicationData}
-          />
-        );
-      case 7:
-        return (
-          <StepCount
-            value={form.count}
-            onChange={handleChange}
-            equipment={form.equipment}
-          />
-        );
-      case 8:
-          return (
-            <StepWorkCompleted value={form.workCompleted} onChange={handleChange} />
-          );
-      case 9:
-        return (
-          <StepLocation value={form.location} onChange={handleChange} options={locations} />
-        );
-      case 10:
+      case "equipment":
+        return <EquipmentSection formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+      case "workCompleted":
+        return <StepWorkCompleted formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+      case "location":
+        return <StepLocation formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+      case "finalPhoto":
         return (
           <StepFinalPhoto 
             formData={form}
             onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-            applicationData={applicationData}
+            applicationData={{
+              workType: form.workType,
+              trainNumber: form.trainNumber,
+              carriageType: form.carriageType,
+              carriageNumber: form.carriageNumber,
+              carriagePhoto: form.carriagePhoto || null,
+              workCompleted: form.workCompleted,
+              location: form.location,
+              finalPhoto: form.finalPhoto || null,
+              equipment: (form.equipment || []).map(eq => eq.equipmentType).join(', ')
+            }}
           />
         );
       default:
-        return null;
+        return <div>Неизвестный шаг</div>;
     }
   };
 

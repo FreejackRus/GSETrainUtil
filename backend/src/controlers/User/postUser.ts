@@ -1,6 +1,6 @@
-import { PrismaClient } from "../../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import { TRequestUser } from "../../utils/types/requestDevice";
+import { TRequestUser } from "../../utils/types/requestUser";
 import bcrypt from "bcrypt";
 
 export const postUser = async (req: Request, res: Response) => {
