@@ -155,7 +155,13 @@ function createAct(
   });
 
   const startX = 20;
-  const startY = (doc as any).lastAutoTable.finalY + 10;
+  const blockHeight = 50;
+  let startY = (doc as any).lastAutoTable.finalY + 10;
+
+  if (doc.internal.pageSize.getHeight() - startY < blockHeight) {
+    doc.addPage();
+    startY = 20; // отступ сверху на новой странице
+  }
   const blockWidth = 90;
   const lineHeight = 7;
   const heightLine = 16;

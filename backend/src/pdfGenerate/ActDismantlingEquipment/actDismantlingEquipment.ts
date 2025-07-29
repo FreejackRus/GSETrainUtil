@@ -55,7 +55,7 @@ function createDismantlingAct(doc: jsPDF, data: DismantlingActData): number {
   const logoWidth = 70;
   const logoHeight = 15;
 
-  const startX = 20;
+  const startX = 15;
   const heightLine = 16;
   const lineHeight = 7;
 
@@ -136,8 +136,8 @@ function createDismantlingAct(doc: jsPDF, data: DismantlingActData): number {
     },
     headStyles: {
       fillColor: [255, 255, 255],
-      textColor: [0, 0, 0],
       fontStyle: "bold",
+      textColor: [0, 0, 0],
       halign: "center",
       lineColor: [0, 0, 0],
       lineWidth: 0.15,
@@ -164,7 +164,14 @@ function createDismantlingAct(doc: jsPDF, data: DismantlingActData): number {
   );
 
   // Подписи подрядчика и заказчика
-  const startY = finalY + 15;
+  const blockHeight = 50;
+  let startY = (doc as any).lastAutoTable.finalY + 15;
+
+  if (doc.internal.pageSize.getHeight() - startY < blockHeight) {
+    doc.addPage();
+    startY = 20; // отступ сверху на новой странице
+  }
+  
   const blockWidth = 90;
 
   doc.setFontSize(fontSize);

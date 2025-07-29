@@ -1,21 +1,42 @@
--- CreateEnum
-CREATE TYPE "Role" AS ENUM ('admin', 'engineer');
-
 -- CreateTable
-CREATE TABLE "requestsTechnicalWorkLog" (
+CREATE TABLE "requests" (
     "id" SERIAL NOT NULL,
     "applicationNumber" INTEGER NOT NULL,
-    "typeWorkId" INTEGER NOT NULL,
-    "trainNumberId" INTEGER NOT NULL,
-    "equipmentId" INTEGER NOT NULL,
-    "countEquipment" INTEGER NOT NULL,
-    "completedJobId" INTEGER NOT NULL,
-    "currentLocationId" INTEGER NOT NULL,
-    "stepPhotos" TEXT[],
-    "finalPhoto" TEXT NOT NULL,
+    "applicationDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "typeWork" TEXT NOT NULL,
+    "trainNumber" TEXT NOT NULL,
+    "carriageType" TEXT NOT NULL,
+    "carriageNumber" TEXT NOT NULL,
+    "completedJob" TEXT NOT NULL,
+    "currentLocation" TEXT NOT NULL,
+    "carriagePhoto" TEXT,
+    "generalPhoto" TEXT,
+    "finalPhoto" TEXT,
     "userId" INTEGER NOT NULL,
+    "userName" TEXT NOT NULL,
+    "userRole" TEXT NOT NULL,
+    "equipment" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "requestsTechnicalWorkLog_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "requests_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "requestEquipment" (
+    "id" SERIAL NOT NULL,
+    "requestId" INTEGER NOT NULL,
+    "equipmentType" TEXT NOT NULL,
+    "serialNumber" TEXT,
+    "macAddress" TEXT,
+    "countEquipment" INTEGER NOT NULL DEFAULT 1,
+    "equipmentPhoto" TEXT,
+    "serialPhoto" TEXT,
+    "macPhoto" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "requestEquipment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -86,10 +107,16 @@ CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "login" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" "Role" NOT NULL DEFAULT 'admin',
+    "role" TEXT NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "typeWagons_typeWagon_key" ON "typeWagons"("typeWagon");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "numberWagons_numberWagon_key" ON "numberWagons"("numberWagon");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "typeWork_typeWork_key" ON "typeWork"("typeWork");
@@ -103,23 +130,11 @@ CREATE UNIQUE INDEX "completedJob_completedJob_key" ON "completedJob"("completed
 -- CreateIndex
 CREATE UNIQUE INDEX "currentLocation_currentLocation_key" ON "currentLocation"("currentLocation");
 
--- AddForeignKey
-ALTER TABLE "requestsTechnicalWorkLog" ADD CONSTRAINT "requestsTechnicalWorkLog_typeWorkId_fkey" FOREIGN KEY ("typeWorkId") REFERENCES "typeWork"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "User_login_key" ON "User"("login");
 
 -- AddForeignKey
-ALTER TABLE "requestsTechnicalWorkLog" ADD CONSTRAINT "requestsTechnicalWorkLog_trainNumberId_fkey" FOREIGN KEY ("trainNumberId") REFERENCES "trainNumber"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "requestsTechnicalWorkLog" ADD CONSTRAINT "requestsTechnicalWorkLog_equipmentId_fkey" FOREIGN KEY ("equipmentId") REFERENCES "equipment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "requestsTechnicalWorkLog" ADD CONSTRAINT "requestsTechnicalWorkLog_completedJobId_fkey" FOREIGN KEY ("completedJobId") REFERENCES "completedJob"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "requestsTechnicalWorkLog" ADD CONSTRAINT "requestsTechnicalWorkLog_currentLocationId_fkey" FOREIGN KEY ("currentLocationId") REFERENCES "currentLocation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "requestsTechnicalWorkLog" ADD CONSTRAINT "requestsTechnicalWorkLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "requestEquipment" ADD CONSTRAINT "requestEquipment_requestId_fkey" FOREIGN KEY ("requestId") REFERENCES "requests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "equipment" ADD CONSTRAINT "equipment_typeWagonsId_fkey" FOREIGN KEY ("typeWagonsId") REFERENCES "typeWagons"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
