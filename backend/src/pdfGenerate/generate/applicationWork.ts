@@ -11,7 +11,6 @@ import {
   nameTimesNewRomanItalic,
   nameTimesNewRomanRegular,
 } from "../utils/config";
-import { jsonData } from "../utils/testJson/testJsonAppWork";
 import path from "path";
 
 interface Work {
