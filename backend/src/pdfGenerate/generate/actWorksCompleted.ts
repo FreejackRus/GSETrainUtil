@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoBase64 from "../utils/logoBase64";
+import fs from "fs/promises";
 
 import {
   fontBoldData,
@@ -12,6 +13,7 @@ import {
   nameTimesNewRomanItalic,
   nameTimesNewRomanRegular,
 } from "../utils/config";
+import path from "path";
 
 interface Item {
   name: string;
@@ -278,54 +280,17 @@ function createAct(doc: jsPDF, data: ActData) {
   doc.text("М.П.", secondBlockX, startY + 2 + heightLine + lineHeight + 3);
 }
 
-// Пример использования
-function generatePDF() {
+export const createActWorksCompleted = async (json:ActData , outputDir: string) => {
   const doc = new jsPDF();
 
-  const data: ActData = {
-    actNumber: "7",
-    actDate: "16.07.2025",
-    contractNumber: "214-СИОИТ/ГСЭ25",
-    contractDate: "09.06.2025",
-    applicationNumber: "9",
-    items: [
-      {
-        name: "Коннектор SUPRLAN 8P8C STP Cat.6A (RJ-45)",
-        count: 16,
-        unit: "шт.",
-        price: 3333.33,
-      },
-      {
-        name: "Монтаж коммутатора, черт. ТСФВ.467000.008",
-        count: 16,
-        unit: "усл.",
-        price: 3333.33,
-      },
-      {
-        name: "Монтаж точки доступа ТСФВ.465000.006-005",
-        count: 16,
-        unit: "усл.",
-        price: 3333.33,
-      },
-      {
-        name: "Дополнительные работы по монтажу оборудования",
-        count: 17,
-        unit: "усл.",
-        price: 5833.33,
-      },
-      {
-        name: "Выезд специалиста в депо",
-        count: 1,
-        unit: "усл.",
-        price: 3333.33,
-      },
-    ],
-  };
+  createAct(doc, json);
+  // Получаем PDF как Uint8Array
+  const pdfBytes = doc.output("arraybuffer");
+  const buffer = Buffer.from(pdfBytes);
+  // Формируем путь к файлу
+  const filePath = path.resolve(outputDir, "actWorksCompleted.pdf");
 
-  createAct(doc, data);
+  // Записываем файл
+  await fs.writeFile(filePath, buffer);
 
-  doc.save("actWorksCompleted.pdf");
-  console.log("PDF создан");
-}
-
-generatePDF();
+};

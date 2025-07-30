@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import fs from "fs/promises";
 import {
   fontBoldData,
   fontBoldItalicData,
@@ -10,6 +11,8 @@ import {
   nameTimesNewRomanItalic,
   nameTimesNewRomanRegular,
 } from "../utils/config";
+import { jsonData } from "../utils/testJson/testJsonAppWork";
+import path from "path";
 
 interface Work {
   description: string;
@@ -23,153 +26,9 @@ interface Wagon {
   workPlace: string;
   works: Work[];
 }
-
-const jsonData: Wagon[] = [
-  {
-    wagonNumber: "085 65012",
-    wagonType: "Одноэтажный",
-    workPlace: "Москва",
-    works: [
-      {
-        description: "Выезд специалиста в депо",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Дополнительные работы по демонтажу оборудования",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Дополнительные работы по монтажу оборудования",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Монтаж коммутатора, черт. ТСФВ.467000.008",
-        equipment: ["Источник питания (24V, 150W)"],
-        equipmentCount: [1],
-      },
-      {
-        description: "Монтаж маршрутизатора Mikrotik Hex RB750Gr3",
-        equipment: ["Коммутатор, черт. ТСФВ.467000.008"],
-        equipmentCount: [1],
-      },
-      {
-        description: "Проверка кабельных трасс",
-        equipment: [
-          "Выключатель автоматический двухполюсный MD63 2P 16А C 6kA",
-          "Коннектор SUPRLAN 8P8C STP Cat.6A (RJ-45)",
-          "Маршрутизатора Mikrotik Hex RB750Gr3",
-          "Точка доступа ТСФВ.465000.006-005",
-        ],
-        equipmentCount: [1, 2, 1, 2],
-      },
-    ],
-  },
-  {
-    wagonNumber: "085 65012",
-    wagonType: "Одноэтажный",
-    workPlace: "Москва",
-    works: [
-      {
-        description: "Выезд специалиста в депо",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Дополнительные работы по демонтажу оборудования",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Дополнительные работы по монтажу оборудования",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Монтаж коммутатора, черт. ТСФВ.467000.008",
-        equipment: ["Источник питания (24V, 150W)"],
-        equipmentCount: [1],
-      },
-      {
-        description: "Монтаж маршрутизатора Mikrotik Hex RB750Gr3",
-        equipment: ["Коммутатор, черт. ТСФВ.467000.008"],
-        equipmentCount: [1],
-      },
-      {
-        description: "Проверка кабельных трасс",
-        equipment: [
-          "Выключатель автоматический двухполюсный MD63 2P 16А C 6kA",
-          "Коннектор SUPRLAN 8P8C STP Cat.6A (RJ-45)",
-          "Маршрутизатора Mikrotik Hex RB750Gr3",
-          "Точка доступа ТСФВ.465000.006-005",
-        ],
-        equipmentCount: [1, 2, 1, 2],
-      },
-    ],
-  },
-  {
-    wagonNumber: "085 65012",
-    wagonType: "Одноэтажный",
-    workPlace: "Москва",
-    works: [
-      {
-        description: "Выезд специалиста в депо",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Дополнительные работы по демонтажу оборудования",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Дополнительные работы по монтажу оборудования",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Монтаж коммутатора, черт. ТСФВ.467000.008",
-        equipment: ["Источник питания (24V, 150W)"],
-        equipmentCount: [1],
-      },
-      {
-        description: "Монтаж маршрутизатора Mikrotik Hex RB750Gr3",
-        equipment: ["Коммутатор, черт. ТСФВ.467000.008"],
-        equipmentCount: [1],
-      },
-      {
-        description: "Проверка кабельных трасс",
-        equipment: [
-          "Выключатель автоматический двухполюсный MD63 2P 16А C 6kA",
-          "Коннектор SUPRLAN 8P8C STP Cat.6A (RJ-45)",
-          "Маршрутизатора Mikrotik Hex RB750Gr3",
-          "Точка доступа ТСФВ.465000.006-005",
-        ],
-        equipmentCount: [1, 2, 1, 2],
-      },
-    ],
-  },
-  {
-    wagonNumber: "020 20121",
-    wagonType: "Одноэтажный",
-    workPlace: "Москва",
-    works: [
-      {
-        description: "Монтаж коммутатора, черт. ТСФВ.467000.008",
-        equipment: [],
-        equipmentCount: [],
-      },
-      {
-        description: "Монтаж маршрутизатора Mikrotik Hex RB750Gr3",
-        equipment: [],
-        equipmentCount: [],
-      },
-    ],
-  },
-];
-
+interface IJson {
+  wagons:Wagon[]
+}
 function generateBody(data: Wagon[]): string[][] {
   const body: string[][] = [];
   let rowIndex = 1;
@@ -254,8 +113,7 @@ function generateBody(data: Wagon[]): string[][] {
 
   return body;
 }
-
-function createRequestForm(doc: jsPDF): void {
+export const createRequestForm = (doc: jsPDF, data: Wagon[]) => {
   doc.addFileToVFS(
     nameTimesNewRomanRegular,
     fontRegularData.toString("base64")
@@ -365,7 +223,7 @@ function createRequestForm(doc: jsPDF): void {
         "Место доставки оборудования для обеспечения резерва",
       ],
     ],
-    body: generateBody(jsonData),
+    body: generateBody(data),
     styles: {
       font: "Font",
       fontSize: 9,
@@ -454,10 +312,21 @@ function createRequestForm(doc: jsPDF): void {
   doc.text(text1, pageWidth - marginRight - text1Width, currentY);
   currentY += 5;
   const text2Width = doc.getTextWidth(text2);
-  doc.text(text2, pageWidth - marginRight - text2Width -24, currentY);
-}
+  doc.text(text2, pageWidth - marginRight - text2Width - 24, currentY);
+};
+export const createPdfAppWork = async (json: IJson, outputDir: string) => {
+  const doc = new jsPDF();
 
-// Пример использования
-const doc = new jsPDF();
-createRequestForm(doc);
-doc.save("Заявка_№7.pdf");
+  createRequestForm(doc, json.wagons);
+  // Получаем PDF как Uint8Array
+  const pdfBytes = doc.output("arraybuffer");
+  const buffer = Buffer.from(pdfBytes);
+  // Формируем путь к файлу
+  const filePath = path.resolve(outputDir, "Заявка_№7.pdf");
+
+  // Записываем файл
+  await fs.writeFile(filePath, buffer);
+
+};
+
+  

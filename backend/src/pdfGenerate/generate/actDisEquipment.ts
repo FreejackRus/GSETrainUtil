@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import fs from "fs/promises";
 import {
   fontBoldData,
   fontBoldItalicData,
@@ -11,6 +12,7 @@ import {
   nameTimesNewRomanRegular,
 } from "../utils/config";
 import logoBase64 from "../utils/logoBase64";
+import path from "path";
 
 interface EquipmentItem {
   wagonNumber: string;
@@ -271,98 +273,17 @@ function createDismantlingAct(doc: jsPDF, data: DismantlingActData): number {
   return startY + heightLine + lineHeight + 20; // пример возвращаемой позиции по вертикали
 }
 
-// Пример использования
-function generatePDF() {
+export const createPdfActDisEquipment = async (json: DismantlingActData, outputDir: string) => {
   const doc = new jsPDF();
 
-  const actData: DismantlingActData = {
-    actNumber: "9.1",
-    actDate: "«__» июля 2025 г.",
-    contractNumber: "214-СИОИТ/ГСЭ25",
-    contractDate: "«09» июня 2025 г.",
-    applicationNumber: "9",
-    equipment: [
-      {
-        wagonNumber: "088 20052",
-        equipmentName: "Маршрутизатор Mikrotik Hex RB750Gr3",
-        serialNumber: "HGQ09SGWKBJ",
-        quantity: "1",
-      },
-      {
-        wagonNumber: "088 20052",
-        equipmentName: "Коммутатор, черт. ТСФВ.467000.008",
-        serialNumber: "DT005276",
-        quantity: "1",
-      },
-      {
-        wagonNumber: "088 20052",
-        equipmentName: "Источник питания (24V, 150W)",
-        serialNumber: "SC554F4465",
-        quantity: "1",
-      },
-      {
-        wagonNumber: "088 20052",
-        equipmentName: "Коннектор SUPRLAN 8P8C STP Cat.6A (RJ-45)",
-        serialNumber: "-",
-        quantity: "2",
-      },
-      {
-        wagonNumber: "088 20052",
-        equipmentName:
-          "Выключатель автоматический двухполюсный MD63 2P 16A C 6kA",
-        serialNumber: "-",
-        quantity: "1",
-      },
-      {
-        wagonNumber: "088 20052",
-        equipmentName: "Точка доступа ТСФВ.465000.006-005",
-        serialNumber: "HGT0A13JJQ4",
-        quantity: "1",
-      },
-      {
-        wagonNumber: "096 27449",
-        equipmentName: "Маршрутизатор Mikrotik Hex RB750Gr3",
-        serialNumber: "HH80A6HH5KJ",
-        quantity: "1",
-      },
-      {
-        wagonNumber: "096 27449",
-        equipmentName: "Коммутатор, черт. ТСФВ.467000.008",
-        serialNumber: "DT005265",
-        quantity: "1",
-      },
-      {
-        wagonNumber: "096 27449",
-        equipmentName: "Источник питания (24V, 150W)",
-        serialNumber: "SC554F4466",
-        quantity: "1",
-      },
-      {
-        wagonNumber: "096 27449",
-        equipmentName: "Коннектор SUPRLAN 8P8C STP Cat.6A (RJ-45)",
-        serialNumber: "-",
-        quantity: "2",
-      },
-      {
-        wagonNumber: "096 27449",
-        equipmentName:
-          "Выключатель автоматический двухполюсный MD63 2P 16A C 6kA",
-        serialNumber: "-",
-        quantity: "1",
-      },
-      {
-        wagonNumber: "096 27449",
-        equipmentName: "Точка доступа ТСФВ.465000.006-005",
-        serialNumber: "HH40AFTFYYM",
-        quantity: "1",
-      },
-    ],
-  };
+  createDismantlingAct(doc, json);
+  // Получаем PDF как Uint8Array
+  const pdfBytes = doc.output("arraybuffer");
+  const buffer = Buffer.from(pdfBytes);
+  // Формируем путь к файлу
+  const filePath = path.resolve(outputDir, "actDismantlingEquipment.pdf");
 
-  createDismantlingAct(doc, actData);
+  // Записываем файл
+  await fs.writeFile(filePath, buffer);
 
-  doc.save("actDismantlingEquipment.pdf");
-  console.log("PDF создан");
-}
-
-generatePDF();
+};
