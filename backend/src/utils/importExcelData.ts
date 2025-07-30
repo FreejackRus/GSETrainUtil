@@ -485,7 +485,7 @@ async function importJournalData(workbook: XLSX.WorkBook) {
         create: { name: row['Тип работ'] }
       });
 
-      const train = await prisma.train.upsert({
+      const train = await prisma.trainNumber.upsert({
 
       });
 
