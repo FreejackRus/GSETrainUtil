@@ -10,7 +10,7 @@ interface Wagon {
   works: Work[];
 }
 
-export const jsonData = {
+export const testJsonAppWork = {
   wagons: <Wagon[]>[
     {
       wagonNumber: "085 65012",

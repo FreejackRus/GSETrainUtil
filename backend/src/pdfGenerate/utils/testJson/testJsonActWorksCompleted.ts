@@ -14,7 +14,7 @@ interface ActData {
   items: Item[];
 }
 
-export const data: ActData = {
+export const testJsonActWorksCompleted: ActData = {
     actNumber: "7",
     actDate: "16.07.2025",
     contractNumber: "214-СИОИТ/ГСЭ25",

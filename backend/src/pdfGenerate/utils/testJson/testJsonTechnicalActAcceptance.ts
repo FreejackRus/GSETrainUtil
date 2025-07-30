@@ -21,7 +21,7 @@ interface Act {
 export interface IJsonTechAct {
   acts: Act[];
 }
-export const actsData: IJsonTechAct = {
+export const testJsonTechnicalActAcceptance: IJsonTechAct = {
   acts: [
     {
       actNumber: "7.1",

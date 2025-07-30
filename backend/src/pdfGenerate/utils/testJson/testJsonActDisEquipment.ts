@@ -14,7 +14,7 @@ interface DismantlingActData {
   equipment: EquipmentItem[];
 }
 
-export const actData: DismantlingActData = {
+export const testJsonActDisEquipment: DismantlingActData = {
     actNumber: "9.1",
     actDate: "«__» июля 2025 г.",
     contractNumber: "214-СИОИТ/ГСЭ25",
