@@ -1,5 +1,5 @@
+import { PrismaClient } from '../generated/prisma'
 import bcrypt from 'bcrypt'
-import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient()
 
@@ -8,244 +8,180 @@ async function main() {
   const adminPasswordHash = await bcrypt.hash('admin', 10)
   const engineerPasswordHash = await bcrypt.hash('engineer', 10)
 
-  // Создаем администратора
+  // Создаем пользователей
   const admin = await prisma.user.upsert({
     where: { login: 'admin' },
     update: {},
     create: {
       login: 'admin',
       password: adminPasswordHash,
-      role: 'admin'
-    }
+      role: 'admin',
+      name: 'Администратор',
+    },
   })
 
-  // Создаем инженера
   const engineer = await prisma.user.upsert({
     where: { login: 'engineer' },
     update: {},
     create: {
       login: 'engineer',
       password: engineerPasswordHash,
-      role: 'engineer'
-    }
+      role: 'engineer',
+      name: 'Инженер',
+    },
   })
 
-  console.log('Пользователи созданы:')
-  console.log('Администратор:', admin)
-  console.log('Инженер:', engineer)
-
-  // Создаем базовые данные для справочников
-
-
-  const typeWork3 = await prisma.typeWork.upsert({
-    where: { typeWork: 'Монтаж' },
+  // Создаем записи в справочниках
+  const typeWorkMontage = await prisma.typeWork.upsert({
+    where: { name: 'Монтаж' },
     update: {},
-    create: {
-      typeWork: 'Монтаж'
-    }
+    create: { name: 'Монтаж' },
   })
 
-  const typeWork4 = await prisma.typeWork.upsert({
-    where: { typeWork: 'Демонтаж' },
+  const typeWorkDismantle = await prisma.typeWork.upsert({
+    where: { name: 'Демонтаж' },
     update: {},
-    create: {
-      typeWork: 'Демонтаж'
-    }
+    create: { name: 'Демонтаж' },
   })
 
-  const trainNumber1 = await prisma.trainNumber.upsert({
-    where: { trainNumber: '001' },
+  const completedJobBreak = await prisma.completedJob.upsert({
+    where: { name: 'Перемена' },
     update: {},
-    create: {
-      trainNumber: '001'
-    }
+    create: { name: 'Перемена' },
   })
 
-  const trainNumber2 = await prisma.trainNumber.upsert({
-    where: { trainNumber: '002' },
+  const completedJobContractor = await prisma.completedJob.upsert({
+    where: { name: 'Подрядчик' },
     update: {},
-    create: {
-      trainNumber: '002'
-    }
-  })
-
-
-  const completedJob3 = await prisma.completedJob.upsert({
-    where: { completedJob: 'Перемена' },
-    update: {},
-    create: {
-      completedJob: 'Перемена'
-    }
-  })
-
-  const completedJob4 = await prisma.completedJob.upsert({
-    where: { completedJob: 'Подрядчик' },
-    update: {},
-    create: {
-      completedJob: 'Подрядчик'
-    }
+    create: { name: 'Подрядчик' },
   })
 
   const location1 = await prisma.currentLocation.upsert({
-    where: { currentLocation: 'Депо №1' },
+    where: { name: 'Депо №1' },
     update: {},
-    create: {
-      currentLocation: 'Депо №1'
-    }
+    create: { name: 'Депо №1' },
   })
 
   const location2 = await prisma.currentLocation.upsert({
-    where: { currentLocation: 'Депо №2' },
+    where: { name: 'Депо №2' },
     update: {},
-    create: {
-      currentLocation: 'Депо №2'
-    }
+    create: { name: 'Депо №2' },
   })
 
-  // Создаем типы вагонов
-  const typeWagon1 = await prisma.typeWagons.upsert({
-    where: { id: 1 },
+  // Создаем поезда
+  const train001 = await prisma.train.upsert({
+    where: { number: '001' },
     update: {},
-    create: {
-      typeWagon: 'Пассажирский'
-    }
+    create: { number: '001' },
   })
 
-  const typeWagon2 = await prisma.typeWagons.upsert({
-    where: { id: 2 },
+  const train002 = await prisma.train.upsert({
+    where: { number: '002' },
     update: {},
-    create: {
-      typeWagon: 'Грузовой'
-    }
+    create: { number: '002' },
   })
 
-  const typeWagon3 = await prisma.typeWagons.upsert({
-    where: { id: 3 },
-    update: {},
-    create: {
-      typeWagon: 'Багажный'
-    }
-  })
+  // Создаем вагоны (уникальность number + trainId)
+  // Для upsert с составным ключом используем findFirst + create/update
 
-  const typeWagon4 = await prisma.typeWagons.upsert({
-    where: { id: 4 },
-    update: {},
-    create: {
-      typeWagon: 'Почтовый'
+  async function upsertCarriage(number: string, type: string, trainId: number) {
+    const existing = await prisma.carriage.findFirst({
+      where: { number, trainId },
+    })
+    if (existing) {
+      return prisma.carriage.update({
+        where: { id: existing.id },
+        data: { type },
+      })
+    } else {
+      return prisma.carriage.create({
+        data: { number, type, trainId },
+      })
     }
-  })
+  }
 
-  const typeWagon5 = await prisma.typeWagons.upsert({
-    where: { id: 5 },
-    update: {},
-    create: {
-      typeWagon: 'Служебный'
-    }
-  })
-
-  // Создаем номера вагонов
-  const numberWagon1 = await prisma.numberWagons.create({
-    data: {
-      numberWagon: 'В-001'
-    }
-  })
-
-  const numberWagon2 = await prisma.numberWagons.create({
-    data: {
-      numberWagon: 'В-002'
-    }
-  })
+  const carriage1 = await upsertCarriage('В-001', 'Пассажирский', train001.id)
+  const carriage2 = await upsertCarriage('В-002', 'Грузовой', train001.id)
+  const carriage3 = await upsertCarriage('В-003', 'Багажный', train002.id)
 
   // Создаем оборудование
-  const equipment1 = await prisma.equipment.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      type: 'GSE Terminal',
-      snNumber: 'GSE-TRM-001',
-      mac: '00:11:22:33:44:55',
-      status: 'Активно',
-      lastService: new Date(),
-      typeWagonsId: typeWagon1.id,
-      numberWagonId: numberWagon1.id,
-      photo: '/images/equipment1.jpg'
+  async function upsertEquipment(
+  id: number,
+  data: {
+    type: string
+    serialNumber?: string | null
+    macAddress?: string | null
+    status: string
+    lastService?: Date | null
+    carriageId: number
+    photos?: { photoType: string; photoPath: string; description?: string }[]
+  }
+) {
+  // Подготовим поле photos для Prisma
+  let photosData = undefined
+  if (data.photos) {
+    photosData = {
+      create: data.photos.map(({ photoType, photoPath, description }) => ({
+        photoType,
+        photoPath,
+        description,
+      })),
     }
+  }
+
+  // Создаем объект для передачи в Prisma, без поля photos из data
+  const dataForPrisma = {
+    type: data.type,
+    serialNumber: data.serialNumber ?? null,
+    macAddress: data.macAddress ?? null,
+    status: data.status,
+    lastService: data.lastService ?? null,
+    carriageId: data.carriageId,
+    ...(photosData ? { photos: photosData } : {}),
+  }
+
+  const existing = await prisma.equipment.findUnique({ where: { id } })
+  if (existing) {
+    return prisma.equipment.update({
+      where: { id },
+      data: dataForPrisma,
+    })
+  } else {
+    return prisma.equipment.create({
+      data: dataForPrisma,
+    })
+  }
+}
+
+  const now = new Date()
+
+  const equipment1 = await upsertEquipment(1, {
+    type: 'GSE Terminal',
+    serialNumber: 'GSE-TRM-001',
+    macAddress: '00:11:22:33:44:55',
+    status: 'Активно',
+    lastService: now,
+    carriageId: carriage1.id,
   })
 
-  const equipment2 = await prisma.equipment.upsert({
-    where: { id: 2 },
-    update: {},
-    create: {
-      type: 'GSE Router',
-      snNumber: 'GSE-RTR-002',
-      mac: '00:11:22:33:44:66',
-      status: 'Неактивно',
-      lastService: new Date(),
-      typeWagonsId: typeWagon2.id,
-      numberWagonId: numberWagon2.id,
-      photo: '/images/equipment2.jpg'
-    }
+  const equipment2 = await upsertEquipment(2, {
+    type: 'GSE Router',
+    serialNumber: 'GSE-RTR-002',
+    macAddress: '00:11:22:33:44:66',
+    status: 'Неактивно',
+    lastService: now,
+    carriageId: carriage2.id,
   })
 
-  const equipment3 = await prisma.equipment.upsert({
-    where: { id: 3 },
-    update: {},
-    create: {
-      type: 'GSE Switch',
-      snNumber: 'GSE-SWT-003',
-      mac: '00:11:22:33:44:77',
-      status: 'Активно',
-      lastService: new Date(),
-      typeWagonsId: typeWagon3.id,
-      numberWagonId: numberWagon1.id,
-      photo: '/images/equipment3.jpg'
-    }
+  const equipment3 = await upsertEquipment(3, {
+    type: 'GSE Switch',
+    serialNumber: 'GSE-SWT-003',
+    macAddress: '00:11:22:33:44:77',
+    status: 'Активно',
+    lastService: now,
+    carriageId: carriage3.id,
   })
 
-  const equipment4 = await prisma.equipment.upsert({
-    where: { id: 4 },
-    update: {},
-    create: {
-      type: 'GSE Access Point',
-      snNumber: 'GSE-AP-004',
-      mac: '00:11:22:33:44:88',
-      status: 'Активно',
-      lastService: new Date(),
-      typeWagonsId: typeWagon4.id,
-      numberWagonId: numberWagon2.id,
-      photo: '/images/equipment4.jpg'
-    }
-  })
-
-  const equipment5 = await prisma.equipment.upsert({
-    where: { id: 5 },
-    update: {},
-    create: {
-      type: 'GSE Controller',
-      snNumber: 'GSE-CTL-005',
-      mac: '00:11:22:33:44:99',
-      status: 'Неактивно',
-      lastService: new Date(),
-      typeWagonsId: typeWagon5.id,
-      numberWagonId: numberWagon1.id,
-      photo: '/images/equipment5.jpg'
-    }
-  })
-
-  const equipment6 = await prisma.equipment.upsert({
-    where: { id: 6 },
-    update: {},
-    create: {
-      type: 'GSE Sensor',
-      snNumber: 'GSE-SNS-006',
-      mac: null, // Некоторое оборудование может не иметь MAC-адрес
-      status: 'Активно',
-      lastService: new Date(),
-      typeWagonsId: typeWagon1.id,
-      numberWagonId: numberWagon2.id,
-      photo: '/images/equipment6.jpg'
-    }
-  })
 
   console.log('Базовые данные созданы успешно!')
 }
