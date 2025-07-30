@@ -254,11 +254,11 @@ export const CreateApplicationForm = ({
   const renderStep = () => {
     switch (currentStepKey) {
       case "workType":
-        return <StepWorkType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return <StepWorkType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} options={workTypes} />;
       case "trainNumber":
-        return <StepTrainNumber formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return <StepTrainNumber formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} options={trainNumbers}/>;
       case "carriageType":
-        return <StepCarriageType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return <StepCarriageType formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} options={carriageTypes} />;
       case "carriageNumber":
         return (
           <StepCarriageNumber
@@ -282,7 +282,7 @@ export const CreateApplicationForm = ({
       case "workCompleted":
         return <StepWorkCompleted formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
       case "location":
-        return <StepLocation formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} />;
+        return <StepLocation formData={form} onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))} options={locations} />;
       case "finalPhoto":
         return (
           <StepFinalPhoto 

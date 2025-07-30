@@ -29,15 +29,13 @@ import {
   Check as CheckIcon,
   Warning as WarningIcon
 } from '@mui/icons-material';
-import { EquipmentFormItem } from '../../../entities/application';
+import type { EquipmentFormItem } from '../../../entities/application';
 import { PhotoUpload } from '../../../shared/ui';
 
 interface EquipmentSectionProps {
-  equipment: EquipmentFormItem[];
-  equipmentTypes: string[];
-  onChange: (equipment: EquipmentFormItem[]) => void;
+  formData: { equipment: EquipmentFormItem[] };
+  onFormDataChange: (data: Partial<{ equipment: EquipmentFormItem[] }>) => void;
 }
-
 // Определяем фиксированные типы оборудования с их ограничениями
 const EQUIPMENT_CONFIG = {
   'Промышленный компьютер БТ-37-НМК (5550.i5 OSUb2204)': { maxCount: 1, hasMac: false },
@@ -50,10 +48,10 @@ const EQUIPMENT_CONFIG = {
 };
 
 export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
-  equipment,
-  equipmentTypes,
-  onChange,
+  formData,
+  onFormDataChange,
 }) => {
+   const equipment = formData.equipment || [];
   const [activeEquipmentStep, setActiveEquipmentStep] = useState(0);
 
   // Получаем доступные типы оборудования (те, которые еще не добавлены или могут быть добавлены повторно)
@@ -78,13 +76,13 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
       serialPhoto: null,
       macPhoto: null,
     };
-    onChange([...equipment, newEquipment]);
+     onFormDataChange({ equipment: [...equipment, newEquipment] });
     setActiveEquipmentStep(equipment.length); // Переходим к новому элементу
   };
 
   const removeEquipment = (index: number) => {
     const newEquipment = equipment.filter((_, i) => i !== index);
-    onChange(newEquipment);
+    onFormDataChange({ equipment: newEquipment });
     // Корректируем активный шаг
     if (activeEquipmentStep >= newEquipment.length && newEquipment.length > 0) {
       setActiveEquipmentStep(newEquipment.length - 1);
@@ -108,7 +106,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
       newEquipment[index].count = 1;
     }
     
-    onChange(newEquipment);
+    onFormDataChange({ equipment: newEquipment });
   };
 
   // Проверяем, нужен ли MAC-адрес для данного типа оборудования
@@ -156,9 +154,9 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         serialPhoto: null,
         macPhoto: null,
       }));
-      onChange(initialEquipment);
+       onFormDataChange({ equipment: initialEquipment});
     }
-  }, [equipment.length, onChange]);
+  }, [equipment.length, onFormDataChange]);
 
   const handleNextEquipment = () => {
     if (activeEquipmentStep < equipment.length - 1) {
