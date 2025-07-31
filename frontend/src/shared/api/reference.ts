@@ -9,15 +9,15 @@ export interface ReferenceData {
 }
 
 interface WorkTypeResponse {
-  typeWork: string;
+  name: string;
 }
 
 interface TrainNumberResponse {
-  trainNumber: string;
+  number: string;
 }
 
 interface CarriageTypeResponse {
-  typeWagon: string;
+  type: string;
 }
 
 interface EquipmentResponse {
@@ -31,17 +31,17 @@ interface LocationResponse {
 export const referenceApi = {
   getWorkTypes: async (): Promise<string[]> => {
     const response = await apiClient.get('/typeWork');
-    return response.data.map((item: WorkTypeResponse) => item.typeWork);
+    return response.data.map((item: WorkTypeResponse) => item.name);
   },
 
   getTrainNumbers: async (): Promise<string[]> => {
     const response = await apiClient.get('/trainNumber');
-    return response.data.map((item: TrainNumberResponse) => item.trainNumber);
+    return response.data.map((item: TrainNumberResponse) => item.number);
   },
 
   getCarriageTypes: async (): Promise<string[]> => {
     const response = await apiClient.get('/typeCarriage');
-    return response.data.map((item: CarriageTypeResponse) => item.typeWagon);
+    return response.data.map((item: CarriageTypeResponse) => item.type);
   },
 
   getEquipmentTypes: async (): Promise<string[]> => {

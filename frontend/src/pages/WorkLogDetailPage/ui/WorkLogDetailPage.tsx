@@ -88,7 +88,8 @@ export const WorkLogDetailPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!editedWorkLog || !id) return;
-
+    console.log(editedWorkLog);
+    
     try {
       const response = await workLogApi.updateWorkLogById(parseInt(id), editedWorkLog);
       
