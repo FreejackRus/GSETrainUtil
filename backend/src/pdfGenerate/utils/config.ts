@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-const correctUrl = __dirname.split("/").slice(0, -1).join("/");
+const correctUrl = path.join(__dirname, "..");
 
 export const nameTimesNewRomanRegular = "TimesNewRomanRegular.ttf";
 export const nameTimesNewRomanItalic = "TimesNewRomanItalic.ttf";
