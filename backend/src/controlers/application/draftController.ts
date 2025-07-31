@@ -6,8 +6,25 @@ const prisma = new PrismaClient();
 // Получить все черновики
 export const getDrafts = async (req: Request, res: Response) => {
   try {
+    // TODO: Получить userId и userRole из токена аутентификации
+    const userId = req.body.userId || 4; // Временно используем ID инженера
+    const userRole = req.body.userRole || 'engineer'; // Временно используем роль инженера
+    
+    // Администраторы не должны видеть черновики
+    if (userRole === 'admin') {
+      return res.status(200).json({
+        success: true,
+        data: []
+      });
+    }
+    
+    // Инженеры видят только свои черновики
+    const whereCondition = userRole === 'engineer' 
+      ? { status: 'draft', userId: userId }
+      : { status: 'draft' };
+
     const drafts = await prisma.request.findMany({
-      where: { status: 'draft' },
+      where: whereCondition,
       include: {
         requestEquipment: {
           include: {
@@ -22,7 +39,8 @@ export const getDrafts = async (req: Request, res: Response) => {
         train: true,
         carriage: true,
         completedJob: true,
-        currentLocation: true
+        currentLocation: true,
+        user: true
       },
       orderBy: { applicationDate: 'desc' }
     });

@@ -39,6 +39,14 @@ export const getApplicationById = async (req: Request, res: Response) => {
     const prisma = new PrismaClient();
     const { id } = req.params;
     
+    // Проверяем, что id существует и является валидным числом
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({
+        success: false,
+        message: "Некорректный ID заявки"
+      });
+    }
+    
     const application = await prisma.request.findUnique({
       where: {
         id: parseInt(id)

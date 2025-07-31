@@ -43,6 +43,7 @@ import {
   StepWorkCompleted, 
   StepFinalPhoto
 } from "../../../shared/ui";
+import { useUser } from "../../../shared/contexts/UserContext";
 
 export const CreateApplicationForm = ({
   open,
@@ -53,6 +54,7 @@ export const CreateApplicationForm = ({
   onClose: () => void;
   draftId?: number;
 }) => {
+  const { user } = useUser();
   const [activeStep, setActiveStep] = useState(0);
   const currentStep = APPLICATION_STEPS[activeStep];
   const currentStepKey = currentStep?.key;
@@ -88,15 +90,12 @@ export const CreateApplicationForm = ({
     // Получаем списки из БД, если не пришли — используем fallback данные
     referenceApi.getAllReferences()
       .then((data) => {
-        console.log('API Response:', data);
         if (data && Object.keys(data).length > 0) {
-          console.log('Using API data');
           setWorkTypes(data.typeWork || FALLBACK_DATA.workTypes);
           setTrainNumbers(data.trainNumber || FALLBACK_DATA.trainNumbers);
           setCarriageTypes(data.typeWagon || FALLBACK_DATA.carriageTypes);
           setLocations(data.currentLocation || FALLBACK_DATA.locations);
         } else {
-          console.log('Using fallback data - empty response');
           // Используем fallback данные если ответ пустой
           setWorkTypes(FALLBACK_DATA.workTypes);
           setTrainNumbers(FALLBACK_DATA.trainNumbers);
@@ -105,8 +104,6 @@ export const CreateApplicationForm = ({
         }
       })
       .catch((error) => {
-        console.log('API Error:', error);
-        console.log('Using fallback data - error');
         // Используем fallback данные в случае ошибки
         setWorkTypes(FALLBACK_DATA.workTypes);
         setTrainNumbers(FALLBACK_DATA.trainNumbers);
@@ -194,11 +191,14 @@ export const CreateApplicationForm = ({
   };
 
   // Функция сохранения черновика
+  // TODO: Проверить роль пользователя - черновики должны быть доступны только инженерам
   const saveDraft = async () => {
     setSavingDraft(true);
     setError(null);
+    setSuccess(null);
+    
     try {
-      const draftData = {
+      const draftData: CreateApplicationRequest = {
         status: 'draft' as const,
         typeWork: form.workType,
         trainNumber: form.trainNumber,
@@ -213,7 +213,6 @@ export const CreateApplicationForm = ({
             equipmentPhoto: item.photos?.equipment ? item.photos.equipment.name : null,
             serialPhoto: item.photos?.serial ? item.photos.serial.name : null,
             macPhoto: item.photos?.mac ? item.photos.mac.name : null,
-            generalPhoto: item.photos?.general ? item.photos.general.name : null
           }
         })),
         completedJob: form.workCompleted,
@@ -221,13 +220,16 @@ export const CreateApplicationForm = ({
         carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
         generalPhoto: form.generalPhoto ? form.generalPhoto.name : null,
         finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
-        userId: 4, // ID инженера из базы данных (временно, TODO: получать из контекста пользователя)
-        userName: "Инженер Иванов И.И.", // TODO: получать из контекста пользователя
-        userRole: "engineer"
+        userId: user?.id || 0,
+        userName: user?.name || '',
+        userRole: user?.role || ''
       };
 
       if (isDraft && draftId) {
-        await applicationApi.updateDraft(draftId, draftData);
+        await applicationApi.updateDraft(draftId, {
+          ...draftData,
+          userId: Number(draftData.userId) // Convert userId to number
+        });
       } else {
         await applicationApi.saveDraft(draftData);
         setIsDraft(true);
@@ -282,12 +284,10 @@ export const CreateApplicationForm = ({
         carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
         generalPhoto: form.generalPhoto ? form.generalPhoto.name : null,
         finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
-        userId: 4, // ID инженера из базы данных (временно, TODO: получать из контекста пользователя)
-        userName: "Инженер Иванов И.И.", // TODO: получать из контекста пользователя
-        userRole: "engineer" // TODO: получать из контекста пользователя
+        userId: user?.id || 0,
+        userName: user?.name || '',
+        userRole: user?.role || ''
       };
-
-      console.log('Отправляемые данные:', requestData);
 
       if (isDraft && draftId) {
         // Завершаем черновик
@@ -601,35 +601,6 @@ export const CreateApplicationForm = ({
           </Button>
           
           <Box display="flex" gap={2} alignItems="center">
-            {/* Кнопка сохранения черновика */}
-            {hasFormProgress() && (
-              <Button
-                variant="outlined"
-                onClick={saveDraft}
-                disabled={savingDraft}
-                startIcon={
-                  savingDraft ? (
-                    <CircularProgress size={16} color="inherit" />
-                  ) : (
-                    <SaveAlt />
-                  )
-                }
-                sx={{
-                  borderRadius: 3,
-                  px: 3,
-                  py: 1.5,
-                  borderColor: '#ff9800',
-                  color: '#ff9800',
-                  '&:hover': {
-                    borderColor: '#f57c00',
-                    bgcolor: 'rgba(255, 152, 0, 0.1)'
-                  }
-                }}
-              >
-                {savingDraft ? "Сохранение..." : "Сохранить черновик"}
-              </Button>
-            )}
-            
             <Typography variant="body2" color="text.secondary">
               {APPLICATION_STEPS[activeStep].label}
             </Typography>

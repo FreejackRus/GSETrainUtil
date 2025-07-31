@@ -48,6 +48,7 @@ routerDevice.put("/applications/:id", createApplication); // Обновлени�
 // Роуты для работы с черновиками
 routerDevice.post("/applications/draft", createApplication); // Создание черновика
 routerDevice.get("/applications/drafts", getDrafts); // Получение всех черновиков
+routerDevice.put("/applications/draft/:id", createApplication); // Обновление черновика
 routerDevice.put("/applications/:id/complete", completeDraft); // Завершение черновика
 routerDevice.delete("/applications/drafts/:id", deleteDraft); // Удаление черновика
 

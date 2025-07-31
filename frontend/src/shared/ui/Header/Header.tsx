@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router';
 import { 
   AppBar, 
   Toolbar, 
@@ -14,13 +15,17 @@ import {
   Drawer,
   ListItemIcon,
   ListItemText,
-  Divider
+  Divider,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { 
   ExitToApp as LogoutIcon,
   AccessTime as TimeIcon,
   Person as PersonIcon,
-  Menu as MenuIcon
+  Menu as MenuIcon,
+  Create as CreateIcon,
+  List as ListIcon
 } from '@mui/icons-material';
 import './Header.css';
 
@@ -30,11 +35,19 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isSmallMobile = useMediaQuery('(max-width: 480px)');
+  
+  // Определяем текущую вкладку для инженеров
+  const getCurrentTab = () => {
+    if (location.pathname === '/my-applications') return 1;
+    return 0; // create-application или главная
+  };
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -81,6 +94,14 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
     onLogout();
   };
 
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    if (newValue === 0) {
+      navigate('/create-application');
+    } else if (newValue === 1) {
+      navigate('/my-applications');
+    }
+  };
+
 
 
   return (
@@ -109,11 +130,44 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
             </Box>
           </Box>
 
-          {/* Центральная часть - дата и время (только на десктопе) */}
+          {/* Центральная часть - навигация для инженеров или дата/время для админа */}
           {!isMobile && (
-            <Box className="header__time">
-              <TimeIcon sx={{ mr: 1, fontSize: 16 }} />
-              {formatDate(currentTime)} • {formatTime(currentTime)}
+            <Box className="header__center">
+              {role === 'engineer' ? (
+                <Tabs 
+                  value={getCurrentTab()} 
+                  onChange={handleTabChange}
+                  textColor="inherit"
+                  indicatorColor="secondary"
+                  sx={{
+                    '& .MuiTab-root': {
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      '&.Mui-selected': {
+                        color: 'white',
+                      },
+                    },
+                    '& .MuiTabs-indicator': {
+                      backgroundColor: 'white',
+                    },
+                  }}
+                >
+                  <Tab 
+                    icon={<CreateIcon />} 
+                    label="Создание заявки" 
+                    iconPosition="start"
+                  />
+                  <Tab 
+                    icon={<ListIcon />} 
+                    label="Мои заявки" 
+                    iconPosition="start"
+                  />
+                </Tabs>
+              ) : (
+                <Box className="header__time">
+                  <TimeIcon sx={{ mr: 1, fontSize: 16 }} />
+                  {formatDate(currentTime)} • {formatTime(currentTime)}
+                </Box>
+              )}
             </Box>
           )}
 
@@ -183,6 +237,44 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
               </Typography>
             </Box>
           </Box>
+          
+          {/* Навигация для инженеров в мобильном меню */}
+          {role === 'engineer' && (
+            <Box sx={{ mt: 2, mb: 2 }}>
+              <Button
+                fullWidth
+                startIcon={<CreateIcon />}
+                onClick={() => {
+                  navigate('/create-application');
+                  setMobileMenuOpen(false);
+                }}
+                sx={{
+                  color: 'white',
+                  justifyContent: 'flex-start',
+                  mb: 1,
+                  backgroundColor: location.pathname === '/create-application' || location.pathname === '/' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                }}
+              >
+                Создание заявки
+              </Button>
+              <Button
+                fullWidth
+                startIcon={<ListIcon />}
+                onClick={() => {
+                  navigate('/my-applications');
+                  setMobileMenuOpen(false);
+                }}
+                sx={{
+                  color: 'white',
+                  justifyContent: 'flex-start',
+                  backgroundColor: location.pathname === '/my-applications' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                }}
+              >
+                Мои заявки
+              </Button>
+            </Box>
+          )}
+          
           <Typography variant="body2" className="header__drawer-time">
             {formatDate(currentTime)}
             <br />

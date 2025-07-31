@@ -52,12 +52,23 @@ export const createApplication = async (req: Request, res: Response) => {
         if (
           !item.equipmentType ||
           !item.serialNumber ||
-          !item.macAddress ||
           !item.quantity
         ) {
           return res.status(400).json({
             success: false,
-            message: "Все поля оборудования должны быть заполнены",
+            message: "Тип оборудования, серийный номер и количество обязательны для заполнения",
+          });
+        }
+        
+        // MAC адрес обязателен только для определенных типов оборудования
+        const needsMac = item.equipmentType.toLowerCase().includes('точка доступа') || 
+                         item.equipmentType.toLowerCase().includes('маршрутизатор') ||
+                         item.equipmentType.toLowerCase().includes('коммутатор');
+        
+        if (needsMac && !item.macAddress) {
+          return res.status(400).json({
+            success: false,
+            message: `MAC адрес обязателен для оборудования типа "${item.equipmentType}"`,
           });
         }
       }
@@ -145,12 +156,20 @@ export const createApplication = async (req: Request, res: Response) => {
     if (equipment && equipment.length > 0) {
       for (const item of equipment) {
         // Находим или создаем оборудование
+        const searchCriteria: any = {
+          type: item.equipmentType,
+          serialNumber: item.serialNumber,
+        };
+        
+        // Добавляем MAC адрес в критерии поиска только если он есть
+        if (item.macAddress) {
+          searchCriteria.macAddress = item.macAddress;
+        } else {
+          searchCriteria.macAddress = null;
+        }
+        
         let equipmentRecord = await prisma.equipment.findFirst({
-          where: {
-            type: item.equipmentType,
-            serialNumber: item.serialNumber,
-            macAddress: item.macAddress,
-          },
+          where: searchCriteria,
         });
 
         if (!equipmentRecord) {
@@ -158,7 +177,7 @@ export const createApplication = async (req: Request, res: Response) => {
             data: {
               type: item.equipmentType,
               serialNumber: item.serialNumber,
-              macAddress: item.macAddress,
+              macAddress: item.macAddress || null,
               status: "active", // Adding required status field with default value
             },
           });

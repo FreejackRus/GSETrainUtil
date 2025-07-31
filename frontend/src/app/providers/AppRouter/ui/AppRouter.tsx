@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router';
 import { Box } from '@mui/material';
-import { Home, Login, AdminPanel, CarriagesPage, WorkLogPage } from '../../../../pages';
+import { Home, Login, AdminPanel, CarriagesPage, WorkLogPage, CreateApplicationPage, MyApplicationsPage } from '../../../../pages';
 import { WorkLogDetailPage } from '../../../../pages/WorkLogDetailPage';
 import { Header } from '../../../../shared/ui';
 import { CreateApplicationButton } from '../../../../features/application-management';
@@ -35,7 +35,12 @@ export const AppRouter = ({ role, onLogout }: AppRouterProps) => {
               <Route path="/work-log/:id" element={<WorkLogDetailPage />} />
             </Routes>
           ) : (
-            <CreateApplicationButton />
+            <Routes>
+              <Route path="/" element={<CreateApplicationPage />} />
+              <Route path="/auth" element={<Login onLogin={() => {}} />} />
+              <Route path="/create-application" element={<CreateApplicationPage />} />
+              <Route path="/my-applications" element={<MyApplicationsPage />} />
+            </Routes>
           )}
         </Box>
       </Box>

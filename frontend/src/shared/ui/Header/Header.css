@@ -20,6 +20,13 @@
   gap: 16px;
 }
 
+.header__center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .header__logo {
   display: flex;
   align-items: center;
