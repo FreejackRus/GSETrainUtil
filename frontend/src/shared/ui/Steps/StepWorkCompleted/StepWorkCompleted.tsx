@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, FormControl, Select, MenuItem, Avatar, Card, CardContent } from "@mui/material";
-import { CheckCircle, Business, Person } from "@mui/icons-material";
+import {
+  Box,
+  Typography,
+  FormControl,
+  Select,
+  MenuItem,
+  Avatar,
+  Card,
+  CardContent,
+} from '@mui/material';
+import { CheckCircle, Business, Person } from '@mui/icons-material';
 import { apiClient } from '../../../api';
-import "./StepWorkCompleted.css";
+import './StepWorkCompleted.css';
 
 interface CompletedJobOption {
   id: number;
@@ -10,8 +19,8 @@ interface CompletedJobOption {
 }
 
 export const StepWorkCompleted = ({
-  value,
-  onChange
+  formData,
+  onFormDataChange,
 }: {
   value: string;
   onChange: (field: string, value: string) => void;
@@ -29,7 +38,7 @@ export const StepWorkCompleted = ({
         // Fallback данные в случае ошибки
         setOptions([
           { id: 1, completedJob: 'Перемена' },
-          { id: 2, completedJob: 'Подрядчик' }
+          { id: 2, completedJob: 'Подрядчик' },
         ]);
       } finally {
         setLoading(false);
@@ -48,7 +57,7 @@ export const StepWorkCompleted = ({
       </Box>
     );
   }
-
+  const value = formData.workCompleted || '';
   return (
     <Box>
       <Typography variant="h6" gutterBottom className="step-work-completed-title">
@@ -57,7 +66,7 @@ export const StepWorkCompleted = ({
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Выберите, кем были выполнены работы
       </Typography>
-      
+
       <Box display="flex" alignItems="center" gap={2} mb={2}>
         <Avatar className="step-work-completed-avatar">
           <CheckCircle className="step-work-completed-avatar-icon" />
@@ -66,7 +75,7 @@ export const StepWorkCompleted = ({
           <FormControl fullWidth variant="outlined">
             <Select
               value={value || ''}
-              onChange={(e) => onChange("workCompleted", e.target.value)}
+              onChange={(e) => onFormDataChange({ workCompleted: e.target.value })}
               displayEmpty
               className="step-work-completed-select"
             >
@@ -88,14 +97,16 @@ export const StepWorkCompleted = ({
           <CardContent>
             <Box display="flex" alignItems="center" gap={2}>
               <Avatar className="step-work-completed-result-avatar">
-                {value === "Перемена" ? <Business /> : <Person />}
+                {value === 'Перемена' ? <Business /> : <Person />}
               </Avatar>
               <Box>
                 <Typography variant="subtitle1" className="step-work-completed-result-title">
                   Исполнитель: {value}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {value === "Перемена" ? "Работы выполнены силами компании" : "Работы выполнены подрядчиком"}
+                  {value === 'Перемена'
+                    ? 'Работы выполнены силами компании'
+                    : 'Работы выполнены подрядчиком'}
                 </Typography>
               </Box>
             </Box>

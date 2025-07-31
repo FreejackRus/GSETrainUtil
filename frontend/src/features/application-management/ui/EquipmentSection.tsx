@@ -35,11 +35,9 @@ import { PhotoUpload } from '../../../shared/ui';
 import './EquipmentSection.css';
 
 interface EquipmentSectionProps {
-  equipment: EquipmentFormItem[];
-  equipmentTypes: string[];
-  onChange: (equipment: EquipmentFormItem[]) => void;
+  formData: { equipment: EquipmentFormItem[] };
+  onFormDataChange: (data: Partial<{ equipment: EquipmentFormItem[] }>) => void;
 }
-
 // Определяем фиксированные типы оборудования с их ограничениями
 const EQUIPMENT_CONFIG = {
   'Промышленный компьютер БТ-37-НМК (5550.i5 OSUb2204)': { maxCount: 1, hasMac: false },
@@ -55,6 +53,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   equipment = [],
   onChange
 }) => {
+   const equipment = formData.equipment || [];
   const [activeEquipmentStep, setActiveEquipmentStep] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));

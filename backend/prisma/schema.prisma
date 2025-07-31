@@ -4,8 +4,10 @@
 // 2. Используются связи через ID вместо дублирования данных
 // 3. Нормализованная структура для лучшей производительности
 
+
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
