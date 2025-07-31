@@ -221,8 +221,8 @@ export const CreateApplicationForm = ({
         carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
         generalPhoto: form.generalPhoto ? form.generalPhoto.name : null,
         finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
-        userId: 1,
-        userName: "Инженер",
+        userId: 4, // ID инженера из базы данных (временно, TODO: получать из контекста пользователя)
+        userName: "Инженер Иванов И.И.", // TODO: получать из контекста пользователя
         userRole: "engineer"
       };
 
@@ -282,8 +282,8 @@ export const CreateApplicationForm = ({
         carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
         generalPhoto: form.generalPhoto ? form.generalPhoto.name : null,
         finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
-        userId: 1, // TODO: получать из контекста пользователя
-        userName: "Инженер", // TODO: получать из контекста пользователя
+        userId: 4, // ID инженера из базы данных (временно, TODO: получать из контекста пользователя)
+        userName: "Инженер Иванов И.И.", // TODO: получать из контекста пользователя
         userRole: "engineer" // TODO: получать из контекста пользователя
       };
 
