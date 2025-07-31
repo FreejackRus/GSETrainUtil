@@ -269,7 +269,7 @@ async function importJournalData(workbook: XLSX.WorkBook) {
         trainId: train.id,
         carriageId: carriage.id,
         ...(equipmentId && { equipmentId: equipmentId }),
-        countEquipment: requestData.equipment.length > 0 ? requestData.equipment[0].countEquipment : 1,
+        // countEquipment: requestData.equipment.length > 0 ? requestData.equipment[0].countEquipment : 1,
         completedJobId: completedJob.id,
         currentLocationId: currentLocation.id,
         userId: requestData.userId
@@ -281,7 +281,7 @@ async function importJournalData(workbook: XLSX.WorkBook) {
         trainId: train.id,
         carriageId: carriage.id,
         ...(equipmentId && { equipmentId: equipmentId }),
-        countEquipment: requestData.equipment.length > 0 ? requestData.equipment[0].countEquipment : 1,
+        // countEquipment: requestData.equipment.length > 0 ? requestData.equipment[0].countEquipment : 1,
         completedJobId: completedJob.id,
         currentLocationId: currentLocation.id,
         userId: requestData.userId
