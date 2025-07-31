@@ -25,6 +25,7 @@ import {
   ArrowForward,
   Save,
   Close,
+  SaveAlt,
 } from "@mui/icons-material";
 
 import { APPLICATION_STEPS, FALLBACK_DATA } from "../../../shared/config";
@@ -46,18 +47,22 @@ import {
 export const CreateApplicationForm = ({
   open,
   onClose,
+  draftId,
 }: {
   open: boolean;
   onClose: () => void;
+  draftId?: number;
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const currentStep = APPLICATION_STEPS[activeStep];
   const currentStepKey = currentStep?.key;
   const [form, setForm] = useState<ApplicationFormData>(INITIAL_FORM_DATA);
   const [loading, setLoading] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [isDraft, setIsDraft] = useState(!!draftId);
 
   // Списки для select
   const [workTypes, setWorkTypes] = useState<string[]>([]);
@@ -74,6 +79,11 @@ export const CreateApplicationForm = ({
     });
     setSuccess(null);
     setError(null);
+
+    // Загружаем черновик если передан draftId
+    if (draftId) {
+      loadDraft(draftId);
+    }
 
     // Получаем списки из БД, если не пришли — используем fallback данные
     referenceApi.getAllReferences()
@@ -103,7 +113,45 @@ export const CreateApplicationForm = ({
         setCarriageTypes(FALLBACK_DATA.carriageTypes);
         setLocations(FALLBACK_DATA.locations);
       });
-  }, [open]);
+  }, [open, draftId]);
+
+  // Функция загрузки черновика
+  const loadDraft = async (id: number) => {
+    try {
+      const drafts = await applicationApi.getDrafts();
+      const draft = drafts.find(d => d.id.toString() === id.toString());
+      
+      if (draft) {
+        setForm({
+          workType: draft.workType || '',
+          trainNumber: draft.trainNumber || '',
+          carriageType: draft.carriageType || '',
+          carriageNumber: draft.carriageNumber || '',
+          equipment: (draft.equipment || []).map(item => ({
+            equipmentType: item.type || '',
+            quantity: item.quantity || 1,
+            serialNumber: item.serialNumber || '',
+            macAddress: item.macAddress || '',
+            photos: {
+              equipment: null, // Файлы из черновика пока не загружаем
+              serial: null,
+              mac: null,
+              general: null
+            }
+          })),
+          workCompleted: draft.workCompleted || '',
+          location: draft.location || '',
+          carriagePhoto: null, // TODO: загрузка файлов из черновика
+          generalPhoto: null,
+          finalPhoto: null
+        });
+        setIsDraft(true);
+      }
+    } catch (error) {
+      console.error("Error loading draft:", error);
+      setError("Ошибка при загрузке черновика");
+    }
+  };
 
   const handleChange = (field: string, value: string | number | File | null) => {
     setForm((prev: ApplicationFormData) => ({
@@ -145,6 +193,65 @@ export const CreateApplicationForm = ({
     setShowExitConfirm(false);
   };
 
+  // Функция сохранения черновика
+  const saveDraft = async () => {
+    setSavingDraft(true);
+    setError(null);
+    try {
+      const draftData = {
+        status: 'draft' as const,
+        typeWork: form.workType,
+        trainNumber: form.trainNumber,
+        carriageType: form.carriageType,
+        carriageNumber: form.carriageNumber,
+        equipment: (form.equipment || []).map(item => ({
+          equipmentType: item.equipmentType || '',
+          serialNumber: item.serialNumber || '',
+          macAddress: item.macAddress || '',
+          quantity: item.quantity || 1,
+          photos: {
+            equipmentPhoto: item.photos?.equipment ? item.photos.equipment.name : null,
+            serialPhoto: item.photos?.serial ? item.photos.serial.name : null,
+            macPhoto: item.photos?.mac ? item.photos.mac.name : null,
+            generalPhoto: item.photos?.general ? item.photos.general.name : null
+          }
+        })),
+        completedJob: form.workCompleted,
+        currentLocation: form.location,
+        carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
+        generalPhoto: form.generalPhoto ? form.generalPhoto.name : null,
+        finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
+        userId: 1,
+        userName: "Инженер",
+        userRole: "engineer"
+      };
+
+      if (isDraft && draftId) {
+        await applicationApi.updateDraft(draftId, draftData);
+      } else {
+        await applicationApi.saveDraft(draftData);
+        setIsDraft(true);
+        // Можно сохранить ID нового черновика если нужно
+      }
+      
+      setSuccess("Черновик успешно сохранен!");
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      setError("Ошибка при сохранении черновика. Попробуйте еще раз.");
+    } finally {
+      setSavingDraft(false);
+    }
+  };
+
+  // Функция сохранения черновика и выхода
+  const handleSaveAndExit = async () => {
+    await saveDraft();
+    if (!error) {
+      setShowExitConfirm(false);
+      onClose();
+    }
+  };
+
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
@@ -153,30 +260,23 @@ export const CreateApplicationForm = ({
     setSuccess(null);
     setError(null);
     try {
-      // Генерируем номер заявки как случайное число в диапазоне INT4
-      const applicationNumber = Math.floor(Math.random() * 2000000000) + 1000000; // От 1,000,000 до 2,000,000,000
-      const applicationDate = new Date().toISOString();
-      
-      // Формируем массив оборудования из формы
-      const equipment = (form.equipment || []).map(item => ({
-        equipmentType: item.equipmentType,
-        serialNumber: item.serialNumber || '',
-        macAddress: item.macAddress || '',
-        countEquipment: item.count,
-        equipmentPhoto: item.equipmentPhoto ? item.equipmentPhoto.name : null,
-        serialPhoto: item.serialPhoto ? item.serialPhoto.name : null,
-        macPhoto: item.macPhoto ? item.macPhoto.name : null
-      }));
-
-      // Подготавливаем данные в формате, ожидаемом бэкендом
       const requestData: CreateApplicationRequest = {
-        applicationNumber,
-        applicationDate,
+        status: 'completed' as const,
         typeWork: form.workType,
         trainNumber: form.trainNumber,
         carriageType: form.carriageType,
         carriageNumber: form.carriageNumber,
-        equipment,
+        equipment: (form.equipment || []).map(item => ({
+          equipmentType: item.equipmentType || '',
+          serialNumber: item.serialNumber || '',
+          macAddress: item.macAddress || '',
+          quantity: item.quantity || 1,
+          photos: {
+            equipmentPhoto: item.photos?.equipment ? item.photos.equipment.name : null,
+            serialPhoto: item.photos?.serial ? item.photos.serial.name : null,
+            macPhoto: item.photos?.mac ? item.photos.mac.name : null,
+          }
+        })),
         completedJob: form.workCompleted,
         currentLocation: form.location,
         carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
@@ -189,7 +289,14 @@ export const CreateApplicationForm = ({
 
       console.log('Отправляемые данные:', requestData);
 
-      await applicationApi.create(requestData);
+      if (isDraft && draftId) {
+        // Завершаем черновик
+        await applicationApi.completeDraft(draftId, requestData);
+      } else {
+        // Создаем новую заявку
+        await applicationApi.create(requestData);
+      }
+      
       setSuccess("Заявка успешно создана!");
       setError(null);
       
@@ -222,15 +329,21 @@ export const CreateApplicationForm = ({
       case "equipment":
         return !form.equipment || form.equipment.length === 0 || 
                form.equipment.some(item => {
-                 // Базовая валидация
-                 if (!item.equipmentType || !item.equipmentPhoto || !item.serialPhoto) {
+                 // Базовая валидация - тип оборудования и фото оборудования обязательны
+                 if (!item.equipmentType || !item.photos?.equipment) {
                    return true;
                  }
                  
-                 // MAC адрес обязателен только для точек доступа и маршрутизаторов
+                 // Серийный номер и его фото обязательны
+                 if (!item.serialNumber || !item.photos?.serial) {
+                   return true;
+                 }
+                 
+                 // MAC адрес и его фото обязательны только для определенных типов оборудования
                  const needsMac = item.equipmentType.toLowerCase().includes('точка доступа') || 
-                                  item.equipmentType.toLowerCase().includes('маршрутизатор');
-                 if (needsMac && (!item.macAddress || !item.macPhoto)) {
+                                  item.equipmentType.toLowerCase().includes('маршрутизатор') ||
+                                  item.equipmentType.toLowerCase().includes('коммутатор');
+                 if (needsMac && (!item.macAddress || !item.photos?.mac)) {
                    return true;
                  }
                  
@@ -281,12 +394,6 @@ export const CreateApplicationForm = ({
               carriagePhoto: form.carriagePhoto || null
             }}
             onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-            applicationData={{
-              requestNumber: `REQ-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`,
-              applicationDate: new Date().toISOString(),
-              trainNumber: form.trainNumber,
-              equipment: (form.equipment || []).map(eq => eq.equipmentType).join(', ')
-            }}
           />
         );
       case "equipment":
@@ -317,12 +424,6 @@ export const CreateApplicationForm = ({
           <StepFinalPhoto 
             formData={form}
             onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-            applicationData={{
-              requestNumber: `REQ-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`,
-              applicationDate: new Date().toISOString(),
-              trainNumber: form.trainNumber,
-              equipment: (form.equipment || []).map(eq => eq.equipmentType).join(', ')
-            }}
           />
         );
       default:
@@ -500,6 +601,35 @@ export const CreateApplicationForm = ({
           </Button>
           
           <Box display="flex" gap={2} alignItems="center">
+            {/* Кнопка сохранения черновика */}
+            {hasFormProgress() && (
+              <Button
+                variant="outlined"
+                onClick={saveDraft}
+                disabled={savingDraft}
+                startIcon={
+                  savingDraft ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : (
+                    <SaveAlt />
+                  )
+                }
+                sx={{
+                  borderRadius: 3,
+                  px: 3,
+                  py: 1.5,
+                  borderColor: '#ff9800',
+                  color: '#ff9800',
+                  '&:hover': {
+                    borderColor: '#f57c00',
+                    bgcolor: 'rgba(255, 152, 0, 0.1)'
+                  }
+                }}
+              >
+                {savingDraft ? "Сохранение..." : "Сохранить черновик"}
+              </Button>
+            )}
+            
             <Typography variant="body2" color="text.secondary">
               {APPLICATION_STEPS[activeStep].label}
             </Typography>
@@ -547,16 +677,24 @@ export const CreateApplicationForm = ({
       </DialogTitle>
       <DialogContent>
         <Typography>
-          У вас есть несохраненные изменения в заявке. Вы уверены, что хотите выйти? 
-          Все введенные данные будут потеряны.
+          У вас есть несохраненные изменения в заявке. Что вы хотите сделать?
         </Typography>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancelExit} variant="outlined">
           Отмена
         </Button>
+        <Button 
+          onClick={handleSaveAndExit} 
+          variant="contained" 
+          color="warning"
+          startIcon={<SaveAlt />}
+          disabled={savingDraft}
+        >
+          {savingDraft ? "Сохранение..." : "Сохранить черновик и выйти"}
+        </Button>
         <Button onClick={handleConfirmExit} variant="contained" color="error">
-          Выйти
+          Выйти без сохранения
         </Button>
       </DialogActions>
     </Dialog>

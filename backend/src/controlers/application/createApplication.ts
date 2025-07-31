@@ -1,70 +1,211 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 
+const prisma = new PrismaClient();
+
 export const createApplication = async (req: Request, res: Response) => {
   try {
-    const prisma = new PrismaClient();
-    
     const {
-      applicationNumber,
+      id, // Для обновления существующего черновика
       applicationDate,
-      typeWorkId,
-      trainId,
-      carriageId,
-      equipmentId,
-      countEquipment,
-      completedJobId,
-      currentLocationId,
-      userId
+      typeWork,
+      trainNumber,
+      carriageType,
+      carriageNumber,
+      equipment, // Массив оборудования
+      completedJob,
+      currentLocation,
+      carriagePhoto,
+      generalPhoto,
+      finalPhoto,
+      userId,
+      userName,
+      userRole,
+      status = 'completed' // По умолчанию завершенная заявка
     } = req.body;
 
-    // Валидация обязательных полей
-    if (!applicationNumber || !typeWorkId || !trainId || !carriageId || 
-        !equipmentId || !countEquipment || !completedJobId || !currentLocationId || !userId) {
-      return res.status(400).json({
-        success: false,
-        message: "Не все обязательные поля заполнены"
+    // Валидация обязательных полей для завершенной заявки
+    if (status === 'completed') {
+      if (!typeWork || !trainNumber || !carriageType || !carriageNumber || 
+          !equipment || !Array.isArray(equipment) || equipment.length === 0 ||
+          !completedJob || !currentLocation || !userId || !userName || !userRole) {
+        return res.status(400).json({
+          success: false,
+          message: 'Все обязательные поля должны быть заполнены для завершенной заявки'
+        });
+      }
+
+      // Валидация каждого элемента оборудования
+      for (const item of equipment) {
+        if (!item.equipmentType || !item.serialNumber || !item.macAddress || !item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: 'Все поля оборудования должны быть заполнены'
+          });
+        }
+      }
+    }
+
+    // Если это обновление существующего черновика
+    if (id) {
+      const existingRequest = await prisma.request.findUnique({
+        where: { id: parseInt(id) },
+        include: { requestEquipment: true }
+      });
+
+      if (!existingRequest) {
+        return res.status(404).json({ 
+          success: false,
+          message: 'Заявка не найдена' 
+        });
+      }
+
+      // Удаляем старые связи с оборудованием
+      await prisma.requestEquipment.deleteMany({
+        where: { requestId: parseInt(id) }
       });
     }
 
-    // Создаем заявку
-    const newApplication = await prisma.request.create({
-      data: {
-        applicationNumber: parseInt(applicationNumber),
-        applicationDate: applicationDate ? new Date(applicationDate) : new Date(),
-        typeWorkId: parseInt(typeWorkId),
-        trainId: parseInt(trainId),
-        carriageId: parseInt(carriageId),
-        equipmentId: parseInt(equipmentId),
-        countEquipment: parseInt(countEquipment),
-        completedJobId: parseInt(completedJobId),
-        currentLocationId: parseInt(currentLocationId),
-        userId: parseInt(userId)
-      },
+    // Создание или обновление заявки
+    const requestData = {
+      applicationDate: applicationDate ? new Date(applicationDate) : new Date(),
+      typeWorkId: typeWork ? parseInt(typeWork) : null,
+      trainId: trainNumber ? parseInt(trainNumber) : null,
+      carriageId: carriageType ? parseInt(carriageType) : null,
+      carriageNumber: carriageNumber || null,
+      completedJobId: completedJob ? parseInt(completedJob) : null,
+      currentLocationId: currentLocation ? parseInt(currentLocation) : null,
+      carriagePhoto: carriagePhoto || null,
+      generalPhoto: generalPhoto || null,
+      finalPhoto: finalPhoto || null,
+      userId: parseInt(userId),
+      userName,
+      userRole,
+      status
+    };
+
+    let request;
+    
+    if (id) {
+      // Обновляем существующую заявку
+      request = await prisma.request.update({
+        where: { id: parseInt(id) },
+        data: requestData
+      });
+    } else {
+      // Создаем новую заявку
+      request = await prisma.request.create({
+        data: requestData
+      });
+    }
+
+    // Создаем связи с оборудованием
+    if (equipment && equipment.length > 0) {
+      for (const item of equipment) {
+        // Находим или создаем оборудование
+        let equipmentRecord = await prisma.equipment.findFirst({
+          where: {
+            type: item.equipmentType,
+            serialNumber: item.serialNumber,
+            macAddress: item.macAddress
+          }
+        });
+
+        if (!equipmentRecord) {
+          equipmentRecord = await prisma.equipment.create({
+            data: {
+              type: item.equipmentType,
+              serialNumber: item.serialNumber,
+              macAddress: item.macAddress,
+              status: 'active', // Adding required status field with default value
+            }
+          });
+        }
+
+        // Создаем связь между заявкой и оборудованием
+        await prisma.requestEquipment.create({
+          data: {
+            requestId: request.id,
+            equipmentId: equipmentRecord.id,
+            quantity: parseInt(item.quantity)
+          }
+        });
+
+        // Сохраняем фотографии оборудования
+        if (item.photos) {
+          const photoData = [];
+          
+          if (item.photos.equipmentPhoto) {
+            photoData.push({
+              equipmentId: equipmentRecord.id,
+              photoUrl: item.photos.equipmentPhoto,
+              photoType: 'equipment'
+            });
+          }
+          
+          if (item.photos.serialPhoto) {
+            photoData.push({
+              equipmentId: equipmentRecord.id,
+              photoUrl: item.photos.serialPhoto,
+              photoType: 'serial'
+            });
+          }
+          
+          if (item.photos.macPhoto) {
+            photoData.push({
+              equipmentId: equipmentRecord.id,
+              photoUrl: item.photos.macPhoto,
+              photoType: 'mac'
+            });
+          }
+
+          if (photoData.length > 0) {
+            await prisma.equipmentPhoto.createMany({
+              data: photoData.map(photo => ({
+                equipmentId: photo.equipmentId,
+                photoPath: photo.photoUrl, // Map photoUrl to required photoPath field
+                photoType: photo.photoType
+              }))
+            });
+          }
+        }
+      }
+    }
+
+    // Получаем полную информацию о созданной/обновленной заявке
+    const fullRequest = await prisma.request.findUnique({
+      where: { id: request.id },
       include: {
+        requestEquipment: {
+          include: {
+            equipment: {
+              include: {
+                photos: true
+              }
+            }
+          }
+        },
         typeWork: true,
         train: true,
         carriage: true,
-        equipment: true,
         completedJob: true,
-        currentLocation: true,
-        user: true
+        currentLocation: true
       }
     });
 
-    await prisma.$disconnect();
-    
     res.status(201).json({
       success: true,
-      message: "Заявка успешно создана",
-      data: newApplication
+      message: id ? 'Заявка успешно обновлена' : 'Заявка успешно создана',
+      data: fullRequest
     });
-    
+
   } catch (error) {
-    console.error("Ошибка при создании заявки:", error);
-    res.status(500).json({
+    console.error('Ошибка при создании/обновлении заявки:', error);
+    res.status(500).json({ 
       success: false,
-      message: "Внутренняя ошибка сервера"
+      message: 'Внутренняя ошибка сервера при создании/обновлении заявки' 
     });
+  } finally {
+    await prisma.$disconnect();
   }
 };

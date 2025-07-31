@@ -2,22 +2,32 @@ export interface Application {
   id: string;
   applicationNumber: number;
   applicationDate: string;
-  workType: string;
-  trainNumber: string;
-  carriageType: string;
-  carriageNumber: string;
-  equipment: string;
+  status: 'draft' | 'completed' | 'cancelled';
+  workType?: string;
+  trainNumber?: string;
+  carriageType?: string;
+  carriageNumber?: string;
+  equipment: EquipmentItem[];
+  workCompleted?: string;
+  location?: string;
+  carriagePhoto?: string | null;
+  generalPhoto?: string | null;
+  finalPhoto?: string | null;
+  user: string;
+}
+
+// Интерфейс для одного элемента оборудования
+export interface EquipmentItem {
+  id?: number;
+  type: string;
   serialNumber: string;
   macAddress: string;
-  count: number;
-  workCompleted: string;
-  location: string;
-  carriagePhoto?: File | null;
-  equipmentPhoto?: File | null;
-  serialPhoto?: File | null;
-  macPhoto?: File | null;
-  generalPhoto?: File | null;
-  finalPhoto?: File | null;
+  quantity: number;
+  photos: {
+    equipmentPhoto?: File | string | null;
+    serialPhoto?: File | string | null;
+    macPhoto?: File | string | null;
+  };
 }
 
 // Интерфейс для одного элемента оборудования в форме
@@ -25,13 +35,17 @@ export interface EquipmentFormItem {
   equipmentType: string;
   serialNumber: string;
   macAddress: string;
-  count: number;
-  equipmentPhoto?: File | null;
-  serialPhoto?: File | null;
-  macPhoto?: File | null;
+  quantity: number;
+  photos: {
+    equipment?: File | null;
+    serial?: File | null;
+    mac?: File | null;
+    general?: File | null;
+  };
 }
 
 export interface ApplicationFormData {
+  id?: number; // Для сохранения черновика
   workType: string;
   trainNumber: string;
   carriageType: string;
@@ -42,33 +56,37 @@ export interface ApplicationFormData {
   carriagePhoto?: File | null;
   generalPhoto?: File | null;
   finalPhoto?: File | null;
+  status?: 'draft' | 'completed';
 }
 
 // Интерфейс для создания заявки (соответствует бэкенду)
 export interface CreateApplicationRequest {
-  applicationNumber: number;
-  applicationDate: string;
-  typeWork: string;
-  trainNumber: string;
-  carriageType: string;
-  carriageNumber: string;
+  id?: number; // Для обновления черновика
+  applicationDate?: string;
+  typeWork?: string;
+  trainNumber?: string;
+  carriageType?: string;
+  carriageNumber?: string;
   equipment: Array<{
     equipmentType: string;
     serialNumber: string;
     macAddress: string;
-    countEquipment: number;
-    equipmentPhoto?: string | null;
-    serialPhoto?: string | null;
-    macPhoto?: string | null;
+    quantity: number;
+    photos: {
+      equipmentPhoto?: string | null;
+      serialPhoto?: string | null;
+      macPhoto?: string | null;
+    };
   }>;
-  completedJob: string;
-  currentLocation: string;
+  completedJob?: string;
+  currentLocation?: string;
   carriagePhoto?: string | null;
   generalPhoto?: string | null;
   finalPhoto?: string | null;
   userId: number;
   userName: string;
   userRole: string;
+  status: 'draft' | 'completed';
 }
 
 // Интерфейс для шага формы заявки

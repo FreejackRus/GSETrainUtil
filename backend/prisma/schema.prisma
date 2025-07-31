@@ -13,37 +13,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Основная таблица заявок (упрощенная)
+// Основная таблица заявок
 model Request {
   id                Int      @id @default(autoincrement())
-  applicationNumber Int      @unique
+  applicationNumber Int      @unique @default(autoincrement())
   applicationDate   DateTime @default(now())
+  status            String   @default("draft") // draft, completed, cancelled
   
   // Связи с нормализованными таблицами
-  typeWorkId        Int
-  trainId           Int
-  carriageId        Int
-  equipmentId       Int?     // Опциональное поле, так как оборудование может быть добавлено позже
-  completedJobId    Int
-  currentLocationId Int
+  typeWorkId        Int?
+  trainId           Int?
+  carriageId        Int?
+  completedJobId    Int?
+  currentLocationId Int?
   userId            Int
   
-  // Количество оборудования
-  countEquipment    Int
-  
   // Связи
-  typeWork          TypeWork        @relation(fields: [typeWorkId], references: [id])
-  train             Train           @relation(fields: [trainId], references: [id])
-  carriage          Carriage        @relation(fields: [carriageId], references: [id])
-  equipment         Equipment?      @relation(fields: [equipmentId], references: [id])
-  completedJob      CompletedJob    @relation(fields: [completedJobId], references: [id])
-  currentLocation   CurrentLocation @relation(fields: [currentLocationId], references: [id])
-  user              User            @relation(fields: [userId], references: [id])
+  typeWork          TypeWork?        @relation(fields: [typeWorkId], references: [id])
+  train             Train?           @relation(fields: [trainId], references: [id])
+  carriage          Carriage?        @relation(fields: [carriageId], references: [id])
+  completedJob      CompletedJob?    @relation(fields: [completedJobId], references: [id])
+  currentLocation   CurrentLocation? @relation(fields: [currentLocationId], references: [id])
+  user              User             @relation(fields: [userId], references: [id])
+  
+  // Связь с оборудованием через промежуточную таблицу
+  requestEquipment  RequestEquipment[]
+  
+  // Общие фотографии заявки
+  carriagePhoto     String?
+  generalPhoto      String?
+  finalPhoto        String?
   
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   @@map("requests")
+}
+
+// Промежуточная таблица для связи заявки с оборудованием
+model RequestEquipment {
+  id          Int       @id @default(autoincrement())
+  requestId   Int
+  equipmentId Int
+  quantity    Int       @default(1)
+  
+  // Связи
+  request     Request   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  equipment   Equipment @relation(fields: [equipmentId], references: [id])
+  
+  @@unique([requestId, equipmentId])
+  @@map("request_equipment")
 }
 
 // Таблица поездов
@@ -80,14 +99,14 @@ model Equipment {
   macAddress      String?
   status          String
   lastService     DateTime?
-  carriageId      Int
+  carriageId      Int?     // Может быть null для нового оборудования
   
   // Фотографии оборудования
   photos          EquipmentPhoto[]
   
   // Связи
-  carriage        Carriage @relation(fields: [carriageId], references: [id])
-  requests        Request[]
+  carriage        Carriage?         @relation(fields: [carriageId], references: [id])
+  requestEquipment RequestEquipment[]
 
   @@map("equipment")
 }

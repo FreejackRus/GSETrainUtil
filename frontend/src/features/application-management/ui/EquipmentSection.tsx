@@ -85,10 +85,12 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
       equipmentType: getAvailableEquipmentTypes[0] || '',
       serialNumber: '',
       macAddress: '',
-      count: 1,
-      equipmentPhoto: null,
-      serialPhoto: null,
-      macPhoto: null,
+      quantity: 1,
+      photos: {
+        equipment: null,
+        serial: null,
+        mac: null,
+      },
     };
     onChangeRef.current([...equipment, newEquipment]);
     setActiveEquipmentStep(equipment.length); // Переходим к новому элементу
@@ -104,19 +106,31 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
     }
   }, [equipment, activeEquipmentStep]);
 
-  const updateEquipment = useCallback((index: number, field: keyof EquipmentFormItem, value: string | number | File | null) => {
+  const updateEquipment = useCallback((index: number, field: string, value: string | number | File | null) => {
     const newEquipment = [...equipment];
-    newEquipment[index] = { ...newEquipment[index], [field]: value };
+    
+    // Обработка фотографий
+    if (field.includes('Photo')) {
+      newEquipment[index] = { 
+        ...newEquipment[index], 
+        photos: {
+          ...newEquipment[index].photos,
+          [field]: value
+        }
+      };
+    } else {
+      newEquipment[index] = { ...newEquipment[index], [field]: value };
+    }
     
     // Если изменился тип оборудования, сбрасываем MAC-адрес если он не нужен
     if (field === 'equipmentType') {
       const config = EQUIPMENT_CONFIG[value as keyof typeof EQUIPMENT_CONFIG];
       if (config && !config.hasMac) {
         newEquipment[index].macAddress = '';
-        newEquipment[index].macPhoto = null;
+        newEquipment[index].photos.mac = null;
       }
       // Устанавливаем количество по умолчанию
-      newEquipment[index].count = 1;
+      newEquipment[index].quantity = 1;
     }
     
     onChangeRef.current(newEquipment);
@@ -136,12 +150,12 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
   // Проверяем, заполнено ли оборудование
   const isEquipmentComplete = useCallback((item: EquipmentFormItem) => {
-    if (!item.equipmentType || !item.serialNumber || !item.equipmentPhoto || !item.serialPhoto) {
+    if (!item.equipmentType || !item.serialNumber || !item.photos.equipment || !item.photos.serial) {
       return false;
     }
     
     const hasMac = needsMacAddress(item.equipmentType);
-    if (hasMac && (!item.macAddress || !item.macPhoto)) {
+    if (hasMac && (!item.macAddress || !item.photos.mac)) {
       return false;
     }
     
@@ -163,12 +177,21 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         equipmentType: type,
         serialNumber: '',
         macAddress: '',
-        count: 1,
-        equipmentPhoto: null,
-        serialPhoto: null,
-        macPhoto: null,
+        quantity: 1,
+        photos: {
+          equipmentPhoto: null,
+          serialPhoto: null,
+          macPhoto: null,
+        },
       }));
-      onChangeRef.current(initialEquipment);
+      onChangeRef.current(initialEquipment.map(item => ({
+        ...item,
+        photos: {
+          equipment: null,
+          serial: null,
+          mac: null
+        }
+      })));
     }
   }, [equipment.length]);
 
@@ -232,7 +255,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
           <Grid container spacing={isMobile ? 2 : 3}>
             {/* Форма выбора типа и количества с адаптивной сеткой */}
-            <Grid item xs={12}>
+            <Grid item={true} xs={12}>
               <FormControl fullWidth size={isMobile ? "small" : "medium"}>
                 <InputLabel>Тип оборудования</InputLabel>
                 <Select
@@ -267,7 +290,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             </Grid>
 
             {/* Серийный номер */}
-            <Grid item xs={12} md={hasMac ? 6 : 12}>
+            <Grid item={true} xs={12} md={hasMac ? 6 : 12}>
               <TextField
                 fullWidth
                 size={isMobile ? "small" : "medium"}
@@ -281,7 +304,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
             {/* MAC-адрес - только для определенных типов */}
             {hasMac && (
-              <Grid item xs={12} md={6}>
+              <Grid item={true} xs={12} md={6}>
                 <TextField
                   fullWidth
                   size={isMobile ? "small" : "medium"}
@@ -297,14 +320,14 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
             {/* Количество - только для коннекторов */}
             {maxCount > 1 && (
-              <Grid item xs={12} md={6}>
+              <Grid item={true} xs={12} md={6}>
                 <TextField
                   fullWidth
                   size={isMobile ? "small" : "medium"}
                   label="Количество"
                   type="number"
-                  value={item.count}
-                  onChange={(e) => updateEquipment(index, 'count', Math.min(parseInt(e.target.value) || 1, maxCount))}
+                  value={item.quantity}
+                  onChange={(e) => updateEquipment(index, 'quantity', Math.min(parseInt(e.target.value) || 1, maxCount))}
                   inputProps={{ 
                     min: 1, 
                     max: maxCount,
@@ -315,7 +338,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
               </Grid>
             )}
 
-            <Grid item xs={12}>
+            <Grid item={true} xs={12}>
               <Divider className={`photo-divider ${isMobile ? 'mobile' : ''}`} />
               <Box 
                 className={`photo-section-header ${isMobile ? 'mobile' : ''}`}
@@ -339,10 +362,10 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             <Collapse in={isPhotosExpanded} timeout="auto" unmountOnExit>
               <Grid container spacing={isMobile ? 1 : 2}>
                 {/* Фото оборудования */}
-                <Grid item xs={12} sm={6} md={hasMac ? 4 : 6}>
+                <Grid item={true} xs={12} sm={6} md={hasMac ? 4 : 6}>
                   <PhotoUpload
                     label="Фото оборудования"
-                    photo={item.equipmentPhoto}
+                    photo={item.photos.equipment ?? null}
                     onPhotoChange={(file) => updateEquipment(index, 'equipmentPhoto', file)}
                     required
                     compact={isMobile}
@@ -350,10 +373,10 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                 </Grid>
 
                 {/* Фото серийного номера */}
-                <Grid item xs={12} sm={6} md={hasMac ? 4 : 6}>
+                <Grid item={true} xs={12} sm={6} md={hasMac ? 4 : 6}>
                   <PhotoUpload
                     label="Фото серийного номера"
-                    photo={item.serialPhoto}
+                    photo={item.photos.serial ?? null}
                     onPhotoChange={(file) => updateEquipment(index, 'serialPhoto', file)}
                     required
                     compact={isMobile}
@@ -362,13 +385,13 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
                 {/* Фото MAC-адреса - только для определенных типов */}
                 {hasMac && (
-                  <Grid item xs={12} sm={hasMac ? 12 : 6} md={4}>
+                  <Grid item={true} xs={12} sm={hasMac ? 12 : 6} md={4}>
                     <PhotoUpload
                       label="Фото MAC-адреса"
-                      photo={item.macPhoto || null}
+                      photo={item.photos.mac ?? null}
                       onPhotoChange={(file) => updateEquipment(index, 'macPhoto', file)}
                       required
-                      compact={isMobile}
+                      size={isMobile ? "small" : "medium"}
                     />
                   </Grid>
                 )}

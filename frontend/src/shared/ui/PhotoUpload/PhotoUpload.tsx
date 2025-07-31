@@ -14,7 +14,7 @@ import {
   CloudUpload,
   CameraAlt
 } from "@mui/icons-material";
-import { UploadPhotoParams } from "../../api/uploadApi";
+import type { UploadPhotoParams } from "../../api/uploadApi";
 import "./PhotoUpload.css";
 
 // New interface for file selection
@@ -25,6 +25,8 @@ interface PhotoUploadNewProps {
   description?: string;
   required?: boolean;
   accept?: string;
+  compact?: boolean;
+  size?: 'small' | 'medium' | 'large';
 }
 
 // Legacy interface for server upload
@@ -36,6 +38,8 @@ interface PhotoUploadLegacyProps {
   description?: string;
   required?: boolean;
   accept?: string;
+  compact?: boolean;
+  size?: 'small' | 'medium' | 'large';
 }
 
 type PhotoUploadProps = PhotoUploadNewProps | PhotoUploadLegacyProps;
@@ -50,7 +54,7 @@ const isLegacyInterface = (props: PhotoUploadProps): props is PhotoUploadLegacyP
 };
 
 export const PhotoUpload = (props: PhotoUploadProps) => {
-  const { label, description, required = false, accept = "image/*" } = props;
+  const { label, description, required = false, accept = "image/*", compact = false, size = 'medium' } = props;
   
   const handleButtonClick = () => {
     const input = document.getElementById(`photo-input-${label.replace(/\s+/g, '-')}`);
@@ -82,18 +86,18 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
   const currentPhoto = isNewInterface(props) ? props.photo : null;
 
   return (
-    <Paper elevation={2} className="photo-upload-container">
+    <Paper elevation={2} className={`photo-upload-container ${compact ? 'compact' : ''}`}>
       <Box className="photo-upload-content">
-        <Avatar className="photo-upload-avatar">
+        <Avatar className={`photo-upload-avatar ${size}`}>
           <PhotoCamera />
         </Avatar>
         
-        <Typography variant="subtitle1" className="photo-upload-title">
+        <Typography variant={compact ? "body2" : "subtitle1"} className="photo-upload-title">
           {label}
           {required && <span className="photo-upload-required"> *</span>}
         </Typography>
         
-        {description && (
+        {description && !compact && (
           <Typography variant="body2" color="text.secondary" className="photo-upload-description">
             {description}
           </Typography>
@@ -112,6 +116,7 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
           onClick={handleButtonClick}
           startIcon={<CloudUpload />}
           className="photo-upload-button"
+          size={size === 'large' ? 'large' : size === 'small' ? 'small' : 'medium'}
         >
           {currentPhoto ? 'Изменить фото' : 'Загрузить фото'}
         </Button>
@@ -119,11 +124,11 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
 
       {/* Превью загруженного фото */}
       {currentPhoto && currentPhoto instanceof File && (
-        <Card className="photo-upload-preview">
+        <Card className={`photo-upload-preview ${compact ? 'compact' : ''}`}>
           <CardContent className="photo-upload-preview-content">
             <Box className="photo-upload-success">
               <CheckCircle className="photo-upload-success-icon" />
-              <Typography variant="subtitle2" className="photo-upload-success-text">
+              <Typography variant={compact ? "caption" : "subtitle2"} className="photo-upload-success-text">
                 Фото выбрано
               </Typography>
             </Box>
@@ -133,7 +138,7 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
                 variant="rounded"
                 src={URL.createObjectURL(currentPhoto)}
                 alt={label}
-                className="photo-upload-image"
+                className={`photo-upload-image ${size}`}
               />
             </Box>
             
