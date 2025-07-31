@@ -159,6 +159,18 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
     return config?.maxCount || 1;
   }, []);
 
+  // Проверяем, нужно ли показывать поле количества
+  const needsQuantityField = useCallback((equipmentType: string) => {
+    const config = EQUIPMENT_CONFIG[equipmentType as keyof typeof EQUIPMENT_CONFIG];
+    return config?.maxQuantity && config.maxQuantity > 1;
+  }, []);
+
+  // Получаем максимальное количество единиц для одного элемента
+  const getMaxQuantity = useCallback((equipmentType: string) => {
+    const config = EQUIPMENT_CONFIG[equipmentType as keyof typeof EQUIPMENT_CONFIG];
+    return config?.maxQuantity || 1;
+  }, []);
+
   // Проверяем, заполнено ли оборудование
   const isEquipmentComplete = useCallback((item: EquipmentFormItem) => {
     if (!item.equipmentType || !item.serialNumber || !item.photos.equipment || !item.photos.serial) {
@@ -215,6 +227,8 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   const renderEquipmentForm = useCallback((item: EquipmentFormItem, index: number) => {
     const maxCount = getMaxCount(item.equipmentType);
     const hasMac = needsMacAddress(item.equipmentType);
+    const hasQuantity = needsQuantityField(item.equipmentType);
+    const maxQuantity = getMaxQuantity(item.equipmentType);
     const isComplete = isEquipmentComplete(item);
     
     return (
@@ -323,7 +337,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             )}
 
             {/* Количество - только для коннекторов */}
-            {maxCount > 1 && (
+            {hasQuantity && (
               <Grid item={true} xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -331,13 +345,13 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                   label="Количество"
                   type="number"
                   value={item.quantity}
-                  onChange={(e) => updateEquipment(index, 'quantity', Math.min(parseInt(e.target.value) || 1, maxCount))}
+                  onChange={(e) => updateEquipment(index, 'quantity', Math.min(parseInt(e.target.value) || 1, maxQuantity))}
                   inputProps={{ 
                     min: 1, 
-                    max: maxCount,
+                    max: maxQuantity,
                     style: { textAlign: isMobile ? 'center' : 'left' }
                   }}
-                  helperText={`Максимум ${maxCount} шт.`}
+                  helperText={`Максимум ${maxQuantity} шт.`}
                 />
               </Grid>
             )}
@@ -405,7 +419,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         </CardContent>
       </Card>
     );
-  }, [isMobile, isSmallMobile, getMaxCount, needsMacAddress, isEquipmentComplete, getAvailableEquipmentTypes, updateEquipment, removeEquipment, isPhotosExpanded]);
+  }, [isMobile, isSmallMobile, getMaxCount, needsMacAddress, needsQuantityField, getMaxQuantity, isEquipmentComplete, getAvailableEquipmentTypes, updateEquipment, removeEquipment, isPhotosExpanded]);
 
   if (equipment.length === 0) {
     return (
