@@ -109,15 +109,26 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   const updateEquipment = useCallback((index: number, field: string, value: string | number | File | null) => {
     const newEquipment = [...equipment];
     
-    // Обработка фотографий
+    // Обработка фотографий - исправляем маппинг полей
     if (field.includes('Photo')) {
-      newEquipment[index] = { 
-        ...newEquipment[index], 
-        photos: {
-          ...newEquipment[index].photos,
-          [field]: value
-        }
-      };
+      let photoField = '';
+      if (field === 'equipmentPhoto') {
+        photoField = 'equipment';
+      } else if (field === 'serialPhoto') {
+        photoField = 'serial';
+      } else if (field === 'macPhoto') {
+        photoField = 'mac';
+      }
+      
+      if (photoField) {
+        newEquipment[index] = { 
+          ...newEquipment[index], 
+          photos: {
+            ...newEquipment[index].photos,
+            [photoField]: value
+          }
+        };
+      }
     } else {
       newEquipment[index] = { ...newEquipment[index], [field]: value };
     }
@@ -179,19 +190,12 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         macAddress: '',
         quantity: 1,
         photos: {
-          equipmentPhoto: null,
-          serialPhoto: null,
-          macPhoto: null,
-        },
-      }));
-      onChangeRef.current(initialEquipment.map(item => ({
-        ...item,
-        photos: {
           equipment: null,
           serial: null,
-          mac: null
-        }
-      })));
+          mac: null,
+        },
+      }));
+      onChangeRef.current(initialEquipment);
     }
   }, [equipment.length]);
 
