@@ -21,26 +21,43 @@ export const createApplication = async (req: Request, res: Response) => {
       userId,
       userName,
       userRole,
-      status = 'completed' // По умолчанию завершенная заявка
+      status = "completed", // По умолчанию завершенная заявка
     } = req.body;
-
+    
     // Валидация обязательных полей для завершенной заявки
-    if (status === 'completed') {
-      if (!typeWork || !trainNumber || !carriageType || !carriageNumber || 
-          !equipment || !Array.isArray(equipment) || equipment.length === 0 ||
-          !completedJob || !currentLocation || !userId || !userName || !userRole) {
+    if (status === "completed") {
+      if (
+        !typeWork ||
+        !trainNumber ||
+        !carriageType ||
+        !carriageNumber ||
+        !equipment ||
+        !Array.isArray(equipment) ||
+        equipment.length === 0 ||
+        !completedJob ||
+        !currentLocation ||
+        !userId ||
+        !userName ||
+        !userRole
+      ) {
         return res.status(400).json({
           success: false,
-          message: 'Все обязательные поля должны быть заполнены для завершенной заявки'
+          message:
+            "Все обязательные поля должны быть заполнены для завершенной заявки",
         });
       }
 
       // Валидация каждого элемента оборудования
       for (const item of equipment) {
-        if (!item.equipmentType || !item.serialNumber || !item.macAddress || !item.quantity) {
+        if (
+          !item.equipmentType ||
+          !item.serialNumber ||
+          !item.macAddress ||
+          !item.quantity
+        ) {
           return res.status(400).json({
             success: false,
-            message: 'Все поля оборудования должны быть заполнены'
+            message: "Все поля оборудования должны быть заполнены",
           });
         }
       }
@@ -50,52 +67,77 @@ export const createApplication = async (req: Request, res: Response) => {
     if (id) {
       const existingRequest = await prisma.request.findUnique({
         where: { id: parseInt(id) },
-        include: { requestEquipment: true }
+        include: { requestEquipment: true },
       });
 
       if (!existingRequest) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           success: false,
-          message: 'Заявка не найдена' 
+          message: "Заявка не найдена",
         });
       }
 
       // Удаляем старые связи с оборудованием
       await prisma.requestEquipment.deleteMany({
-        where: { requestId: parseInt(id) }
+        where: { requestId: parseInt(id) },
       });
     }
 
-    // Создание или обновление заявки
+    const [
+      typeWorkRecord,
+      trainRecord,
+      carriageRecord,
+      completedJobRecord,
+      locationRecord,
+    ] = await Promise.all([
+      prisma.typeWork.findFirst({ where: { name: typeWork } }),
+      prisma.train.findFirst({ where: { number: trainNumber } }),
+      prisma.carriage.findFirst({ where: { number: carriageNumber } }),
+      prisma.completedJob.findFirst({ where: { name: completedJob } }),
+      prisma.currentLocation.findFirst({ where: { name: currentLocation } }),
+    ]);
+
+    if (status === "completed") {
+      if (
+        !typeWorkRecord ||
+        !trainRecord ||
+        !carriageRecord ||
+        !completedJobRecord ||
+        !locationRecord
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Невозможно найти один из справочников: тип работ, поезд, вагон, выполненная работа или местоположение.",
+        });
+      }
+    }
+
     const requestData = {
       applicationDate: applicationDate ? new Date(applicationDate) : new Date(),
-      typeWorkId: typeWork ? parseInt(typeWork) : null,
-      trainId: trainNumber ? parseInt(trainNumber) : null,
-      carriageId: carriageType ? parseInt(carriageType) : null,
-      carriageNumber: carriageNumber || null,
-      completedJobId: completedJob ? parseInt(completedJob) : null,
-      currentLocationId: currentLocation ? parseInt(currentLocation) : null,
+      typeWorkId: typeWorkRecord?.id || null,
+      trainId: trainRecord?.id || null,
+      carriageId: carriageRecord?.id || null,
+      completedJobId: completedJobRecord?.id || null,
+      currentLocationId: locationRecord?.id || null,
       carriagePhoto: carriagePhoto || null,
       generalPhoto: generalPhoto || null,
       finalPhoto: finalPhoto || null,
       userId: parseInt(userId),
-      userName,
-      userRole,
-      status
+      status,
     };
-
     let request;
-    
+
     if (id) {
       // Обновляем существующую заявку
       request = await prisma.request.update({
         where: { id: parseInt(id) },
-        data: requestData
+        data: requestData,
       });
     } else {
       // Создаем новую заявку
       request = await prisma.request.create({
-        data: requestData
+        data: requestData,
       });
     }
 
@@ -107,8 +149,8 @@ export const createApplication = async (req: Request, res: Response) => {
           where: {
             type: item.equipmentType,
             serialNumber: item.serialNumber,
-            macAddress: item.macAddress
-          }
+            macAddress: item.macAddress,
+          },
         });
 
         if (!equipmentRecord) {
@@ -117,8 +159,8 @@ export const createApplication = async (req: Request, res: Response) => {
               type: item.equipmentType,
               serialNumber: item.serialNumber,
               macAddress: item.macAddress,
-              status: 'active', // Adding required status field with default value
-            }
+              status: "active", // Adding required status field with default value
+            },
           });
         }
 
@@ -127,45 +169,45 @@ export const createApplication = async (req: Request, res: Response) => {
           data: {
             requestId: request.id,
             equipmentId: equipmentRecord.id,
-            quantity: parseInt(item.quantity)
-          }
+            quantity: parseInt(item.quantity),
+          },
         });
 
         // Сохраняем фотографии оборудования
         if (item.photos) {
           const photoData = [];
-          
+
           if (item.photos.equipmentPhoto) {
             photoData.push({
               equipmentId: equipmentRecord.id,
               photoUrl: item.photos.equipmentPhoto,
-              photoType: 'equipment'
+              photoType: "equipment",
             });
           }
-          
+
           if (item.photos.serialPhoto) {
             photoData.push({
               equipmentId: equipmentRecord.id,
               photoUrl: item.photos.serialPhoto,
-              photoType: 'serial'
+              photoType: "serial",
             });
           }
-          
+
           if (item.photos.macPhoto) {
             photoData.push({
               equipmentId: equipmentRecord.id,
               photoUrl: item.photos.macPhoto,
-              photoType: 'mac'
+              photoType: "mac",
             });
           }
 
           if (photoData.length > 0) {
             await prisma.equipmentPhoto.createMany({
-              data: photoData.map(photo => ({
+              data: photoData.map((photo) => ({
                 equipmentId: photo.equipmentId,
                 photoPath: photo.photoUrl, // Map photoUrl to required photoPath field
-                photoType: photo.photoType
-              }))
+                photoType: photo.photoType,
+              })),
             });
           }
         }
@@ -180,30 +222,29 @@ export const createApplication = async (req: Request, res: Response) => {
           include: {
             equipment: {
               include: {
-                photos: true
-              }
-            }
-          }
+                photos: true,
+              },
+            },
+          },
         },
         typeWork: true,
         train: true,
         carriage: true,
         completedJob: true,
-        currentLocation: true
-      }
+        currentLocation: true,
+      },
     });
 
     res.status(201).json({
       success: true,
-      message: id ? 'Заявка успешно обновлена' : 'Заявка успешно создана',
-      data: fullRequest
+      message: id ? "Заявка успешно обновлена" : "Заявка успешно создана",
+      data: fullRequest,
     });
-
   } catch (error) {
-    console.error('Ошибка при создании/обновлении заявки:', error);
-    res.status(500).json({ 
+    console.error("Ошибка при создании/обновлении заявки:", error);
+    res.status(500).json({
       success: false,
-      message: 'Внутренняя ошибка сервера при создании/обновлении заявки' 
+      message: "Внутренняя ошибка сервера при создании/обновлении заявки",
     });
   } finally {
     await prisma.$disconnect();
