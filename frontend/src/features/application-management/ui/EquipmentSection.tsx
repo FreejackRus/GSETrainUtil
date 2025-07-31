@@ -1,43 +1,39 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Typography,
+  TextField,
+  Button,
   Card,
   CardContent,
-  Grid,
-  IconButton,
-  Button,
-  Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
   Chip,
   LinearProgress,
   Alert,
   Fab,
   Zoom,
+  useTheme,
+  useMediaQuery,
   Collapse,
+  IconButton,
+  Divider,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
-import { 
-  Add as AddIcon, 
-  Delete as DeleteIcon, 
-  NavigateNext as NextIcon,
-  NavigateBefore as PrevIcon,
-  Check as CheckIcon,
-  Warning as WarningIcon,
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
-} from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import CheckIcon from '@mui/icons-material/Check';
+import WarningIcon from '@mui/icons-material/Warning';
 import type { EquipmentFormItem } from '../../../entities/application';
 import { PhotoUpload } from '../../../shared/ui';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material';
+import './EquipmentSection.css';
 
 interface EquipmentSectionProps {
   equipment: EquipmentFormItem[];
@@ -184,42 +180,21 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
     }
   }, [activeEquipmentStep]);
 
-  const renderEquipmentForm = (item: EquipmentFormItem, index: number) => {
+  const renderEquipmentForm = useCallback((item: EquipmentFormItem, index: number) => {
     const maxCount = getMaxCount(item.equipmentType);
     const hasMac = needsMacAddress(item.equipmentType);
     const isComplete = isEquipmentComplete(item);
     
     return (
-      <Card sx={{ 
-        border: '1px solid #e0e0e0', 
-        borderRadius: 2,
-        mx: isMobile ? -1 : 0, // Расширяем на мобильных для лучшего использования пространства
-      }}>
-        <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+      <Card className={`equipment-card ${isMobile ? 'mobile' : ''}`}>
+        <CardContent className={`equipment-card-content ${isMobile ? 'mobile' : ''}`}>
           {/* Заголовок с адаптивным дизайном */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: isMobile ? 'flex-start' : 'center', 
-            mb: 2,
-            flexDirection: isSmallMobile ? 'column' : 'row',
-            gap: isSmallMobile ? 1 : 0
-          }}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              flexWrap: 'wrap',
-              flex: 1
-            }}>
+          <Box className={`equipment-card-header ${isSmallMobile ? 'small-mobile' : ''}`}>
+            <Box className="equipment-card-title">
               <Typography 
                 variant={isMobile ? "subtitle1" : "h6"} 
                 color="primary"
-                sx={{ 
-                  fontSize: isSmallMobile ? '0.9rem' : undefined,
-                  lineHeight: 1.2,
-                  wordBreak: 'break-word'
-                }}
+                className={`equipment-title ${isSmallMobile ? 'small-mobile' : ''}`}
               >
                 {item.equipmentType || `Оборудование #${index + 1}`}
               </Typography>
@@ -244,10 +219,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
               onClick={() => removeEquipment(index)}
               color="error"
               size="small"
-              sx={{ 
-                alignSelf: isSmallMobile ? 'flex-end' : 'center',
-                mt: isSmallMobile ? -4 : 0
-              }}
+              className={`delete-button ${isSmallMobile ? 'small-mobile' : ''}`}
             >
               <DeleteIcon />
             </IconButton>
@@ -339,22 +311,14 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             )}
 
             <Grid item xs={12}>
-              <Divider sx={{ my: isMobile ? 1 : 2 }} />
+              <Divider className={`photo-divider ${isMobile ? 'mobile' : ''}`} />
               <Box 
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between',
-                  cursor: isMobile ? 'pointer' : 'default'
-                }}
+                className={`photo-section-header ${isMobile ? 'mobile' : ''}`}
                 onClick={isMobile ? () => setIsPhotosExpanded(!isPhotosExpanded) : undefined}
               >
                 <Typography 
                   variant={isMobile ? "body1" : "subtitle2"} 
-                  sx={{ 
-                    mb: isMobile ? 1 : 2,
-                    fontWeight: 'medium'
-                  }}
+                  className={`photo-section-title ${isMobile ? 'mobile' : ''}`}
                 >
                   Фотографии оборудования
                 </Typography>
@@ -446,41 +410,22 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   }
 
   return (
-    <Box sx={{ px: isMobile ? 1 : 0 }}>
+    <Box className="equipment-section">
       {/* Заголовок с прогрессом - адаптивный дизайн */}
-      <Box sx={{ mb: isMobile ? 2 : 3 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: isMobile ? 'flex-start' : 'center',
-          mb: 2,
-          flexDirection: isSmallMobile ? 'column' : 'row',
-          gap: isSmallMobile ? 1 : 0
-        }}>
+      <Box className="equipment-header">
+        <Box className={`equipment-header-content ${isSmallMobile ? 'small-mobile' : ''}`}>
           <Typography 
             variant={isMobile ? "h6" : "h5"}
-            sx={{ 
-              fontSize: isSmallMobile ? '1.1rem' : undefined,
-              mb: isSmallMobile ? 1 : 0
-            }}
+            className={`equipment-title ${isSmallMobile ? 'small-mobile' : ''}`}
           >
             Оборудование
           </Typography>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: isMobile ? 1 : 2,
-            flexDirection: isSmallMobile ? 'column' : 'row',
-            width: isSmallMobile ? '100%' : 'auto'
-          }}>
+          <Box className={`equipment-header-actions ${isSmallMobile ? 'small-mobile' : ''}`}>
             <Chip 
               label={`${Math.round(getCompletionProgress)}% заполнено`}
               color={getCompletionProgress === 100 ? 'success' : 'primary'}
               size={isMobile ? "small" : "medium"}
-              sx={{ 
-                fontSize: isSmallMobile ? '0.75rem' : undefined,
-                width: isSmallMobile ? '100%' : 'auto'
-              }}
+              className={`progress-chip ${isSmallMobile ? 'small-mobile' : ''}`}
             />
             {getAvailableEquipmentTypes().length > 0 && (
               <Button
@@ -500,95 +445,57 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         <LinearProgress 
           variant="determinate" 
           value={getCompletionProgress}
-          sx={{ 
-            height: isMobile ? 4 : 6, 
-            borderRadius: 3,
-            bgcolor: 'grey.200'
-          }}
+          className={`progress-bar ${isMobile ? 'mobile' : ''}`}
         />
       </Box>
 
       {/* Навигация по оборудованию - улучшенная для мобильных */}
-      <Box sx={{ mb: isMobile ? 2 : 3 }}>
+      <Box className={`equipment-navigation ${isMobile ? 'mobile' : ''}`}>
         <Typography 
           variant={isMobile ? "body2" : "subtitle2"} 
-          sx={{ 
-            mb: 1,
-            fontSize: isSmallMobile ? '0.8rem' : undefined,
-            fontWeight: 'medium'
-          }}
+          className={`navigation-title ${isSmallMobile ? 'small-mobile' : ''}`}
         >
           Заполнение оборудования ({activeEquipmentStep + 1} из {equipment.length})
         </Typography>
         
         {/* Мини-степпер с улучшенной мобильной навигацией */}
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: isMobile ? 0.5 : 1, 
-          mb: 2, 
-          flexWrap: 'wrap',
-          justifyContent: isMobile ? 'center' : 'flex-start'
-        }}>
+        <Box className={`equipment-stepper ${isMobile ? 'mobile' : ''}`}>
           {equipment.map((item, index) => (
-            <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box key={index} className="stepper-item">
               <Chip
                 label={isSmallMobile ? (index + 1) : `${index + 1}${item.equipmentType ? ` - ${item.equipmentType.substring(0, 8)}${item.equipmentType.length > 8 ? '...' : ''}` : ''}`}
                 onClick={() => setActiveEquipmentStep(index)}
                 color={index === activeEquipmentStep ? 'primary' : 'default'}
                 variant={isEquipmentComplete(item) ? 'filled' : 'outlined'}
                 size={isMobile ? "small" : "medium"}
-                sx={{ 
-                  cursor: 'pointer',
-                  bgcolor: isEquipmentComplete(item) ? 'success.main' : undefined,
-                  color: isEquipmentComplete(item) ? 'white' : undefined,
-                  fontSize: isSmallMobile ? '0.7rem' : undefined,
-                  height: isSmallMobile ? 24 : undefined,
-                  minWidth: isSmallMobile ? 24 : undefined,
-                  '&:hover': {
-                    bgcolor: isEquipmentComplete(item) ? 'success.dark' : undefined,
-                    transform: 'scale(1.05)',
-                  },
-                  transition: 'all 0.2s ease-in-out'
-                }}
+                className={`stepper-chip ${isEquipmentComplete(item) ? 'completed' : ''} ${isSmallMobile ? 'small-mobile' : ''}`}
               />
               {index < equipment.length - 1 && !isMobile && (
-                <Box sx={{ width: 20, height: 2, bgcolor: 'grey.300', mx: 0.5 }} />
+                <Box className="stepper-connector" />
               )}
             </Box>
           ))}
         </Box>
 
         {/* Кнопки навигации - улучшенные для мобильных */}
-        <Box sx={{ 
-          display: 'flex', 
-          gap: isMobile ? 1 : 2, 
-          flexDirection: isMobile ? 'row' : 'row',
-          justifyContent: isMobile ? 'space-between' : 'flex-start'
-        }}>
+        <Box className={`navigation-buttons ${isMobile ? 'mobile' : ''}`}>
           <Button
-            startIcon={!isSmallMobile ? <PrevIcon /> : undefined}
+            startIcon={!isSmallMobile ? <NavigateBeforeIcon /> : undefined}
             onClick={handlePrevEquipment}
             disabled={activeEquipmentStep === 0}
             variant="outlined"
             size={isMobile ? "small" : "medium"}
-            sx={{ 
-              flex: isMobile ? 1 : 'none',
-              minWidth: isSmallMobile ? 'auto' : undefined
-            }}
+            className={`nav-button ${isMobile ? 'mobile' : ''} ${isSmallMobile ? 'small-mobile' : ''}`}
           >
             {isSmallMobile ? "←" : "Предыдущее"}
           </Button>
           <Button
-            endIcon={!isSmallMobile ? <NextIcon /> : undefined}
+            endIcon={!isSmallMobile ? <NavigateNextIcon /> : undefined}
             onClick={handleNextEquipment}
             disabled={activeEquipmentStep === equipment.length - 1}
             variant="outlined"
             size={isMobile ? "small" : "medium"}
-            sx={{ 
-              flex: isMobile ? 1 : 'none',
-              minWidth: isSmallMobile ? 'auto' : undefined
-            }}
+            className={`nav-button ${isMobile ? 'mobile' : ''} ${isSmallMobile ? 'small-mobile' : ''}`}
           >
             {isSmallMobile ? "→" : "Следующее"}
           </Button>
@@ -599,17 +506,11 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
       {equipment[activeEquipmentStep] && renderEquipmentForm(equipment[activeEquipmentStep], activeEquipmentStep)}
 
       {/* Информационные сообщения - адаптивные для мобильных */}
-      <Box sx={{ mt: isMobile ? 2 : 3 }}>
+      <Box className={`info-messages ${isMobile ? 'mobile' : ''}`}>
         {getCompletionProgress === 100 && (
           <Alert 
             severity="success" 
-            sx={{ 
-              mb: 2,
-              fontSize: isMobile ? '0.875rem' : undefined,
-              '& .MuiAlert-message': {
-                fontSize: isMobile ? '0.875rem' : undefined
-              }
-            }}
+            className={`info-alert ${isMobile ? 'mobile' : ''}`}
             icon={!isSmallMobile ? undefined : false}
           >
             {isMobile ? "Все оборудование заполнено!" : "Все оборудование заполнено! Можете переходить к следующему шагу."}
@@ -619,13 +520,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         {getAvailableEquipmentTypes.length === 0 && getCompletionProgress < 100 && (
           <Alert 
             severity="info" 
-            sx={{ 
-              mb: 2,
-              fontSize: isMobile ? '0.875rem' : undefined,
-              '& .MuiAlert-message': {
-                fontSize: isMobile ? '0.875rem' : undefined
-              }
-            }}
+            className={`info-alert ${isMobile ? 'mobile' : ''}`}
             icon={!isSmallMobile ? undefined : false}
           >
             {isMobile ? "Все типы добавлены. Завершите заполнение." : "Все доступные типы оборудования добавлены. Завершите заполнение данных."}
@@ -640,12 +535,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             color="primary"
             aria-label="добавить оборудование"
             onClick={addEquipment}
-            sx={{
-              position: 'fixed',
-              bottom: 16,
-              right: 16,
-              zIndex: 1000,
-            }}
+            className="floating-add-button"
           >
             <AddIcon />
           </Fab>

@@ -1,0 +1,472 @@
+/* EquipmentSection.css */
+
+/* Основные контейнеры */
+.equipment-section {
+  width: 100%;
+}
+
+.equipment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 8px;
+}
+
+.equipment-header.mobile {
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.equipment-header.small-mobile {
+  gap: 8px;
+}
+
+/* Заголовки */
+.equipment-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.equipment-title.mobile {
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.equipment-title.small-mobile {
+  font-size: 1.1rem;
+}
+
+.equipment-subtitle {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.equipment-subtitle.mobile {
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.equipment-subtitle.small-mobile {
+  font-size: 0.75rem;
+}
+
+/* Прогресс */
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-container.mobile {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.progress-text.mobile {
+  font-size: 0.8rem;
+}
+
+.progress-text.small-mobile {
+  font-size: 0.75rem;
+}
+
+/* Навигация оборудования */
+.equipment-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0;
+  padding: 0 8px;
+}
+
+.equipment-navigation.mobile {
+  flex-direction: column;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 0 4px;
+}
+
+.equipment-navigation.small-mobile {
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.equipment-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.equipment-chips.mobile {
+  gap: 6px;
+}
+
+.equipment-chips.small-mobile {
+  gap: 4px;
+}
+
+.equipment-chip {
+  transition: all 0.2s ease;
+}
+
+.equipment-chip:hover {
+  transform: translateY(-1px);
+}
+
+.equipment-chip.small {
+  height: 28px;
+  font-size: 0.75rem;
+}
+
+.equipment-chip.small-mobile {
+  height: 24px;
+  font-size: 0.7rem;
+  padding: 0 8px;
+}
+
+/* Кнопки навигации */
+.navigation-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.navigation-buttons.mobile {
+  gap: 6px;
+}
+
+.navigation-buttons.small-mobile {
+  gap: 4px;
+}
+
+.nav-button {
+  min-width: 100px;
+}
+
+.nav-button.mobile {
+  min-width: 80px;
+  font-size: 0.8rem;
+}
+
+.nav-button.small {
+  min-width: 40px;
+  padding: 6px 12px;
+}
+
+.nav-button.small-mobile {
+  min-width: 36px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
+/* Карточка оборудования */
+.equipment-card {
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.equipment-card.mobile {
+  margin-bottom: 12px;
+}
+
+.equipment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.equipment-card-content {
+  padding: 24px;
+}
+
+.equipment-card-content.mobile {
+  padding: 16px;
+}
+
+.equipment-card-content.small-mobile {
+  padding: 12px;
+}
+
+/* Поля ввода */
+.input-field {
+  margin-bottom: 16px;
+}
+
+.input-field.mobile {
+  margin-bottom: 12px;
+}
+
+.input-field.small-mobile {
+  margin-bottom: 8px;
+}
+
+.quantity-field {
+  text-align: center;
+}
+
+.quantity-field.mobile {
+  text-align: left;
+}
+
+/* Секция фотографий */
+.photos-section {
+  margin-top: 24px;
+}
+
+.photos-section.mobile {
+  margin-top: 16px;
+}
+
+.photos-section.small-mobile {
+  margin-top: 12px;
+}
+
+.photos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.photos-header:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.photos-header.mobile {
+  margin-bottom: 12px;
+  padding: 6px;
+}
+
+.photos-header.small-mobile {
+  margin-bottom: 8px;
+  padding: 4px;
+}
+
+.photos-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.photos-title.mobile {
+  font-size: 1rem;
+}
+
+.photos-title.small-mobile {
+  font-size: 0.9rem;
+}
+
+.photos-grid {
+  margin-top: 16px;
+}
+
+.photos-grid.mobile {
+  margin-top: 12px;
+}
+
+.photos-grid.small-mobile {
+  margin-top: 8px;
+}
+
+/* Разделители */
+.section-divider {
+  margin: 24px 0;
+}
+
+.section-divider.mobile {
+  margin: 16px 0;
+}
+
+.section-divider.small-mobile {
+  margin: 12px 0;
+}
+
+/* Информационные сообщения */
+.info-alert {
+  margin: 16px 0;
+}
+
+.info-alert.mobile {
+  margin: 12px 0;
+}
+
+.info-alert.small-mobile {
+  margin: 8px 0;
+}
+
+.alert-text {
+  font-size: 0.875rem;
+}
+
+.alert-text.mobile {
+  font-size: 0.8rem;
+}
+
+.alert-text.small-mobile {
+  font-size: 0.75rem;
+}
+
+/* Плавающая кнопка */
+.fab-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+.fab-container.mobile {
+  bottom: 16px;
+  right: 16px;
+}
+
+.fab-container.small-mobile {
+  bottom: 12px;
+  right: 12px;
+}
+
+.fab-button {
+  background: linear-gradient(45deg, #1976d2, #42a5f5);
+  color: white;
+  box-shadow: 0 4px 20px rgba(25, 118, 210, 0.4);
+  transition: all 0.3s ease;
+}
+
+.fab-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(25, 118, 210, 0.6);
+}
+
+.fab-button.small {
+  width: 48px;
+  height: 48px;
+}
+
+.fab-button.small-mobile {
+  width: 40px;
+  height: 40px;
+}
+
+/* Анимации */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивные медиа-запросы */
+@media (max-width: 600px) {
+  .equipment-section {
+    padding: 0 8px;
+  }
+  
+  .equipment-card-content {
+    padding: 12px;
+  }
+  
+  .photos-grid {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .equipment-section {
+    padding: 0 4px;
+  }
+  
+  .equipment-card-content {
+    padding: 8px;
+  }
+  
+  .photos-grid {
+    gap: 4px;
+  }
+  
+  .equipment-chips {
+    justify-content: center;
+  }
+}
+
+/* Утилитарные классы */
+.text-center {
+  text-align: center;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.gap-small {
+  gap: 8px;
+}
+
+.gap-medium {
+  gap: 16px;
+}
+
+.gap-large {
+  gap: 24px;
+}
+
+.margin-bottom-small {
+  margin-bottom: 8px;
+}
+
+.margin-bottom-medium {
+  margin-bottom: 16px;
+}
+
+.margin-bottom-large {
+  margin-bottom: 24px;
+}
+
+.padding-small {
+  padding: 8px;
+}
+
+.padding-medium {
+  padding: 16px;
+}
+
+.padding-large {
+  padding: 24px;
+}
