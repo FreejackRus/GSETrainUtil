@@ -120,8 +120,6 @@ export const updateWorkLogById = async (req: Request, res: Response) => {
 
     const { requestEquipment: newRequestEquipment, ...otherUpdateData } =
       updateData;
-    console.log(otherUpdateData);
-    console.log(otherUpdateData.currentLocationId);
 
     const typeWork = await prisma.typeWork.findFirst({
       where: { name: otherUpdateData.typeWork },

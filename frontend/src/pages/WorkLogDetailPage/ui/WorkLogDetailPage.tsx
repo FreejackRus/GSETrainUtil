@@ -25,7 +25,7 @@ import {
   Alert,
   CircularProgress,
   Tooltip,
-  Fab
+  Fab,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -43,11 +43,12 @@ import {
   AccessTime as AccessTimeIcon,
   Visibility as VisibilityIcon,
   CalendarToday as CalendarTodayIcon,
-  Work as WorkIcon
+  Work as WorkIcon,
 } from '@mui/icons-material';
 import { workLogApi } from '../../../entities/worklog/api/workLogApi';
 import type { WorkLogEntry } from '../../../entities/worklog/model/types';
 import './WorkLogDetailPage.css';
+import { FALLBACK_DATA, referenceApi } from '../../../shared';
 
 export const WorkLogDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -60,7 +61,32 @@ export const WorkLogDetailPage: React.FC = () => {
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
+  const [workTypes, setWorkTypes] = useState<string[]>([]);
+  const [carriageTypes, setCarriageTypes] = useState<string[]>([]);
+
   useEffect(() => {
+    referenceApi
+      .getAllReferences()
+      .then((data) => {
+        console.log('API Response:', data);
+        if (data && Object.keys(data).length > 0) {
+          console.log('Using API data');
+          setWorkTypes(data.typeWork || FALLBACK_DATA.workTypes);
+          setCarriageTypes(data.typeWagon || FALLBACK_DATA.carriageTypes);
+        } else {
+          console.log('Using fallback data - empty response');
+          // Используем fallback данные если ответ пустой
+          setWorkTypes(FALLBACK_DATA.workTypes);
+          setCarriageTypes(FALLBACK_DATA.carriageTypes);
+        }
+      })
+      .catch((error) => {
+        console.log('API Error:', error);
+        console.log('Using fallback data - error');
+        // Используем fallback данные в случае ошибки
+        setWorkTypes(FALLBACK_DATA.workTypes);
+      });
+
     if (id) {
       fetchWorkLogDetail(parseInt(id));
     }
@@ -71,7 +97,7 @@ export const WorkLogDetailPage: React.FC = () => {
       setLoading(true);
       setError(null);
       const response = await workLogApi.getWorkLogById(entryId);
-      
+
       if (response.success) {
         setWorkLog(response.data);
         setEditedWorkLog(response.data);
@@ -88,10 +114,10 @@ export const WorkLogDetailPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!editedWorkLog || !id) return;
-    
+
     try {
       const response = await workLogApi.updateWorkLogById(parseInt(id), editedWorkLog);
-      
+
       if (response.success) {
         setWorkLog(response.data);
         setEditedWorkLog(response.data);
@@ -186,10 +212,7 @@ export const WorkLogDetailPage: React.FC = () => {
       <Paper className="detail-header" elevation={0}>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Box display="flex" alignItems="center" gap={2}>
-            <IconButton
-              onClick={() => navigate('/work-log')}
-              className="back-button"
-            >
+            <IconButton onClick={() => navigate('/work-log')} className="back-button">
               <ArrowBackIcon />
             </IconButton>
             <Avatar className="request-avatar">
@@ -219,22 +242,12 @@ export const WorkLogDetailPage: React.FC = () => {
             ) : (
               <>
                 <Tooltip title="Сохранить">
-                  <Fab
-                    color="primary"
-                    size="medium"
-                    onClick={handleSave}
-                    className="save-fab"
-                  >
+                  <Fab color="primary" size="medium" onClick={handleSave} className="save-fab">
                     <SaveIcon />
                   </Fab>
                 </Tooltip>
                 <Tooltip title="Отменить">
-                  <Fab
-                    color="default"
-                    size="medium"
-                    onClick={handleCancel}
-                    className="cancel-fab"
-                  >
+                  <Fab color="default" size="medium" onClick={handleCancel} className="cancel-fab">
                     <CancelIcon />
                   </Fab>
                 </Tooltip>
@@ -248,12 +261,30 @@ export const WorkLogDetailPage: React.FC = () => {
           <Chip
             icon={getStatusIcon(workLog)}
             label={getStatusText(workLog)}
-            color={getStatusColor(workLog) as 'success' | 'warning' | 'error' | 'info' | 'primary' | 'secondary' | 'default'}
+            color={
+              getStatusColor(workLog) as
+                | 'success'
+                | 'warning'
+                | 'error'
+                | 'info'
+                | 'primary'
+                | 'secondary'
+                | 'default'
+            }
             className="status-chip"
           />
           <Chip
             label={workLog.typeWork}
-            color={getWorkTypeColor(workLog.typeWork) as 'success' | 'warning' | 'error' | 'info' | 'primary' | 'secondary' | 'default'}
+            color={
+              getWorkTypeColor(workLog.typeWork) as
+                | 'success'
+                | 'warning'
+                | 'error'
+                | 'info'
+                | 'primary'
+                | 'secondary'
+                | 'default'
+            }
             variant="outlined"
           />
         </Box>
@@ -272,12 +303,14 @@ export const WorkLogDetailPage: React.FC = () => {
             {/* Информационные карточки */}
             <Grid container spacing={3} sx={{ mb: 3 }}>
               <Grid item xs={12} sm={6} md={4}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
-                  border: '1px solid #2196f3',
-                  borderRadius: 2,
-                  height: '100%'
-                }}>
+                <Card
+                  sx={{
+                    background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+                    border: '1px solid #2196f3',
+                    borderRadius: 2,
+                    height: '100%',
+                  }}
+                >
                   <CardContent sx={{ p: 2 }}>
                     <Box display="flex" alignItems="center" mb={1}>
                       <CalendarTodayIcon sx={{ color: '#1976d2', mr: 1, fontSize: 20 }} />
@@ -289,7 +322,7 @@ export const WorkLogDetailPage: React.FC = () => {
                       {new Date(workLog.applicationDate).toLocaleDateString('ru-RU', {
                         day: '2-digit',
                         month: '2-digit',
-                        year: 'numeric'
+                        year: 'numeric',
                       })}
                     </Typography>
                   </CardContent>
@@ -297,12 +330,14 @@ export const WorkLogDetailPage: React.FC = () => {
               </Grid>
 
               <Grid item xs={12} sm={6} md={4}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
-                  border: '1px solid #9c27b0',
-                  borderRadius: 2,
-                  height: '100%'
-                }}>
+                <Card
+                  sx={{
+                    background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
+                    border: '1px solid #9c27b0',
+                    borderRadius: 2,
+                    height: '100%',
+                  }}
+                >
                   <CardContent sx={{ p: 2 }}>
                     <Box display="flex" alignItems="center" mb={1}>
                       <WorkIcon sx={{ color: '#7b1fa2', mr: 1, fontSize: 20 }} />
@@ -314,18 +349,26 @@ export const WorkLogDetailPage: React.FC = () => {
                       <FormControl fullWidth size="small">
                         <Select
                           value={editedWorkLog?.typeWork || ''}
-                          onChange={(e) => setEditedWorkLog(prev => prev ? {...prev, typeWork: e.target.value} : null)}
-                          sx={{ 
+                          onChange={(e) =>
+                            setEditedWorkLog((prev) =>
+                              prev ? { ...prev, typeWork: e.target.value } : null,
+                            )
+                          }
+                          sx={{
                             '& .MuiOutlinedInput-root': {
-                              backgroundColor: 'rgba(255,255,255,0.8)'
-                            }
+                              backgroundColor: 'rgba(255,255,255,0.8)',
+                            },
                           }}
                         >
+                          {workTypes.map((item) => (
+                            <MenuItem value={item}>{item}</MenuItem>
+                          ))}
+                          {/*                           
                           <MenuItem value="Установка оборудования">Установка оборудования</MenuItem>
                           <MenuItem value="Замена оборудования">Замена оборудования</MenuItem>
                           <MenuItem value="Техническое обслуживание">Техническое обслуживание</MenuItem>
                           <MenuItem value="Ремонт">Ремонт</MenuItem>
-                          <MenuItem value="Диагностика">Диагностика</MenuItem>
+                          <MenuItem value="Диагностика">Диагностика</MenuItem> */}
                         </Select>
                       </FormControl>
                     ) : (
@@ -338,12 +381,14 @@ export const WorkLogDetailPage: React.FC = () => {
               </Grid>
 
               <Grid item xs={12} sm={6} md={4}>
-                <Card sx={{ 
-                  background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-                  border: '1px solid #4caf50',
-                  borderRadius: 2,
-                  height: '100%'
-                }}>
+                <Card
+                  sx={{
+                    background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+                    border: '1px solid #4caf50',
+                    borderRadius: 2,
+                    height: '100%',
+                  }}
+                >
                   <CardContent sx={{ p: 2 }}>
                     <Box display="flex" alignItems="center" mb={1}>
                       <LocationIcon sx={{ color: '#388e3c', mr: 1, fontSize: 20 }} />
@@ -355,12 +400,16 @@ export const WorkLogDetailPage: React.FC = () => {
                       <TextField
                         fullWidth
                         value={editedWorkLog?.currentLocation || ''}
-                        onChange={(e) => setEditedWorkLog(prev => prev ? {...prev, currentLocation: e.target.value} : null)}
+                        onChange={(e) =>
+                          setEditedWorkLog((prev) =>
+                            prev ? { ...prev, currentLocation: e.target.value } : null,
+                          )
+                        }
                         size="small"
-                        sx={{ 
+                        sx={{
                           '& .MuiOutlinedInput-root': {
-                            backgroundColor: 'rgba(255,255,255,0.8)'
-                          }
+                            backgroundColor: 'rgba(255,255,255,0.8)',
+                          },
                         }}
                       />
                     ) : (
@@ -374,12 +423,14 @@ export const WorkLogDetailPage: React.FC = () => {
             </Grid>
 
             {/* Информация о поезде и вагоне */}
-            <Card sx={{ 
-              background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
-              border: '1px solid #ff9800',
-              borderRadius: 2,
-              mb: 3
-            }}>
+            <Card
+              sx={{
+                background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+                border: '1px solid #ff9800',
+                borderRadius: 2,
+                mb: 3,
+              }}
+            >
               <CardContent sx={{ p: 3 }}>
                 <Box display="flex" alignItems="center" mb={2}>
                   <TrainIcon sx={{ color: '#f57c00', mr: 1, fontSize: 24 }} />
@@ -387,7 +438,7 @@ export const WorkLogDetailPage: React.FC = () => {
                     Информация о составе
                   </Typography>
                 </Box>
-                
+
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={4}>
                     <Box>
@@ -398,12 +449,16 @@ export const WorkLogDetailPage: React.FC = () => {
                         <TextField
                           fullWidth
                           value={editedWorkLog?.trainNumber || ''}
-                          onChange={(e) => setEditedWorkLog(prev => prev ? {...prev, trainNumber: e.target.value} : null)}
+                          onChange={(e) =>
+                            setEditedWorkLog((prev) =>
+                              prev ? { ...prev, trainNumber: e.target.value } : null,
+                            )
+                          }
                           size="small"
-                          sx={{ 
+                          sx={{
                             '& .MuiOutlinedInput-root': {
-                              backgroundColor: 'rgba(255,255,255,0.8)'
-                            }
+                              backgroundColor: 'rgba(255,255,255,0.8)',
+                            },
                           }}
                         />
                       ) : (
@@ -423,17 +478,24 @@ export const WorkLogDetailPage: React.FC = () => {
                         <FormControl fullWidth size="small">
                           <Select
                             value={editedWorkLog?.carriageType || ''}
-                            onChange={(e) => setEditedWorkLog(prev => prev ? {...prev, carriageType: e.target.value} : null)}
-                            sx={{ 
+                            onChange={(e) =>
+                              setEditedWorkLog((prev) =>
+                                prev ? { ...prev, carriageType: e.target.value } : null,
+                              )
+                            }
+                            sx={{
                               '& .MuiOutlinedInput-root': {
-                                backgroundColor: 'rgba(255,255,255,0.8)'
-                              }
+                                backgroundColor: 'rgba(255,255,255,0.8)',
+                              },
                             }}
                           >
-                            <MenuItem value="Плацкартный">Плацкартный</MenuItem>
+                            {carriageTypes.map((item) => (
+                              <MenuItem value={item}>{item}</MenuItem>
+                            ))}
+                            {/* <MenuItem value="Плацкартный">Плацкартный</MenuItem>
                             <MenuItem value="Купейный">Купейный</MenuItem>
                             <MenuItem value="СВ">СВ</MenuItem>
-                            <MenuItem value="Общий">Общий</MenuItem>
+                            <MenuItem value="Общий">Общий</MenuItem> */}
                           </Select>
                         </FormControl>
                       ) : (
@@ -453,12 +515,16 @@ export const WorkLogDetailPage: React.FC = () => {
                         <TextField
                           fullWidth
                           value={editedWorkLog?.carriageNumber || ''}
-                          onChange={(e) => setEditedWorkLog(prev => prev ? {...prev, carriageNumber: e.target.value} : null)}
+                          onChange={(e) =>
+                            setEditedWorkLog((prev) =>
+                              prev ? { ...prev, carriageNumber: e.target.value } : null,
+                            )
+                          }
                           size="small"
-                          sx={{ 
+                          sx={{
                             '& .MuiOutlinedInput-root': {
-                              backgroundColor: 'rgba(255,255,255,0.8)'
-                            }
+                              backgroundColor: 'rgba(255,255,255,0.8)',
+                            },
                           }}
                         />
                       ) : (
@@ -541,7 +607,11 @@ export const WorkLogDetailPage: React.FC = () => {
                                 <TextField
                                   fullWidth
                                   value={editedWorkLog?.equipmentType || ''}
-                                  onChange={(e) => setEditedWorkLog(prev => prev ? {...prev, equipmentType: e.target.value} : null)}
+                                  onChange={(e) =>
+                                    setEditedWorkLog((prev) =>
+                                      prev ? { ...prev, equipmentType: e.target.value } : null,
+                                    )
+                                  }
                                   size="small"
                                 />
                               ) : (
@@ -552,9 +622,7 @@ export const WorkLogDetailPage: React.FC = () => {
                               <Typography variant="subtitle2" color="textSecondary">
                                 Количество
                               </Typography>
-                              <Typography variant="body1">
-                                {workLog.countEquipment} ед.
-                              </Typography>
+                              <Typography variant="body1">{workLog.countEquipment} ед.</Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
                               <Typography variant="subtitle2" color="textSecondary">
@@ -564,7 +632,11 @@ export const WorkLogDetailPage: React.FC = () => {
                                 <TextField
                                   fullWidth
                                   value={editedWorkLog?.serialNumber || ''}
-                                  onChange={(e) => setEditedWorkLog(prev => prev ? {...prev, serialNumber: e.target.value} : null)}
+                                  onChange={(e) =>
+                                    setEditedWorkLog((prev) =>
+                                      prev ? { ...prev, serialNumber: e.target.value } : null,
+                                    )
+                                  }
                                   size="small"
                                 />
                               ) : (
@@ -579,7 +651,11 @@ export const WorkLogDetailPage: React.FC = () => {
                                 <TextField
                                   fullWidth
                                   value={editedWorkLog?.macAddress || ''}
-                                  onChange={(e) => setEditedWorkLog(prev => prev ? {...prev, macAddress: e.target.value} : null)}
+                                  onChange={(e) =>
+                                    setEditedWorkLog((prev) =>
+                                      prev ? { ...prev, macAddress: e.target.value } : null,
+                                    )
+                                  }
                                   size="small"
                                 />
                               ) : (
@@ -605,7 +681,11 @@ export const WorkLogDetailPage: React.FC = () => {
                       multiline
                       rows={4}
                       value={editedWorkLog?.completedJob || ''}
-                      onChange={(e) => setEditedWorkLog(prev => prev ? {...prev, completedJob: e.target.value} : null)}
+                      onChange={(e) =>
+                        setEditedWorkLog((prev) =>
+                          prev ? { ...prev, completedJob: e.target.value } : null,
+                        )
+                      }
                       placeholder="Описание выполненной работы..."
                     />
                   ) : (
@@ -623,40 +703,42 @@ export const WorkLogDetailPage: React.FC = () => {
             const photos = Object.entries(workLog.photos)
               .filter(([, url]) => url)
               .map(([key, url]) => ({ key, url: url! }));
-            
-            return photos.length > 0 && (
-              <Paper className="detail-section" elevation={2}>
-                <Typography variant="h6" className="section-title" gutterBottom>
-                  <PhotoCameraIcon sx={{ mr: 1 }} />
-                  Фотографии ({photos.length})
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
 
-                <Grid container spacing={2}>
-                  {photos.map(({ key, url }) => (
-                    <Grid item xs={6} sm={4} md={3} key={key}>
-                      <Card 
-                        className="photo-card"
-                        onClick={() => handlePhotoClick(url)}
-                        sx={{ cursor: 'pointer' }}
-                      >
-                        <CardMedia
-                          component="img"
-                          height="120"
-                          image={url}
-                          alt={`Фото ${key}`}
-                          sx={{ objectFit: 'cover' }}
-                        />
-                        <CardContent sx={{ p: 1 }}>
-                          <Typography variant="caption" color="textSecondary">
-                            Фото {key}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Paper>
+            return (
+              photos.length > 0 && (
+                <Paper className="detail-section" elevation={2}>
+                  <Typography variant="h6" className="section-title" gutterBottom>
+                    <PhotoCameraIcon sx={{ mr: 1 }} />
+                    Фотографии ({photos.length})
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Grid container spacing={2}>
+                    {photos.map(({ key, url }) => (
+                      <Grid item xs={6} sm={4} md={3} key={key}>
+                        <Card
+                          className="photo-card"
+                          onClick={() => handlePhotoClick(url)}
+                          sx={{ cursor: 'pointer' }}
+                        >
+                          <CardMedia
+                            component="img"
+                            height="120"
+                            image={url}
+                            alt={`Фото ${key}`}
+                            sx={{ objectFit: 'cover' }}
+                          />
+                          <CardContent sx={{ p: 1 }}>
+                            <Typography variant="caption" color="textSecondary">
+                              Фото {key}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Paper>
+              )
             );
           })()}
         </Grid>
@@ -672,9 +754,7 @@ export const WorkLogDetailPage: React.FC = () => {
             <Divider sx={{ mb: 2 }} />
 
             <Box display="flex" alignItems="center" gap={2} mb={2}>
-              <Avatar className="user-avatar">
-                {workLog.userName.charAt(0).toUpperCase()}
-              </Avatar>
+              <Avatar className="user-avatar">{workLog.userName.charAt(0).toUpperCase()}</Avatar>
               <Box>
                 <Typography variant="subtitle1" fontWeight={600}>
                   {workLog.userName}
@@ -709,7 +789,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 {new Date(workLog.applicationDate).toLocaleDateString('ru-RU', {
                   year: 'numeric',
                   month: 'long',
-                  day: 'numeric'
+                  day: 'numeric',
                 })}
               </Typography>
             </Box>
@@ -718,9 +798,7 @@ export const WorkLogDetailPage: React.FC = () => {
               <Typography variant="subtitle2" color="textSecondary">
                 Количество оборудования
               </Typography>
-              <Typography variant="body1">
-                {workLog.countEquipment}
-              </Typography>
+              <Typography variant="body1">{workLog.countEquipment}</Typography>
             </Box>
 
             <Box className="info-item">
@@ -760,16 +838,14 @@ export const WorkLogDetailPage: React.FC = () => {
                 style={{
                   maxWidth: '100%',
                   maxHeight: '70vh',
-                  objectFit: 'contain'
+                  objectFit: 'contain',
                 }}
               />
             </Box>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPhotoDialogOpen(false)}>
-            Закрыть
-          </Button>
+          <Button onClick={() => setPhotoDialogOpen(false)}>Закрыть</Button>
         </DialogActions>
       </Dialog>
     </Container>
