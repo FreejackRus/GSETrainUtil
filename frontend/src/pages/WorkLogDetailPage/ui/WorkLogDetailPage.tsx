@@ -673,7 +673,10 @@ export const WorkLogDetailPage: React.FC = () => {
 
             <Box display="flex" alignItems="center" gap={2} mb={2}>
               <Avatar className="user-avatar">
+                {console.log(workLog)}
+                
                 {workLog.userName.charAt(0).toUpperCase()}
+                
               </Avatar>
               <Box>
                 <Typography variant="subtitle1" fontWeight={600}>

@@ -202,6 +202,7 @@ export const WorkLogPage = () => {
 
   // Функции для определения статуса и цветов
   const getEntryStatus = (entry: WorkLogEntry): FilterStatus => {
+    
     if (entry.photos.finalPhoto) return 'completed';
     if (entry.photos.generalPhoto) return 'in-progress';
     return 'started';
