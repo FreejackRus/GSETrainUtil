@@ -46,7 +46,7 @@ const EQUIPMENT_CONFIG = {
   'Маршрутизатор Mikrotik Hex RB750Gr3': { maxCount: 1, hasMac: true },
   'Коммутатор, черт. ТСФВ.467000.008': { maxCount: 1, hasMac: false },
   'Источник питания (24V, 150W)': { maxCount: 1, hasMac: false },
-  'Коннектор SUPRLAN 8P8C STP Cat.6A (RJ-45)': { maxCount: 2, hasMac: false },
+  'Коннектор SUPRLAN 8P8C STP Cat.6A (RJ-45)': { maxCount: 1, hasMac: false, maxQuantity: 2 },
   'Выключатель автоматический двухполюсный MD63 2P 16А C 6kA': { maxCount: 1, hasMac: false },
   'Точка доступа ТСФВ.465000.006-005': { maxCount: 1, hasMac: true }
 };
