@@ -1,24 +1,17 @@
 import { Box, Typography } from "@mui/material";
 import { PhotoUpload } from "../../PhotoUpload/PhotoUpload";
-import { ApplicationFormData } from "../../../entities/application/model/types";
-
-interface StepGeneralPhotoProps {
-  formData: ApplicationFormData;
-  onFormDataChange: (data: Partial<ApplicationFormData>) => void;
-  applicationData?: {
-    requestNumber?: string;
-    applicationDate?: string;
-    trainNumber?: string;
-    carriageNumber?: string;
-    equipment?: string;
-  };
+interface ApplicationFormData {
+  generalPhoto: File | null;
+  // Add other form fields as needed
 }
 
-export const StepGeneralPhoto = ({ 
-  formData, 
-  onFormDataChange, 
-  applicationData 
-}: StepGeneralPhotoProps) => {
+export const StepGeneralPhoto = ({
+  formData,
+  onFormDataChange,
+}: {
+  formData: ApplicationFormData;
+  onFormDataChange: (data: Partial<ApplicationFormData>) => void;
+}) => {
   const handlePhotoChange = (file: File | null) => {
     onFormDataChange({ generalPhoto: file });
   };

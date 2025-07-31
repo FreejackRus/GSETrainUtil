@@ -470,3 +470,127 @@
 .padding-large {
   padding: 24px;
 }
+
+/* Missing CSS classes */
+.equipment-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.equipment-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.equipment-header-content.small-mobile {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.equipment-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.equipment-header-actions.small-mobile {
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.progress-chip {
+  transition: all 0.2s ease;
+}
+
+.progress-chip.small-mobile {
+  font-size: 0.7rem;
+}
+
+.progress-bar {
+  margin-top: 8px;
+  border-radius: 4px;
+}
+
+.progress-bar.mobile {
+  margin-top: 6px;
+}
+
+.navigation-title {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.navigation-title.small-mobile {
+  font-size: 0.75rem;
+}
+
+.equipment-stepper {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.equipment-stepper.mobile {
+  gap: 6px;
+}
+
+.stepper-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper-chip {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stepper-chip:hover {
+  transform: translateY(-1px);
+}
+
+.stepper-chip.completed {
+  background-color: #4caf50;
+  color: white;
+}
+
+.stepper-chip.small-mobile {
+  font-size: 0.7rem;
+  height: 24px;
+}
+
+.stepper-connector {
+  width: 16px;
+  height: 2px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 1px;
+}
+
+.info-messages {
+  margin-top: 16px;
+}
+
+.info-messages.mobile {
+  margin-top: 12px;
+}
+
+.floating-add-button {
+  position: fixed !important;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  background: linear-gradient(45deg, #1976d2, #42a5f5) !important;
+  box-shadow: 0 4px 20px rgba(25, 118, 210, 0.4) !important;
+  transition: all 0.3s ease !important;
+}
+
+.floating-add-button:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 25px rgba(25, 118, 210, 0.6) !important;
+}

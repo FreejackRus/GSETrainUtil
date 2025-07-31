@@ -5,10 +5,10 @@ export const getCurrentLocation = async (req: Request, res: Response) => {
   try {
     const prisma = new PrismaClient();
   
-    const getCurrentLocation = await prisma.currentLocation.findMany();
+    const currentLocationList = await prisma.currentLocation.findMany();
 
     await prisma.$disconnect();
-    res.status(200).json(getCurrentLocation);
+    res.status(200).json(currentLocationList);
   } catch (e) {
     console.log(e);
     res.status(500).json(e);

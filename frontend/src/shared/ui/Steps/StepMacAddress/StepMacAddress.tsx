@@ -1,24 +1,17 @@
 import React from 'react';
-import { Box, TextField, Typography, Alert } from '@mui/material';
-import { PhotoUpload } from '../../PhotoUpload';
-import { ApplicationFormData } from '../../../entities/application/model/types';
-import './StepMacAddress.css';
-
-interface StepMacAddressProps {
-  formData: ApplicationFormData;
-  onFormDataChange: (data: Partial<ApplicationFormData>) => void;
-  applicationData: {
-    requestNumber: string;
-    applicationDate: string;
-    trainNumber: string;
-    equipment: string;
-  };
+import { TextField, Box, Typography, Alert } from "@mui/material";
+import { PhotoUpload } from "../../PhotoUpload";
+interface ApplicationFormData {
+  macAddress: string;
 }
+import "./StepMacAddress.css";
 
-export const StepMacAddress: React.FC<StepMacAddressProps> = ({
+export const StepMacAddress = ({
   formData,
   onFormDataChange,
-  applicationData,
+}: {
+  formData: ApplicationFormData;
+  onFormDataChange: (data: Partial<ApplicationFormData>) => void;
 }) => {
   const formatMacAddress = (input: string) => {
     // Удаляем все символы кроме букв и цифр

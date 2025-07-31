@@ -12,19 +12,12 @@ interface StepEquipmentWithPhotoProps {
   formData: ApplicationFormData;
   onFormDataChange: (data: Partial<ApplicationFormData>) => void;
   equipmentOptions: string[];
-  applicationData: {
-    requestNumber: string;
-    applicationDate: string;
-    trainNumber: string;
-    equipment: string;
-  };
 }
 
 export const StepEquipmentWithPhoto: React.FC<StepEquipmentWithPhotoProps> = ({
   formData,
   onFormDataChange,
   equipmentOptions,
-  applicationData,
 }) => {
   const handleEquipmentChange = (value: string) => {
     onFormDataChange({ equipment: value });

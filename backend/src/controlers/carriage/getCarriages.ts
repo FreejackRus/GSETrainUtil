@@ -5,51 +5,40 @@ export const getCarriages = async (req: Request, res: Response) => {
   const prisma = new PrismaClient();
   
   try {
-    // Получаем все оборудование с информацией о вагонах
-    const equipmentData = await prisma.equipment.findMany({
+    // Получаем все вагоны с оборудованием и информацией о поезде
+    const carriagesData = await prisma.carriage.findMany({
       include: {
-        connectionTypeWagons: true,
-        connectionNumberWagon: true,
+        train: true,
+        equipment: {
+          include: {
+            photos: true,
+          },
+        },
       },
     });
 
-    // Группируем оборудование по номерам вагонов
-    const carriageMap = new Map();
-    
-    equipmentData.forEach((equipment) => {
-      const carriageNumber = equipment.connectionNumberWagon?.numberWagon;
-      const carriageType = equipment.connectionTypeWagons?.typeWagon;
-      
-      if (!carriageNumber) return;
-      
-      if (!carriageMap.has(carriageNumber)) {
-        carriageMap.set(carriageNumber, {
-          number: carriageNumber,
-          type: carriageType,
-          equipment: [],
-        });
-      }
-      
-      carriageMap.get(carriageNumber).equipment.push({
+    // Преобразуем данные в нужный формат
+    const carriages = carriagesData.map(carriage => ({
+      carriageNumber: carriage.number,
+      carriageType: carriage.type,
+      trainNumber: carriage.train?.number || 'Неизвестно',
+      equipment: carriage.equipment.map(equipment => ({
         id: equipment.id,
         type: equipment.type,
         status: equipment.status,
-        snNumber: equipment.snNumber,
-        mac: equipment.mac,
+        snNumber: equipment.serialNumber,
+        mac: equipment.macAddress,
         lastService: equipment.lastService,
-        photo: equipment.photo,
-      });
-    });
-
-    // Преобразуем Map в массив
-    const carriages = Array.from(carriageMap.values()).map(carriage => ({
-      carriageNumber: carriage.number,
-      carriageType: carriage.type || 'Неизвестно',
-      equipment: carriage.equipment
+        photos: equipment.photos.map(photo => photo.photoPath),
+      })),
     }));
 
     // Получаем уникальные типы оборудования
-    const equipmentTypes = [...new Set(equipmentData.map(eq => eq.type))];
+    const equipmentTypes = [...new Set(
+      carriagesData.flatMap(carriage => 
+        carriage.equipment.map(eq => eq.type)
+      )
+    )];
 
     res.json({ 
       success: true,

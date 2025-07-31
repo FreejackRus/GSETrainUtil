@@ -8,62 +8,47 @@ export const createApplication = async (req: Request, res: Response) => {
     const {
       applicationNumber,
       applicationDate,
-      typeWork,
-      trainNumber,
-      carriageType,
-      carriageNumber,
-      equipment, // Массив оборудования с деталями
-      completedJob,
-      currentLocation,
-      carriagePhoto,
-      generalPhoto,
-      finalPhoto,
-      userId,
-      userName,
-      userRole
+      typeWorkId,
+      trainId,
+      carriageId,
+      equipmentId,
+      countEquipment,
+      completedJobId,
+      currentLocationId,
+      userId
     } = req.body;
 
     // Валидация обязательных полей
-    if (!applicationNumber || !typeWork || !trainNumber || !carriageNumber || 
-        !completedJob || !currentLocation || !userId) {
+    if (!applicationNumber || !typeWorkId || !trainId || !carriageId || 
+        !equipmentId || !countEquipment || !completedJobId || !currentLocationId || !userId) {
       return res.status(400).json({
         success: false,
         message: "Не все обязательные поля заполнены"
       });
     }
 
-    // Создаем заявку с оборудованием
-    const newApplication = await prisma.requests.create({
+    // Создаем заявку
+    const newApplication = await prisma.request.create({
       data: {
         applicationNumber: parseInt(applicationNumber),
         applicationDate: applicationDate ? new Date(applicationDate) : new Date(),
-        typeWork: typeWork,
-        trainNumber: trainNumber,
-        carriageType: carriageType || "default",
-        carriageNumber,
-        completedJob: completedJob,
-        currentLocation: currentLocation,
-        carriagePhoto,
-        generalPhoto,
-        finalPhoto,
-        userId: parseInt(userId),
-        userName: userName || "default",
-        userRole: userRole || "default",
-        // Создаем связанное оборудование
-        requestEquipment: {
-          create: equipment && Array.isArray(equipment) ? equipment.map((eq: any) => ({
-            equipmentType: eq.equipmentType || eq.type,
-            serialNumber: eq.serialNumber,
-            macAddress: eq.macAddress,
-            countEquipment: eq.countEquipment || eq.count || 1,
-            equipmentPhoto: eq.equipmentPhoto,
-            serialPhoto: eq.serialPhoto,
-            macPhoto: eq.macPhoto
-          })) : []
-        }
+        typeWorkId: parseInt(typeWorkId),
+        trainId: parseInt(trainId),
+        carriageId: parseInt(carriageId),
+        equipmentId: parseInt(equipmentId),
+        countEquipment: parseInt(countEquipment),
+        completedJobId: parseInt(completedJobId),
+        currentLocationId: parseInt(currentLocationId),
+        userId: parseInt(userId)
       },
       include: {
-        requestEquipment: true
+        typeWork: true,
+        train: true,
+        carriage: true,
+        equipment: true,
+        completedJob: true,
+        currentLocation: true,
+        user: true
       }
     });
 

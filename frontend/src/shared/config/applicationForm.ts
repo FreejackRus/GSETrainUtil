@@ -1,4 +1,4 @@
-import type { ApplicationStep, ApplicationFormData, EquipmentFormItem } from '../../entities/application';
+import type { ApplicationStep, ApplicationFormData } from '../../entities/application';
 
 export const APPLICATION_STEPS: ApplicationStep[] = [
   { key: "workType", label: "Тип работ", type: "select" },

@@ -29,12 +29,12 @@ import {
   IconButton,
   Chip,
   Alert,
-  Snackbar
+  Snackbar,
+  CircularProgress
 } from '@mui/material';
 import {
   PersonAdd as PersonAddIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon,
   AdminPanelSettings as AdminIcon,
   Engineering as EngineeringIcon,
   Person as PersonIcon,
@@ -130,11 +130,11 @@ export const AdminPanelPage = () => {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Ошибка добавления пользователя');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Ошибка:', error);
       setSnackbar({
         open: true,
-        message: error.message || 'Ошибка добавления пользователя',
+        message: error instanceof Error ? error.message : 'Ошибка добавления пользователя',
         severity: 'error'
       });
     }
@@ -214,6 +214,16 @@ export const AdminPanelPage = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  if (loading) {
+    return (
+      <Container maxWidth="xl" className="admin-panel">
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+          <CircularProgress size={60} />
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="xl" className="admin-panel">
@@ -352,7 +362,7 @@ export const AdminPanelPage = () => {
                       <TableCell>
                         <Chip
                           label={getRoleName(user.role)}
-                          color={getRoleColor(user.role) as any}
+                          color={getRoleColor(user.role) as 'success' | 'warning' | 'error' | 'info' | 'primary' | 'secondary' | 'default'}
                           size="small"
                         />
                       </TableCell>

@@ -24,7 +24,6 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -53,16 +52,22 @@ const EQUIPMENT_CONFIG = {
 };
 
 export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
-  equipment,
-  equipmentTypes,
-  onChange,
+  equipment = [],
+  onChange
 }) => {
   const [activeEquipmentStep, setActiveEquipmentStep] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down(400));
   const [isPhotosExpanded, setIsPhotosExpanded] = useState(!isMobile);
+
+  // Create a stable reference to onChange
+  const onChangeRef = React.useRef(onChange);
+  const hasInitialized = React.useRef(false);
+  
+  React.useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   // Получаем доступные типы оборудования (те, которые еще не добавлены или могут быть добавлены повторно)
   const getAvailableEquipmentTypes = useMemo(() => {
@@ -85,22 +90,21 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
       serialPhoto: null,
       macPhoto: null,
     };
-    onChange([...equipment, newEquipment]);
+    onChangeRef.current([...equipment, newEquipment]);
     setActiveEquipmentStep(equipment.length); // Переходим к новому элементу
-  }, [equipment, getAvailableEquipmentTypes, onChange]);
+  }, [equipment, getAvailableEquipmentTypes]);
 
   const removeEquipment = useCallback((index: number) => {
     const newEquipment = equipment.filter((_, i) => i !== index);
-    onChange(newEquipment);
+    onChangeRef.current(newEquipment);
+    
     // Корректируем активный шаг
-    if (activeEquipmentStep >= newEquipment.length && newEquipment.length > 0) {
-      setActiveEquipmentStep(newEquipment.length - 1);
-    } else if (newEquipment.length === 0) {
-      setActiveEquipmentStep(0);
+    if (activeEquipmentStep >= newEquipment.length) {
+      setActiveEquipmentStep(Math.max(0, newEquipment.length - 1));
     }
-  }, [equipment, activeEquipmentStep, onChange]);
+  }, [equipment, activeEquipmentStep]);
 
-  const updateEquipment = useCallback((index: number, field: keyof EquipmentFormItem, value: any) => {
+  const updateEquipment = useCallback((index: number, field: keyof EquipmentFormItem, value: string | number | File | null) => {
     const newEquipment = [...equipment];
     newEquipment[index] = { ...newEquipment[index], [field]: value };
     
@@ -115,23 +119,23 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
       newEquipment[index].count = 1;
     }
     
-    onChange(newEquipment);
-  }, [equipment, onChange]);
+    onChangeRef.current(newEquipment);
+  }, [equipment]);
 
   // Проверяем, нужен ли MAC-адрес для данного типа оборудования
-  const needsMacAddress = (equipmentType: string) => {
+  const needsMacAddress = useCallback((equipmentType: string) => {
     const config = EQUIPMENT_CONFIG[equipmentType as keyof typeof EQUIPMENT_CONFIG];
     return config?.hasMac || false;
-  };
+  }, []);
 
   // Получаем максимальное количество для типа оборудования
-  const getMaxCount = (equipmentType: string) => {
+  const getMaxCount = useCallback((equipmentType: string) => {
     const config = EQUIPMENT_CONFIG[equipmentType as keyof typeof EQUIPMENT_CONFIG];
     return config?.maxCount || 1;
-  };
+  }, []);
 
   // Проверяем, заполнено ли оборудование
-  const isEquipmentComplete = (item: EquipmentFormItem) => {
+  const isEquipmentComplete = useCallback((item: EquipmentFormItem) => {
     if (!item.equipmentType || !item.serialNumber || !item.equipmentPhoto || !item.serialPhoto) {
       return false;
     }
@@ -142,18 +146,19 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
     }
     
     return true;
-  };
+  }, [needsMacAddress]);
 
   // Получаем прогресс заполнения
   const getCompletionProgress = useMemo(() => {
     if (equipment.length === 0) return 0;
     const completedCount = equipment.filter(isEquipmentComplete).length;
     return (completedCount / equipment.length) * 100;
-  }, [equipment]);
+  }, [equipment, isEquipmentComplete]);
 
   // Автоматически добавляем все типы оборудования при первом рендере
   React.useEffect(() => {
-    if (equipment.length === 0) {
+    if (equipment.length === 0 && !hasInitialized.current) {
+      hasInitialized.current = true;
       const initialEquipment = Object.keys(EQUIPMENT_CONFIG).map(type => ({
         equipmentType: type,
         serialNumber: '',
@@ -163,18 +168,18 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         serialPhoto: null,
         macPhoto: null,
       }));
-      onChange(initialEquipment);
+      onChangeRef.current(initialEquipment);
     }
-  }, [equipment.length, onChange]);
+  }, [equipment.length]);
 
   // Мемоизируем функции навигации
-  const handleNextEquipment = useCallback(() => {
+  const goToNext = useCallback(() => {
     if (activeEquipmentStep < equipment.length - 1) {
       setActiveEquipmentStep(activeEquipmentStep + 1);
     }
   }, [activeEquipmentStep, equipment.length]);
 
-  const handlePrevEquipment = useCallback(() => {
+  const goToPrevious = useCallback(() => {
     if (activeEquipmentStep > 0) {
       setActiveEquipmentStep(activeEquipmentStep - 1);
     }
@@ -373,7 +378,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         </CardContent>
       </Card>
     );
-  };
+  }, [isMobile, isSmallMobile, getMaxCount, needsMacAddress, isEquipmentComplete, getAvailableEquipmentTypes, updateEquipment, removeEquipment, isPhotosExpanded]);
 
   if (equipment.length === 0) {
     return (
@@ -427,7 +432,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
               size={isMobile ? "small" : "medium"}
               className={`progress-chip ${isSmallMobile ? 'small-mobile' : ''}`}
             />
-            {getAvailableEquipmentTypes().length > 0 && (
+            {getAvailableEquipmentTypes.length > 0 && (
               <Button
                 startIcon={<AddIcon />}
                 onClick={addEquipment}
@@ -481,7 +486,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         <Box className={`navigation-buttons ${isMobile ? 'mobile' : ''}`}>
           <Button
             startIcon={!isSmallMobile ? <NavigateBeforeIcon /> : undefined}
-            onClick={handlePrevEquipment}
+            onClick={goToPrevious}
             disabled={activeEquipmentStep === 0}
             variant="outlined"
             size={isMobile ? "small" : "medium"}
@@ -491,7 +496,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
           </Button>
           <Button
             endIcon={!isSmallMobile ? <NavigateNextIcon /> : undefined}
-            onClick={handleNextEquipment}
+            onClick={goToNext}
             disabled={activeEquipmentStep === equipment.length - 1}
             variant="outlined"
             size={isMobile ? "small" : "medium"}

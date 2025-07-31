@@ -19,7 +19,6 @@ import {
   DialogActions,
   TextField,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Divider,
@@ -33,10 +32,6 @@ import {
   Edit as EditIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Remove as RemoveIcon,
-  ExpandMore as ExpandMoreIcon,
   PhotoCamera as PhotoCameraIcon,
   Assignment as AssignmentIcon,
   Person as PersonIcon,
@@ -253,12 +248,12 @@ export const WorkLogDetailPage: React.FC = () => {
           <Chip
             icon={getStatusIcon(workLog)}
             label={getStatusText(workLog)}
-            color={getStatusColor(workLog) as any}
+            color={getStatusColor(workLog) as 'success' | 'warning' | 'error' | 'info' | 'primary' | 'secondary' | 'default'}
             className="status-chip"
           />
           <Chip
             label={workLog.typeWork}
-            color={getWorkTypeColor(workLog.typeWork) as any}
+            color={getWorkTypeColor(workLog.typeWork) as 'success' | 'warning' | 'error' | 'info' | 'primary' | 'secondary' | 'default'}
             variant="outlined"
           />
         </Box>
@@ -486,7 +481,7 @@ export const WorkLogDetailPage: React.FC = () => {
                   </Typography>
                   {workLog.equipmentDetails && workLog.equipmentDetails.length > 0 ? (
                     <Box>
-                      {workLog.equipmentDetails.map((equipment, index) => (
+                      {workLog.equipmentDetails.map((equipment) => (
                         <Card key={equipment.id} sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
                           <CardContent sx={{ p: 2 }}>
                             <Grid container spacing={2}>
@@ -626,7 +621,7 @@ export const WorkLogDetailPage: React.FC = () => {
           {/* Фотографии */}
           {(() => {
             const photos = Object.entries(workLog.photos)
-              .filter(([_, url]) => url)
+              .filter(([, url]) => url)
               .map(([key, url]) => ({ key, url: url! }));
             
             return photos.length > 0 && (

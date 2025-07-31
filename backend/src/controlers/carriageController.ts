@@ -5,55 +5,36 @@ const prisma = new PrismaClient();
 
 export const getCarriages = async (req: Request, res: Response) => {
   try {
-    // Получаем все оборудование с информацией о вагонах
-    const equipment = await prisma.equipment.findMany({
+    // Получаем все вагоны с оборудованием
+    const carriages = await prisma.carriage.findMany({
       include: {
-        connectionTypeWagons: true,
-        connectionNumberWagon: true,
+        train: true,
+        equipment: {
+          include: {
+            photos: true,
+          },
+        },
       },
     });
 
-    // Группируем оборудование по номерам вагонов
-    const carriagesMap = new Map();
-
-    equipment.forEach((item: { 
-      id: number;
-      type: string;
-      snNumber: string | null;
-      mac: string | null;
-      status: string;
-      lastService: Date;
-      photo: string;
-      connectionNumberWagon: { numberWagon: string };
-      connectionTypeWagons: { typeWagon: string };
-    }) => {
-      const carriageNumber = item.connectionNumberWagon.numberWagon;
-      const carriageType = item.connectionTypeWagons.typeWagon;
-      
-      if (!carriagesMap.has(carriageNumber)) {
-        carriagesMap.set(carriageNumber, {
-          carriageNumber,
-          carriageType,
-          equipment: [],
-        });
-      }
-      
-      carriagesMap.get(carriageNumber).equipment.push({
+    const carriagesData = carriages.map((carriage) => ({
+      carriageNumber: carriage.number,
+      carriageType: carriage.type,
+      trainNumber: carriage.train?.number || 'Неизвестно',
+      equipment: carriage.equipment.map((item) => ({
         id: item.id,
         type: item.type,
-        snNumber: item.snNumber,
-        mac: item.mac,
+        snNumber: item.serialNumber,
+        mac: item.macAddress,
         status: item.status,
         lastService: item.lastService,
-        photo: item.photo,
-      });
-    });
-
-    const carriages = Array.from(carriagesMap.values());
+        photos: item.photos.map(photo => photo.photoPath),
+      })),
+    }));
 
     res.status(200).json({
       success: true,
-      data: carriages,
+      data: carriagesData,
     });
   } catch (error) {
     console.error('Error fetching carriages:', error);
@@ -69,19 +50,21 @@ export const getCarriageById = async (req: Request, res: Response) => {
   try {
     const { carriageNumber } = req.params;
 
-    const equipment = await prisma.equipment.findMany({
+    const carriage = await prisma.carriage.findFirst({
       where: {
-        connectionNumberWagon: {
-          numberWagon: carriageNumber,
-        },
+        number: carriageNumber,
       },
       include: {
-        connectionTypeWagons: true,
-        connectionNumberWagon: true,
+        train: true,
+        equipment: {
+          include: {
+            photos: true,
+          },
+        },
       },
     });
 
-    if (equipment.length === 0) {
+    if (!carriage) {
       return res.status(404).json({
         success: false,
         message: 'Вагон не найден',
@@ -89,16 +72,17 @@ export const getCarriageById = async (req: Request, res: Response) => {
     }
 
     const carriageData = {
-      carriageNumber,
-      carriageType: equipment[0].connectionTypeWagons.typeWagon,
-      equipment: equipment.map((item: { id: number; type: string; snNumber: string | null; mac: string | null; status: string; lastService: Date; photo: string; }) => ({
+      carriageNumber: carriage.number,
+      carriageType: carriage.type,
+      trainNumber: carriage.train?.number || 'Неизвестно',
+      equipment: carriage.equipment.map((item) => ({
         id: item.id,
         type: item.type,
-        snNumber: item.snNumber,
-        mac: item.mac,
+        snNumber: item.serialNumber,
+        mac: item.macAddress,
         status: item.status,
         lastService: item.lastService,
-        photo: item.photo,
+        photos: item.photos.map(photo => photo.photoPath),
       })),
     };
 

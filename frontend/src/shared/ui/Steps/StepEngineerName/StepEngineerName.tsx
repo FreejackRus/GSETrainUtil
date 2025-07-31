@@ -7,7 +7,7 @@ export const StepEngineerName = ({
   onChange,
 }: {
   value: string;
-  onChange: (field: string, value: any) => void;
+  onChange: (field: string, value: string) => void;
 }) => (
   <Box>
     <Typography variant="h6" gutterBottom className="step-engineer-name-title">

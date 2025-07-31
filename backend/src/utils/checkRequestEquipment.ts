@@ -7,9 +7,19 @@ async function checkRequestEquipment() {
     console.log('Проверка оборудования в заявках...\n');
     
     // Проверяем все заявки с оборудованием
-    const requestsWithEquipment = await prisma.requests.findMany({
+    const requestsWithEquipment = await prisma.request.findMany({
       include: {
-        requestEquipment: true
+        equipment: {
+          include: {
+            photos: true
+          }
+        },
+        typeWork: true,
+        train: true,
+        carriage: true,
+        completedJob: true,
+        currentLocation: true,
+        user: true
       }
     });
     
@@ -19,19 +29,18 @@ async function checkRequestEquipment() {
     let totalEquipmentCount = 0;
     
     requestsWithEquipment.forEach((request, index) => {
-      const equipmentCount = request.requestEquipment.length;
-      totalEquipmentCount += equipmentCount;
+      const hasEquipment = request.equipment !== null;
       
-      if (equipmentCount > 0) {
+      if (hasEquipment) {
         requestsWithEquipmentCount++;
+        totalEquipmentCount += request.countEquipment || 0;
       }
       
-      console.log(`Заявка ${request.applicationNumber}: ${equipmentCount} единиц оборудования`);
+      console.log(`Заявка ${request.applicationNumber}: ${hasEquipment ? 'есть оборудование' : 'нет оборудования'}`);
       
-      if (equipmentCount > 0) {
-        request.requestEquipment.forEach((eq, eqIndex) => {
-          console.log(`  - ${eq.equipmentType} (S/N: ${eq.serialNumber || 'нет'}, MAC: ${eq.macAddress || 'нет'}, Кол-во: ${eq.countEquipment})`);
-        });
+      if (hasEquipment && request.equipment) {
+        console.log(`  - ${request.equipment.type} (S/N: ${request.equipment.serialNumber || 'нет'}, MAC: ${request.equipment.macAddress || 'нет'}, Кол-во: ${request.countEquipment || 0})`);
+        console.log(`  - Фотографий: ${request.equipment.photos.length}`);
       }
     });
     
@@ -40,9 +49,14 @@ async function checkRequestEquipment() {
     console.log(`- Заявок без оборудования: ${requestsWithEquipment.length - requestsWithEquipmentCount}`);
     console.log(`- Общее количество единиц оборудования: ${totalEquipmentCount}`);
     
-    // Проверяем таблицу requestEquipment отдельно
-    const allRequestEquipment = await prisma.requestEquipment.findMany();
-    console.log(`\nВсего записей в таблице requestEquipment: ${allRequestEquipment.length}`);
+    // Проверяем таблицу equipment отдельно
+    const allEquipment = await prisma.equipment.findMany({
+      include: {
+        photos: true,
+        carriage: true
+      }
+    });
+    console.log(`\nВсего записей в таблице equipment: ${allEquipment.length}`);
     
   } catch (error) {
     console.error('Ошибка при проверке оборудования заявок:', error);

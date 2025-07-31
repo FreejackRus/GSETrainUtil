@@ -28,7 +28,7 @@ export const AppRouter = ({ role, onLogout }: AppRouterProps) => {
           {role === "admin" ? (
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/auth" element={<Login onLogin={(token: string, role: string) => {}} />} />
+              <Route path="/auth" element={<Login onLogin={() => {}} />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/carriages" element={<CarriagesPage />} />
               <Route path="/work-log" element={<WorkLogPage />} />

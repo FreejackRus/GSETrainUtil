@@ -8,7 +8,7 @@ export const StepEquipment = ({
   options,
 }: {
   value: string;
-  onChange: (field: string, value: any) => void;
+  onChange: (field: string, value: string) => void;
   options: string[];
 }) => (
   <Box>

@@ -7,8 +7,12 @@ export const getDevices = async (req: Request, res: Response) => {
   try {
     const equipmentData = await prisma.equipment.findMany({
       include: {
-        connectionTypeWagons: true,
-        connectionNumberWagon: true,
+        carriage: {
+          include: {
+            train: true
+          }
+        },
+        photos: true
       },
     });
 
@@ -16,12 +20,13 @@ export const getDevices = async (req: Request, res: Response) => {
       id: item.id,
       name: item.type,
       status: item.status,
-      snNumber: item.snNumber,
-      mac: item.mac,
+      snNumber: item.serialNumber,
+      mac: item.macAddress,
       lastService: item.lastService,
-      photo: item.photo,
-      typeWagon: item.connectionTypeWagons?.typeWagon,
-      numberWagon: item.connectionNumberWagon?.numberWagon,
+      photos: item.photos,
+      typeWagon: item.carriage?.type,
+      numberWagon: item.carriage?.number,
+      trainNumber: item.carriage?.train?.number,
     }));
 
     res.json({ devices });

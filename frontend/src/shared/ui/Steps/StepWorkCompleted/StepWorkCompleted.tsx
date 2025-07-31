@@ -14,7 +14,7 @@ export const StepWorkCompleted = ({
   onChange
 }: {
   value: string;
-  onChange: (field: string, value: any) => void;
+  onChange: (field: string, value: string) => void;
 }) => {
   const [options, setOptions] = useState<CompletedJobOption[]>([]);
   const [loading, setLoading] = useState(true);

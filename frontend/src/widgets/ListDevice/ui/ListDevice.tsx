@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { TDevice, TResponse } from '../../../shared/types/typeDevice';
+import type { TDevice } from '../../../shared/types/typeDevice';
 import { arrayValidDevices } from '../../../shared/transformation/arrayValidDevices';
 import './listDevice.scss';
 

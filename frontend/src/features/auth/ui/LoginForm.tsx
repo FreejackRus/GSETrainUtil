@@ -78,7 +78,7 @@ export const LoginForm = ({ onLogin }: { onLogin: (token: string, role: string) 
         const errorData = await response.json();
         setError(errorData.error || "Неверный логин или пароль");
       }
-    } catch (error) {
+    } catch {
       setError("Ошибка подключения к серверу");
     }
   };

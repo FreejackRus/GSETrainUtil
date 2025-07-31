@@ -5,9 +5,16 @@ export const getApplications = async (req: Request, res: Response) => {
   try {
     const prisma = new PrismaClient();
     
-    const applications = await prisma.requests.findMany({
+    const applications = await prisma.request.findMany({
       orderBy: {
         applicationDate: 'desc'
+      },
+      include: {
+        typeWork: true,
+        train: true,
+        completedJob: true,
+        currentLocation: true,
+        carriage: true
       }
     });
 
@@ -32,9 +39,16 @@ export const getApplicationById = async (req: Request, res: Response) => {
     const prisma = new PrismaClient();
     const { id } = req.params;
     
-    const application = await prisma.requests.findUnique({
+    const application = await prisma.request.findUnique({
       where: {
         id: parseInt(id)
+      },
+      include: {
+        typeWork: true,
+        train: true,
+        completedJob: true,
+        currentLocation: true,
+        carriage: true
       }
     });
 

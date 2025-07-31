@@ -21,10 +21,6 @@ import {
   CardActions,
   CircularProgress,
   Alert,
-  Fab,
-  Badge,
-  Divider,
-  Stack,
   LinearProgress,
   Menu,
   MenuItem,
@@ -40,10 +36,6 @@ import {
   Photo as PhotoIcon,
   Assignment as AssignmentIcon,
   Build as BuildIcon,
-  CheckCircle as CheckCircleIcon,
-  Schedule as ScheduleIcon,
-  Add as AddIcon,
-  FilterList as FilterListIcon,
   ViewList as ViewListIcon,
   ViewModule as ViewModuleIcon,
   MoreVert as MoreVertIcon,
@@ -76,7 +68,7 @@ export const WorkLogPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'applicationDate', direction: 'desc' });
+  const [sortConfig] = useState<SortConfig>({ key: 'applicationDate', direction: 'desc' });
   const [selectedEntry, setSelectedEntry] = useState<WorkLogEntry | null>(null);
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
@@ -316,7 +308,7 @@ export const WorkLogPage = () => {
     };
 
     return Object.entries(photos)
-      .filter(([_, url]) => url)
+      .filter(([, url]) => url)
       .map(([key, url]) => ({
         label: photoLabels[key as keyof typeof photoLabels],
         url: url!,

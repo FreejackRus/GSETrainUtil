@@ -1,21 +1,17 @@
 import { Box, TextField } from "@mui/material";
 import { PhotoUpload } from "../../PhotoUpload";
-import { ApplicationFormData } from "../../../types/application";
+interface ApplicationFormData {
+  carriageNumber: string;
+  carriagePhoto: File | null;
+}
 import "./StepCarriageNumber.css";
 
 export const StepCarriageNumber = ({
   formData,
   onFormDataChange,
-  applicationData,
 }: {
   formData: ApplicationFormData;
   onFormDataChange: (data: Partial<ApplicationFormData>) => void;
-  applicationData?: {
-    requestNumber?: string;
-    applicationDate?: string;
-    trainNumber?: string;
-    equipment?: string;
-  };
 }) => {
   const handleCarriageNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFormDataChange({ carriageNumber: e.target.value });
@@ -23,10 +19,6 @@ export const StepCarriageNumber = ({
 
   const handlePhotoChange = (file: File | null) => {
     onFormDataChange({ carriagePhoto: file });
-  };
-
-  const handlePhotoUploaded = (path: string) => {
-    console.log("Фото номера вагона загружено:", path);
   };
 
   return (

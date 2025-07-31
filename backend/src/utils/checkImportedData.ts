@@ -7,9 +7,15 @@ async function checkImportedData() {
     console.log('Проверка импортированных данных...\n');
     
     // Проверяем заявки
-    const requests = await prisma.requests.findMany({
+    const requests = await prisma.request.findMany({
       include: {
-        requestEquipment: true
+        typeWork: true,
+        train: true,
+        carriage: true,
+        equipment: true,
+        completedJob: true,
+        currentLocation: true,
+        user: true
       }
     });
     
@@ -20,59 +26,60 @@ async function checkImportedData() {
       const firstRequest = requests[0];
       console.log(`- Номер заявки: ${firstRequest.applicationNumber}`);
       console.log(`- Дата: ${firstRequest.applicationDate}`);
-      console.log(`- Тип работ: ${firstRequest.typeWork}`);
-      console.log(`- Номер поезда: ${firstRequest.trainNumber}`);
-      console.log(`- Тип вагона: ${firstRequest.carriageType}`);
-      console.log(`- Номер вагона: ${firstRequest.carriageNumber}`);
-      console.log(`- Выполнил: ${firstRequest.completedJob}`);
-      console.log(`- Текущее место: ${firstRequest.currentLocation}`);
-      console.log(`- Количество оборудования: ${firstRequest.requestEquipment.length}`);
+      console.log(`- Тип работ: ${firstRequest.typeWork?.name || 'не указан'}`);
+      console.log(`- Номер поезда: ${firstRequest.train?.number || 'не указан'}`);
+      console.log(`- Тип вагона: ${firstRequest.carriage?.type || 'не указан'}`);
+      console.log(`- Номер вагона: ${firstRequest.carriage?.number || 'не указан'}`);
+      console.log(`- Выполнил: ${firstRequest.completedJob?.name || 'не указан'}`);
+      console.log(`- Текущее место: ${firstRequest.currentLocation?.name || 'не указан'}`);
+      console.log(`- Пользователь: ${firstRequest.user?.name || 'не указан'}`);
+      console.log(`- Количество оборудования: ${firstRequest.countEquipment || 0}`);
       
-      if (firstRequest.requestEquipment.length > 0) {
+      if (firstRequest.equipment) {
         console.log('\nОборудование:');
-        firstRequest.requestEquipment.forEach((eq, index) => {
-          console.log(`  ${index + 1}. ${eq.equipmentType}`);
-          console.log(`     S/N: ${eq.serialNumber || 'не указан'}`);
-          console.log(`     MAC: ${eq.macAddress || 'не указан'}`);
-          console.log(`     Количество: ${eq.countEquipment}`);
-        });
+        console.log(`  Тип: ${firstRequest.equipment.type}`);
+        console.log(`  S/N: ${firstRequest.equipment.serialNumber || 'не указан'}`);
+        console.log(`  MAC: ${firstRequest.equipment.macAddress || 'не указан'}`);
+        console.log(`  Статус: ${firstRequest.equipment.status}`);
       }
     }
     
-    // Проверяем оборудование вагонов
+    // Проверяем оборудование
     const equipment = await prisma.equipment.findMany({
       include: {
-        connectionTypeWagons: true,
-        connectionNumberWagon: true
+        carriage: true,
+        photos: true
       }
     });
     
-    console.log(`\nВсего записей оборудования вагонов: ${equipment.length}`);
+    console.log(`\nВсего записей оборудования: ${equipment.length}`);
     
     if (equipment.length > 0) {
-      console.log('\nПример оборудования вагона:');
+      console.log('\nПример оборудования:');
       const firstEquipment = equipment[0];
       console.log(`- Тип: ${firstEquipment.type}`);
       console.log(`- Статус: ${firstEquipment.status}`);
-      console.log(`- Тип вагона: ${firstEquipment.connectionTypeWagons.typeWagon}`);
-      console.log(`- Номер вагона: ${firstEquipment.connectionNumberWagon.numberWagon}`);
+      console.log(`- S/N: ${firstEquipment.serialNumber || 'не указан'}`);
+      console.log(`- MAC: ${firstEquipment.macAddress || 'не указан'}`);
+      console.log(`- Вагон: ${firstEquipment.carriage?.number || 'не указан'}`);
+      console.log(`- Фотографий: ${firstEquipment.photos.length}`);
     }
     
     // Проверяем справочники
     const typeWork = await prisma.typeWork.findMany();
-    const trainNumbers = await prisma.trainNumber.findMany();
+    const trains = await prisma.train.findMany();
+    const carriages = await prisma.carriage.findMany();
     const completedJobs = await prisma.completedJob.findMany();
     const currentLocations = await prisma.currentLocation.findMany();
-    const typeWagons = await prisma.typeWagons.findMany();
-    const numberWagons = await prisma.numberWagons.findMany();
+    const users = await prisma.user.findMany();
     
     console.log('\nСправочники:');
     console.log(`- Типы работ: ${typeWork.length}`);
-    console.log(`- Номера поездов: ${trainNumbers.length}`);
+    console.log(`- Поезда: ${trains.length}`);
+    console.log(`- Вагоны: ${carriages.length}`);
     console.log(`- Исполнители: ${completedJobs.length}`);
     console.log(`- Текущие места: ${currentLocations.length}`);
-    console.log(`- Типы вагонов: ${typeWagons.length}`);
-    console.log(`- Номера вагонов: ${numberWagons.length}`);
+    console.log(`- Пользователи: ${users.length}`);
     
   } catch (error) {
     console.error('Ошибка при проверке данных:', error);

@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
+import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { AppRouter } from './providers/AppRouter/ui/AppRouter';
 import { LoginForm } from "../features/auth";
-import { CreateApplicationButton } from "../features/application-management";
-import { Header } from "../shared/ui";
 
 const theme = createTheme({
   palette: {

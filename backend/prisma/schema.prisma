@@ -1,8 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Улучшенная схема базы данных с нормализацией
+// Основные принципы:
+// 1. Фотографии хранятся в equipment, а не в requests
+// 2. Используются связи через ID вместо дублирования данных
+// 3. Нормализованная структура для лучшей производительности
 
 generator client {
   provider = "prisma-client-js"
@@ -13,109 +13,142 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model requests {
+// Основная таблица заявок (упрощенная)
+model Request {
   id                Int      @id @default(autoincrement())
   applicationNumber Int      @unique
   applicationDate   DateTime @default(now())
-  typeWork          String
-  trainNumber       String
-  carriageType      String
-  carriageNumber    String
-  completedJob      String
-  currentLocation   String
   
-  // Пути к фотографиям
-  carriagePhoto     String?
-  generalPhoto      String?
-  finalPhoto        String?
-  
-  // Информация о пользователе
+  // Связи с нормализованными таблицами
+  typeWorkId        Int
+  trainId           Int
+  carriageId        Int
+  equipmentId       Int?     // Опциональное поле, так как оборудование может быть добавлено позже
+  completedJobId    Int
+  currentLocationId Int
   userId            Int
-  userName          String
-  userRole          String
   
-  // Массив ID установленного оборудования
-  equipment         Int[]    @default([])
+  // Количество оборудования
+  countEquipment    Int
   
-  // Связь с оборудованием (оставляем для совместимости)
-  requestEquipment  requestEquipment[]
+  // Связи
+  typeWork          TypeWork        @relation(fields: [typeWorkId], references: [id])
+  train             Train           @relation(fields: [trainId], references: [id])
+  carriage          Carriage        @relation(fields: [carriageId], references: [id])
+  equipment         Equipment?      @relation(fields: [equipmentId], references: [id])
+  completedJob      CompletedJob    @relation(fields: [completedJobId], references: [id])
+  currentLocation   CurrentLocation @relation(fields: [currentLocationId], references: [id])
+  user              User            @relation(fields: [userId], references: [id])
   
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  @@map("requests")
 }
 
-model requestEquipment {
-  id               Int      @id @default(autoincrement())
-  requestId        Int
-  equipmentType    String
-  serialNumber     String?
-  macAddress       String?
-  countEquipment   Int      @default(1)
-  
-  // Пути к фотографиям оборудования
-  equipmentPhoto   String?
-  serialPhoto      String?
-  macPhoto         String?
+// Таблица поездов
+model Train {
+  id          Int       @id @default(autoincrement())
+  number      String    @unique
+  requests    Request[]
+  carriages   Carriage[]
+
+  @@map("trains")
+}
+
+// Таблица вагонов
+model Carriage {
+  id          Int         @id @default(autoincrement())
+  number      String
+  type        String
+  trainId     Int
   
   // Связи
-  request          requests @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  train       Train       @relation(fields: [trainId], references: [id])
+  equipment   Equipment[]
+  requests    Request[]
+
+  @@unique([number, trainId]) // Уникальность номера вагона в рамках поезда
+  @@map("carriages")
+}
+
+// Таблица оборудования (с фотографиями)
+model Equipment {
+  id              Int      @id @default(autoincrement())
+  type            String
+  serialNumber    String?
+  macAddress      String?
+  status          String
+  lastService     DateTime?
+  carriageId      Int
   
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  // Фотографии оборудования
+  photos          EquipmentPhoto[]
+  
+  // Связи
+  carriage        Carriage @relation(fields: [carriageId], references: [id])
+  requests        Request[]
+
+  @@map("equipment")
 }
 
-model typeWagons {
-  id                   Int         @id @default(autoincrement())
-  typeWagon            String      @unique
-  connectionTypeWagons equipment[]
+// Таблица фотографий оборудования
+model EquipmentPhoto {
+  id          Int       @id @default(autoincrement())
+  equipmentId Int
+  photoType   String    // 'carriage', 'equipment', 'serial', 'mac', 'general', 'final'
+  photoPath   String
+  description String?
+  createdAt   DateTime  @default(now())
+  
+  // Связи
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@map("equipment_photos")
 }
 
-model numberWagons {
-  id                    Int         @id @default(autoincrement())
-  numberWagon           String      @unique
-  connectionNumberWagon equipment[]
+// Справочные таблицы
+model TypeWork {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  requests Request[]
+
+  @@map("type_work")
 }
 
-model equipment {
-  id          Int      @id @default(autoincrement())
-  type        String
-  snNumber    String?
-  mac         String?
-  status      String
-  lastService DateTime
+model CompletedJob {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  requests Request[]
 
-  connectionTypeWagons typeWagons @relation(fields: [typeWagonsId], references: [id])
-  typeWagonsId         Int
-
-  connectionNumberWagon numberWagons @relation(fields: [numberWagonId], references: [id])
-  numberWagonId         Int
-
-  photo               String
+  @@map("completed_jobs")
 }
 
-model typeWork {
-  id                 Int                        @id @default(autoincrement())
-  typeWork           String                     @unique
-}
+model CurrentLocation {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  requests Request[]
 
-model trainNumber {
-  id                    Int                        @id @default(autoincrement())
-  trainNumber           String                     @unique
-}
-
-model completedJob {
-  id                     Int                        @id @default(autoincrement())
-  completedJob           String                     @unique
-}
-
-model currentLocation {
-  id                        Int                        @id @default(autoincrement())
-  currentLocation           String                     @unique
+  @@map("current_locations")
 }
 
 model User {
-  id             Int                        @id @default(autoincrement())
-  login          String   @unique
-  password       String
-  role           String
+  id       Int       @id @default(autoincrement())
+  login    String    @unique
+  password String
+  role     String
+  name     String
+  requests Request[]
+
+  @@map("users")
+}
+
+// Устройства (для общей статистики)
+model Device {
+  id     Int    @id @default(autoincrement())
+  status String
+  name   String
+  count  Int
+
+  @@map("devices")
 }

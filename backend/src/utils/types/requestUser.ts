@@ -3,4 +3,5 @@ export type TRequestUser = {
   login: string;
   password: string;
   role: string;
+  name: string;
 };

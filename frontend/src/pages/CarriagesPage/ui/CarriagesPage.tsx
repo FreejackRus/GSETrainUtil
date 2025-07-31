@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
   // Add DevicesIcon import at the top of the file
 import { Devices as DevicesIcon } from '@mui/icons-material';
@@ -36,7 +36,6 @@ import {
   Train as TrainIcon,
   ExpandMore as ExpandMoreIcon,
   ArrowBack as ArrowBackIcon,
-  FilterList as FilterListIcon,
   Search as SearchIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -90,6 +89,30 @@ export const CarriagesPage = () => {
     fetchCarriages();
   }, []);
 
+  // Вспомогательные функции (объявляем до useEffect)
+  const isEquipmentInstalled = useCallback((status: string): boolean => {
+    if (!status) return false;
+    const installedStatuses = ['installed', 'установлено', 'active', 'активен', 'ok'];
+    return installedStatuses.includes(status.toLowerCase());
+  }, []);
+
+  // Получаем статус вагона на основе статуса оборудования
+  const getCarriageStatus = useCallback((carriage: Carriage): 'installed' | 'not_installed' | 'partial' => {
+    if (!carriage.equipment || carriage.equipment.length === 0) {
+      return 'not_installed';
+    }
+
+    const installedEquipment = carriage.equipment.filter(eq => isEquipmentInstalled(eq.status));
+    
+    if (installedEquipment.length === 0) {
+      return 'not_installed';
+    } else if (installedEquipment.length === carriage.equipment.length) {
+      return 'installed';
+    } else {
+      return 'partial';
+    }
+  }, [isEquipmentInstalled]);
+
   // Фильтрация и поиск
   useEffect(() => {
     let filtered = carriages;
@@ -134,13 +157,7 @@ export const CarriagesPage = () => {
     }
 
     setFilteredCarriages(filtered);
-  }, [carriages, statusFilter, searchTerm]);
-
-  const isEquipmentInstalled = (status: string): boolean => {
-    if (!status) return false;
-    const installedStatuses = ['installed', 'установлено', 'active', 'активен', 'ok'];
-    return installedStatuses.includes(status.toLowerCase());
-  };
+  }, [carriages, statusFilter, searchTerm, getCarriageStatus]);
 
   const getEquipmentStatusColor = (status: string) => {
     if (isEquipmentInstalled(status)) {
@@ -155,23 +172,6 @@ export const CarriagesPage = () => {
       return 'Установлено';
     } else {
       return 'Не установлено';
-    }
-  };
-
-  // Получаем статус вагона на основе статуса оборудования
-  const getCarriageStatus = (carriage: Carriage): 'installed' | 'not_installed' | 'partial' => {
-    if (!carriage.equipment || carriage.equipment.length === 0) {
-      return 'not_installed';
-    }
-
-    const installedEquipment = carriage.equipment.filter(eq => isEquipmentInstalled(eq.status));
-    
-    if (installedEquipment.length === 0) {
-      return 'not_installed';
-    } else if (installedEquipment.length === carriage.equipment.length) {
-      return 'installed';
-    } else {
-      return 'partial';
     }
   };
 

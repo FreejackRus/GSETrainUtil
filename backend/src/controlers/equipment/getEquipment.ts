@@ -5,10 +5,19 @@ export const getEquipment = async (req: Request, res: Response) => {
   try {
     const prisma = new PrismaClient();
   
-    const getTypeWork = await prisma.equipment.findMany();
+    const equipmentList = await prisma.equipment.findMany({
+      include: {
+        carriage: {
+          include: {
+            train: true
+          }
+        },
+        photos: true
+      }
+    });
 
     await prisma.$disconnect();
-    res.status(200).json(getTypeWork);
+    res.status(200).json(equipmentList);
   } catch (e) {
     console.log(e);
     res.status(500).json(e);

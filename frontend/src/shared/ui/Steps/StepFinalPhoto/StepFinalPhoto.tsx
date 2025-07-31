@@ -8,18 +8,11 @@ import "./StepFinalPhoto.css";
 interface StepFinalPhotoProps {
   formData: ApplicationFormData;
   onFormDataChange: (data: Partial<ApplicationFormData>) => void;
-  applicationData: {
-    requestNumber: string;
-    applicationDate: string;
-    trainNumber: string;
-    equipment: string;
-  };
 }
 
 export const StepFinalPhoto: React.FC<StepFinalPhotoProps> = ({
   formData,
   onFormDataChange,
-  applicationData,
 }) => {
   const handlePhotoChange = (file: File | null) => {
     onFormDataChange({ finalPhoto: file });

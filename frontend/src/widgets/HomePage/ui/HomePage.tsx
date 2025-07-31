@@ -14,8 +14,6 @@ import {
 } from '@mui/material';
 import { 
   Dashboard as DashboardIcon,
-  Settings as SettingsIcon,
-  Analytics as AnalyticsIcon,
   DevicesOther as DevicesIcon,
   TrendingUp as TrendingUpIcon,
   Security as SecurityIcon,
@@ -25,7 +23,6 @@ import {
   Assignment as AssignmentIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { Button as CustomButton } from "../../../shared/ui";
 import { Button } from "@mui/material";
 import { deviceApi } from '../../../entities/device';
 import './HomePage.css';

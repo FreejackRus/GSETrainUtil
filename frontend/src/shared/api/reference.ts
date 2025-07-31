@@ -8,30 +8,50 @@ export interface ReferenceData {
   currentLocation: string[];
 }
 
+interface WorkTypeResponse {
+  typeWork: string;
+}
+
+interface TrainNumberResponse {
+  trainNumber: string;
+}
+
+interface CarriageTypeResponse {
+  typeWagon: string;
+}
+
+interface EquipmentResponse {
+  type: string;
+}
+
+interface LocationResponse {
+  currentLocation: string;
+}
+
 export const referenceApi = {
   getWorkTypes: async (): Promise<string[]> => {
     const response = await apiClient.get('/typeWork');
-    return response.data.map((item: any) => item.typeWork);
+    return response.data.map((item: WorkTypeResponse) => item.typeWork);
   },
 
   getTrainNumbers: async (): Promise<string[]> => {
     const response = await apiClient.get('/trainNumber');
-    return response.data.map((item: any) => item.trainNumber);
+    return response.data.map((item: TrainNumberResponse) => item.trainNumber);
   },
 
   getCarriageTypes: async (): Promise<string[]> => {
     const response = await apiClient.get('/typeCarriage');
-    return response.data.map((item: any) => item.typeWagon);
+    return response.data.map((item: CarriageTypeResponse) => item.typeWagon);
   },
 
   getEquipmentTypes: async (): Promise<string[]> => {
     const response = await apiClient.get('/equipment');
-    return response.data.map((item: any) => item.type);
+    return response.data.map((item: EquipmentResponse) => item.type);
   },
 
   getLocations: async (): Promise<string[]> => {
     const response = await apiClient.get('/currentLocation');
-    return response.data.map((item: any) => item.currentLocation);
+    return response.data.map((item: LocationResponse) => item.currentLocation);
   },
 
   getAllReferences: async (): Promise<ReferenceData> => {
