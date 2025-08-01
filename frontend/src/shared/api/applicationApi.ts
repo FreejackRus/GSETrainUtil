@@ -80,6 +80,8 @@ export const applicationApi = {
   updateDraft: async (id: number, data: any): Promise<ApplicationResponse> => {
     const response = await apiClient.put(`/applications/draft/${id}`, data);
     return response.data.data; // Извлекаем данные из структуры { success, message, data }
+  },
+
   getDrafts: async (userId: number, userRole?: string): Promise<ApplicationResponse> => {
     const roleParam = userRole ? `&userRole=${userRole}` : '';
     const response = await apiClient.get(`/applications/drafts?userId=${userId}${roleParam}`);
