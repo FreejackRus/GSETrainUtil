@@ -138,7 +138,8 @@ export const createApplication = async (req: Request, res: Response) => {
       status,
     };
     let request;
-
+    console.log(requestData);
+    
     if (id) {
       // Обновляем существующую заявку
       request = await prisma.request.update({
@@ -147,6 +148,7 @@ export const createApplication = async (req: Request, res: Response) => {
       });
     } else {
       // Создаем новую заявку
+      
       request = await prisma.request.create({
         data: requestData,
       });

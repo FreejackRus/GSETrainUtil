@@ -226,7 +226,9 @@ export const CreateApplicationForm = ({
         userName: user?.name || '',
         userRole: user?.role || ''
       };
-
+      console.log(draftData);
+      console.log(user);
+      
       if (isDraft && draftId) {
         await applicationApi.updateDraft(draftId, {
           ...draftData,
