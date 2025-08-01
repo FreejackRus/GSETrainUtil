@@ -42,6 +42,14 @@ export const createApplication = async (req: Request, res: Response) => {
       equipmentCount: equipment?.length || 0
     });
     
+    // Валидация userId - обязательно для всех заявок (включая черновики)
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "userId обязателен для создания заявки",
+      });
+    }
+    
     // Валидация обязательных полей для завершенной заявки
     if (status === "completed") {
       if (
@@ -54,7 +62,6 @@ export const createApplication = async (req: Request, res: Response) => {
         equipment.length === 0 ||
         !completedJob ||
         !currentLocation ||
-        !userId ||
         !userName ||
         !userRole
       ) {
@@ -153,12 +160,8 @@ export const createApplication = async (req: Request, res: Response) => {
       generalPhoto: generalPhoto || null,
       finalPhoto: finalPhoto || null,
       status,
+      userId: parseInt(userId), // userId всегда обязателен
     };
-
-    // Добавляем userId только если он есть
-    if (userId) {
-      requestData.userId = parseInt(userId);
-    }
     let request;
 
     if (id) {

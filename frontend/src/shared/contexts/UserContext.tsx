@@ -35,7 +35,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     // TODO: Здесь должна быть логика получения пользователя из API или localStorage
     // Пока используем моковые данные
     const mockUser: User = {
-      id: 4,
+      id: 2,
       name: "Инженер Иванов И.И.",
       role: "engineer"
     };
