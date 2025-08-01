@@ -51,4 +51,25 @@ export const applicationApi = {
     const response = await apiClient.delete(`/applications/${id}`);
     return response.data;
   },
+
+  // Методы для работы с черновиками
+  saveDraft: async (data: any): Promise<ApplicationResponse> => {
+    const response = await apiClient.post('/applications/draft', data);
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
+  },
+
+  updateDraft: async (id: number, data: any): Promise<ApplicationResponse> => {
+    const response = await apiClient.put(`/applications/draft/${id}`, data);
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
+  },
+
+  getDrafts: async (): Promise<ApplicationResponse> => {
+    const response = await apiClient.get('/applications/drafts');
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
+  },
+
+  completeDraft: async (data: any): Promise<ApplicationResponse> => {
+    const response = await apiClient.post('/applications', data);
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
+  },
 };

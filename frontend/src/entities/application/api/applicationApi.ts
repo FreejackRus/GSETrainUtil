@@ -26,28 +26,28 @@ export const applicationApi = {
     await apiClient.delete(`/applications/${id}`);
   },
 
-  // Сохранить как черновик
+  // Сохранить черновик
   saveDraft: async (data: CreateApplicationRequest): Promise<Application> => {
     const response = await apiClient.post('/applications/draft', { ...data, status: 'draft' });
-    return response.data;
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
 
-  // Получить черновики
+  // Получить все черновики
   getDrafts: async (): Promise<Application[]> => {
     const response = await apiClient.get('/applications/drafts');
-    return response.data;
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
 
   // Обновить черновик
   updateDraft: async (id: number, data: CreateApplicationRequest): Promise<Application> => {
     const response = await apiClient.put(`/applications/draft/${id}`, { ...data, status: 'draft' });
-    return response.data;
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
 
   // Завершить черновик (перевести в статус completed)
   completeDraft: async (id: number, data: Partial<CreateApplicationRequest>): Promise<Application> => {
     const response = await apiClient.put(`/applications/${id}/complete`, { ...data, status: 'completed' });
-    return response.data;
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
 
   // Загрузка файлов
