@@ -12,7 +12,6 @@ export const deleteUser = async (req: Request, res: Response) => {
         id: parseInt(id),
       },
     });
-    await prisma.$disconnect();
     res.sendStatus(200);
   } catch (e) {
     console.log(e);

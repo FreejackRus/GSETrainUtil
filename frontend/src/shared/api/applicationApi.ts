@@ -72,4 +72,9 @@ export const applicationApi = {
     const response = await apiClient.post('/applications', data);
     return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
+
+  deleteDraft: async (id: string): Promise<ApplicationResponse> => {
+    const response = await apiClient.delete(`/applications/drafts/${id}`);
+    return response.data;
+  },
 };

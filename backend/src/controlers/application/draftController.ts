@@ -56,8 +56,6 @@ export const getDrafts = async (req: Request, res: Response) => {
       success: false,
       message: 'Внутренняя ошибка сервера при получении черновиков' 
     });
-  } finally {
-    await prisma.$disconnect();
   }
 };
 
@@ -135,8 +133,6 @@ export const completeDraft = async (req: Request, res: Response) => {
       success: false,
       message: 'Внутренняя ошибка сервера при завершении черновика' 
     });
-  } finally {
-    await prisma.$disconnect();
   }
 };
 
@@ -185,7 +181,5 @@ export const deleteDraft = async (req: Request, res: Response) => {
       success: false,
       message: 'Внутренняя ошибка сервера при удалении черновика' 
     });
-  } finally {
-    await prisma.$disconnect();
   }
 };

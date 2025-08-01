@@ -83,7 +83,7 @@ export const CreateApplicationPage: React.FC = () => {
 
   const handleDeleteDraft = async (draftId: string) => {
     try {
-      await applicationApi.delete(draftId);
+      await applicationApi.deleteDraft(draftId);
       await loadDrafts();
     } catch (error) {
       console.error('Ошибка удаления черновика:', error);

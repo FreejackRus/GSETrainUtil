@@ -50,6 +50,11 @@ export const applicationApi = {
     return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
 
+  // Удалить черновик
+  deleteDraft: async (id: string): Promise<void> => {
+    await apiClient.delete(`/applications/drafts/${id}`);
+  },
+
   // Загрузка файлов
   uploadFiles: async (files: FormData): Promise<{ [key: string]: string }> => {
     const response = await apiClient.post('/applications/upload', files, {
