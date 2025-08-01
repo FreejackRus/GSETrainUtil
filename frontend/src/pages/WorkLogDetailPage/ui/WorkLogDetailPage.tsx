@@ -49,6 +49,7 @@ import { workLogApi } from '../../../entities/worklog/api/workLogApi';
 import type { WorkLogEntry } from '../../../entities/worklog/model/types';
 import './WorkLogDetailPage.css';
 import { FALLBACK_DATA, referenceApi } from '../../../shared';
+import { API_BASE_URL } from '../../../shared/api/base';
 
 export const WorkLogDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,6 +64,16 @@ export const WorkLogDetailPage: React.FC = () => {
 
   const [workTypes, setWorkTypes] = useState<string[]>([]);
   const [carriageTypes, setCarriageTypes] = useState<string[]>([]);
+
+  // Функция для формирования полного URL фотографии
+  const getFullPhotoUrl = (url: string): string => {
+    if (url.startsWith('http')) {
+      return url;
+    }
+    // Убираем ведущий слеш, если он есть, так как API_BASE_URL уже содержит протокол и домен
+    const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+    return `${API_BASE_URL.replace('/api/v1', '')}/${cleanUrl}`;
+  };
 
   useEffect(() => {
     referenceApi
@@ -718,13 +729,13 @@ export const WorkLogDetailPage: React.FC = () => {
                       <Grid item xs={6} sm={4} md={3} key={key}>
                         <Card
                           className="photo-card"
-                          onClick={() => handlePhotoClick(url)}
+                          onClick={() => handlePhotoClick(getFullPhotoUrl(url))}
                           sx={{ cursor: 'pointer' }}
                         >
                           <CardMedia
                             component="img"
                             height="120"
-                            image={url}
+                            image={getFullPhotoUrl(url)}
                             alt={`Фото ${key}`}
                             sx={{ objectFit: 'cover' }}
                           />
@@ -833,7 +844,7 @@ export const WorkLogDetailPage: React.FC = () => {
           {selectedPhoto && (
             <Box textAlign="center">
               <img
-                src={selectedPhoto}
+                src={getFullPhotoUrl(selectedPhoto)}
                 alt="Увеличенное фото"
                 className="photo-dialog-image"
               />
