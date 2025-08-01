@@ -160,6 +160,9 @@ export interface CarriageResponse {
 
 // Типы для журнала работ
 export interface WorkLogEntry {
+  countEquipments?:number[]
+  equipmentTypes?:string[]
+  serialNumbers?:string[]
   id: number;
   applicationNumber: number;
   applicationDate: string;
