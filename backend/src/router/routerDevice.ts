@@ -18,6 +18,7 @@ import { createApplication } from "../controlers/application/createApplication";
 import { getApplications, getApplicationById } from "../controlers/application/getApplications";
 import { getDrafts, completeDraft, deleteDraft } from "../controlers/application/draftController";
 import { upload, uploadFiles, getFile } from "../controlers/application/fileController";
+import { getUserById } from "../controlers/User/getUserById";
 
 export const routerDevice = Router();
 
@@ -28,6 +29,7 @@ routerDevice.get("/devices", getDevices);
 routerDevice.get("/carriages", getCarriages);
 
 routerDevice.get("/users", getUser);
+routerDevice.get("/users/:id", getUserById);
 routerDevice.post("/users", postUser);
 routerDevice.delete("/users/:id", deleteUser);
 routerDevice.post("/login", loginUser);
@@ -38,6 +40,12 @@ routerDevice.get("/trainNumber", getTrainNumber);
 routerDevice.get("/typeCarriage", getTypeCarriage);
 routerDevice.get("/currentLocation", getCurrentLocation);
 routerDevice.get("/completedJob", getCompletedJob);
+// Роуты для работы с черновиками
+routerDevice.post("/applications/draft", createApplication); // Создание черновика
+routerDevice.get("/applications/drafts", getDrafts); // Получение всех черновиков
+routerDevice.put("/applications/draft/:id", createApplication); // Обновление черновика
+routerDevice.put("/applications/:id/complete", completeDraft); // Завершение черновика
+routerDevice.delete("/applications/drafts/:id", deleteDraft); // Удаление черновика
 
 // Роуты для работы с заявками
 routerDevice.post("/applications", createApplication);
@@ -45,12 +53,6 @@ routerDevice.get("/applications", getApplications);
 routerDevice.get("/applications/:id", getApplicationById);
 routerDevice.put("/applications/:id", createApplication); // Обновление заявки
 
-// Роуты для работы с черновиками
-routerDevice.post("/applications/draft", createApplication); // Создание черновика
-routerDevice.get("/applications/drafts", getDrafts); // Получение всех черновиков
-routerDevice.put("/applications/draft/:id", createApplication); // Обновление черновика
-routerDevice.put("/applications/:id/complete", completeDraft); // Завершение черновика
-routerDevice.delete("/applications/drafts/:id", deleteDraft); // Удаление черновика
 
 // Роуты для загрузки файлов
 routerDevice.post("/upload/photo", uploadPhoto);

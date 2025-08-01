@@ -5,23 +5,26 @@ const prisma = new PrismaClient();
 
 // Получить все черновики
 export const getDrafts = async (req: Request, res: Response) => {
+  console.log("Dasdasdadas");
+
   try {
     // TODO: Получить userId и userRole из токена аутентификации
-    const userId = req.body.userId || 4; // Временно используем ID инженера
-    const userRole = req.body.userRole || 'engineer'; // Временно используем роль инженера
-    
+    const userId = req.body.userId || 2; // Временно используем ID инженера
+    const userRole = req.body.userRole || "engineer"; // Временно используем роль инженера
+
     // Администраторы не должны видеть черновики
-    if (userRole === 'admin') {
+    if (userRole === "admin") {
       return res.status(200).json({
         success: true,
-        data: []
+        data: [],
       });
     }
-    
+
     // Инженеры видят только свои черновики
-    const whereCondition = userRole === 'engineer' 
-      ? { status: 'draft', userId: userId }
-      : { status: 'draft' };
+    const whereCondition =
+      userRole === "engineer"
+        ? { status: "draft", userId: userId }
+        : { status: "draft" };
 
     const drafts = await prisma.request.findMany({
       where: whereCondition,
@@ -30,31 +33,30 @@ export const getDrafts = async (req: Request, res: Response) => {
           include: {
             equipment: {
               include: {
-                photos: true
-              }
-            }
-          }
+                photos: true,
+              },
+            },
+          },
         },
         typeWork: true,
         train: true,
         carriage: true,
         completedJob: true,
         currentLocation: true,
-        user: true
+        user: true,
       },
-      orderBy: { applicationDate: 'desc' }
+      orderBy: { applicationDate: "desc" },
     });
 
     res.status(200).json({
       success: true,
-      data: drafts
+      data: drafts,
     });
-
   } catch (error) {
-    console.error('Ошибка при получении черновиков:', error);
-    res.status(500).json({ 
+    console.error("Ошибка при получении черновиков:", error);
+    res.status(500).json({
       success: false,
-      message: 'Внутренняя ошибка сервера при получении черновиков' 
+      message: "Внутренняя ошибка сервера при получении черновиков",
     });
   } finally {
     await prisma.$disconnect();
@@ -69,32 +71,49 @@ export const completeDraft = async (req: Request, res: Response) => {
 
     // Проверяем, что заявка существует и является черновиком
     const existingRequest = await prisma.request.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
     });
 
     if (!existingRequest) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Заявка не найдена' 
+        message: "Заявка не найдена",
       });
     }
 
-    if (existingRequest.status !== 'draft') {
-      return res.status(400).json({ 
+    if (existingRequest.status !== "draft") {
+      return res.status(400).json({
         success: false,
-        message: 'Можно завершить только черновики' 
+        message: "Можно завершить только черновики",
       });
     }
 
     // Валидация обязательных полей для завершенной заявки
-    const { typeWork, trainNumber, carriageType, carriageNumber, equipment, completedJob, currentLocation } = requestData;
-    
-    if (!typeWork || !trainNumber || !carriageType || !carriageNumber || 
-        !equipment || !Array.isArray(equipment) || equipment.length === 0 ||
-        !completedJob || !currentLocation) {
+    const {
+      typeWork,
+      trainNumber,
+      carriageType,
+      carriageNumber,
+      equipment,
+      completedJob,
+      currentLocation,
+    } = requestData;
+
+    if (
+      !typeWork ||
+      !trainNumber ||
+      !carriageType ||
+      !carriageNumber ||
+      !equipment ||
+      !Array.isArray(equipment) ||
+      equipment.length === 0 ||
+      !completedJob ||
+      !currentLocation
+    ) {
       return res.status(400).json({
         success: false,
-        message: 'Все обязательные поля должны быть заполнены для завершения заявки'
+        message:
+          "Все обязательные поля должны быть заполнены для завершения заявки",
       });
     }
 
@@ -103,37 +122,36 @@ export const completeDraft = async (req: Request, res: Response) => {
       where: { id: parseInt(id) },
       data: {
         ...requestData,
-        status: 'completed'
+        status: "completed",
       },
       include: {
         requestEquipment: {
           include: {
             equipment: {
               include: {
-                photos: true
-              }
-            }
-          }
+                photos: true,
+              },
+            },
+          },
         },
         typeWork: true,
         train: true,
         carriage: true,
         completedJob: true,
-        currentLocation: true
-      }
+        currentLocation: true,
+      },
     });
 
     res.status(200).json({
       success: true,
-      message: 'Черновик успешно завершен',
-      data: updatedRequest
+      message: "Черновик успешно завершен",
+      data: updatedRequest,
     });
-
   } catch (error) {
-    console.error('Ошибка при завершении черновика:', error);
-    res.status(500).json({ 
+    console.error("Ошибка при завершении черновика:", error);
+    res.status(500).json({
       success: false,
-      message: 'Внутренняя ошибка сервера при завершении черновика' 
+      message: "Внутренняя ошибка сервера при завершении черновика",
     });
   } finally {
     await prisma.$disconnect();
@@ -147,43 +165,42 @@ export const deleteDraft = async (req: Request, res: Response) => {
 
     // Проверяем, что заявка существует и является черновиком
     const existingRequest = await prisma.request.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
     });
 
     if (!existingRequest) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Заявка не найдена' 
+        message: "Заявка не найдена",
       });
     }
 
-    if (existingRequest.status !== 'draft') {
-      return res.status(400).json({ 
+    if (existingRequest.status !== "draft") {
+      return res.status(400).json({
         success: false,
-        message: 'Можно удалить только черновики' 
+        message: "Можно удалить только черновики",
       });
     }
 
     // Удаляем связи с оборудованием
     await prisma.requestEquipment.deleteMany({
-      where: { requestId: parseInt(id) }
+      where: { requestId: parseInt(id) },
     });
 
     // Удаляем заявку
     await prisma.request.delete({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
     });
 
     res.status(200).json({
       success: true,
-      message: 'Черновик успешно удален'
+      message: "Черновик успешно удален",
     });
-
   } catch (error) {
-    console.error('Ошибка при удалении черновика:', error);
-    res.status(500).json({ 
+    console.error("Ошибка при удалении черновика:", error);
+    res.status(500).json({
       success: false,
-      message: 'Внутренняя ошибка сервера при удалении черновика' 
+      message: "Внутренняя ошибка сервера при удалении черновика",
     });
   } finally {
     await prisma.$disconnect();

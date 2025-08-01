@@ -35,6 +35,8 @@ export const applicationApi = {
   // Получить черновики
   getDrafts: async (): Promise<Application[]> => {
     const response = await apiClient.get('/applications/drafts');
+    console.log(response);
+    
     return response.data;
   },
 
