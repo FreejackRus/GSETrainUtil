@@ -6,7 +6,7 @@ import "./StepWorkCompleted.css";
 
 interface CompletedJobOption {
   id: number;
-  completedJob: string;
+  name: string;
 }
 
 export const StepWorkCompleted = ({
@@ -28,8 +28,8 @@ export const StepWorkCompleted = ({
         console.error('Error fetching completed jobs:', error);
         // Fallback данные в случае ошибки
         setOptions([
-          { id: 1, completedJob: 'Перемена' },
-          { id: 2, completedJob: 'Подрядчик' }
+          { id: 1, name: 'Перемена' },
+          { id: 2, name: 'Подрядчик' }
         ]);
       } finally {
         setLoading(false);
@@ -74,8 +74,8 @@ export const StepWorkCompleted = ({
                 Выберите исполнителя
               </MenuItem>
               {options.map((option) => (
-                <MenuItem key={option.id} value={option.completedJob}>
-                  {option.completedJob}
+                <MenuItem key={option.id} value={option.name}>
+                  {option.name}
                 </MenuItem>
               ))}
             </Select>

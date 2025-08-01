@@ -94,6 +94,8 @@ export const CreateApplicationForm = ({
           setWorkTypes(data.typeWork || FALLBACK_DATA.workTypes);
           setTrainNumbers(data.trainNumber || FALLBACK_DATA.trainNumbers);
           setCarriageTypes(data.typeWagon || FALLBACK_DATA.carriageTypes);
+          console.log(data);
+          
           setLocations(data.currentLocation || FALLBACK_DATA.locations);
         } else {
           // Используем fallback данные если ответ пустой

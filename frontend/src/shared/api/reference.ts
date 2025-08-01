@@ -25,7 +25,7 @@ interface EquipmentResponse {
 }
 
 interface LocationResponse {
-  currentLocation: string;
+  name: string;
 }
 
 export const referenceApi = {
@@ -51,7 +51,7 @@ export const referenceApi = {
 
   getLocations: async (): Promise<string[]> => {
     const response = await apiClient.get('/currentLocation');
-    return response.data.map((item: LocationResponse) => item.currentLocation);
+    return response.data.map((item: LocationResponse) => item.name);
   },
 
   getAllReferences: async (): Promise<ReferenceData> => {
