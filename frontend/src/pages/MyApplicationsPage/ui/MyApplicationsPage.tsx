@@ -117,8 +117,6 @@ export const MyApplicationsPage: React.FC = () => {
         return 'warning';
       case 'cancelled':
         return 'error';
-      case 'in_progress':
-        return 'info';
       default:
         return 'default';
     }
@@ -132,8 +130,6 @@ export const MyApplicationsPage: React.FC = () => {
         return 'Черновик';
       case 'cancelled':
         return 'Отменена';
-      case 'in_progress':
-        return 'В работе';
       default:
         return status;
     }
@@ -163,7 +159,6 @@ export const MyApplicationsPage: React.FC = () => {
     total: Array.isArray(applications) ? applications.length : 0,
     completed: Array.isArray(applications) ? applications.filter(app => app.status === 'completed').length : 0,
     drafts: Array.isArray(applications) ? applications.filter(app => app.status === 'draft').length : 0,
-    inProgress: Array.isArray(applications) ? applications.filter(app => app.status === 'in_progress').length : 0,
     cancelled: Array.isArray(applications) ? applications.filter(app => app.status === 'cancelled').length : 0
   };
 
@@ -249,25 +244,6 @@ export const MyApplicationsPage: React.FC = () => {
               <Card className="stat-card modern-stat-card">
                 <CardContent>
                   <Box className="stat-content">
-                    <Avatar className="stat-avatar stat-avatar--info">
-                      <TrainIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h4" className="stat-number">
-                        {stats.inProgress}
-                      </Typography>
-                      <Typography variant="body2" className="stat-label">
-                        В работе
-                      </Typography>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={6} md={3}>
-              <Card className="stat-card modern-stat-card">
-                <CardContent>
-                  <Box className="stat-content">
                     <Avatar className="stat-avatar stat-avatar--warning">
                       <DescriptionIcon />
                     </Avatar>
@@ -331,7 +307,6 @@ export const MyApplicationsPage: React.FC = () => {
                   >
                     <MenuItem value="all">Все статусы</MenuItem>
                     <MenuItem value="draft">Черновики</MenuItem>
-                    <MenuItem value="in_progress">В работе</MenuItem>
                     <MenuItem value="completed">Завершенные</MenuItem>
                     <MenuItem value="cancelled">Отмененные</MenuItem>
                   </Select>
@@ -431,7 +406,7 @@ export const MyApplicationsPage: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" color="text.secondary">
-                              {formatDate(application.createdAt)}
+                              {formatDate(application.applicationDate)}
                             </Typography>
                           </TableCell>
                           <TableCell align="center">

@@ -21,6 +21,12 @@ import { upload, uploadFiles, getFile } from "../controlers/application/fileCont
 
 export const routerDevice = Router();
 
+// Middleware для логирования всех запросов
+routerDevice.use((req: Request, res: Response, next) => {
+  console.log(`REQUEST: ${req.method} ${req.path}`);
+  next();
+});
+
 // Маршрут для получения оборудования (совместимость с фронтендом)
 routerDevice.get("/devices", getDevices);
 
@@ -42,15 +48,25 @@ routerDevice.get("/completedJob", getCompletedJob);
 // Роуты для работы с заявками
 routerDevice.post("/applications", createApplication);
 routerDevice.get("/applications", getApplications);
-routerDevice.get("/applications/:id", getApplicationById);
-routerDevice.put("/applications/:id", createApplication); // Обновление заявки
 
-// Роуты для работы с черновиками
+// Роуты для работы с черновиками (должны быть ПЕРЕД роутами с параметрами)
 routerDevice.post("/applications/draft", createApplication); // Создание черновика
-routerDevice.get("/applications/drafts", getDrafts); // Получение всех черновиков
+routerDevice.get("/applications/drafts", (req: Request, res: Response) => {
+  console.log('DRAFTS ROUTE CALLED!');
+  return getDrafts(req, res);
+}); // Получение всех черновиков
 routerDevice.put("/applications/draft/:id", createApplication); // Обновление черновика
-routerDevice.put("/applications/:id/complete", completeDraft); // Завершение черновика
 routerDevice.delete("/applications/drafts/:id", deleteDraft); // Удаление черновика
+
+// Роуты с параметрами для завершения черновика (специфичный путь)
+routerDevice.put("/applications/:id/complete", completeDraft); // Завершение черновика
+
+// Общие роуты с параметрами (должны быть В САМОМ КОНЦЕ)
+routerDevice.get("/applications/:id", (req: Request, res: Response) => {
+  console.log('ID ROUTE CALLED with id:', req.params.id);
+  return getApplicationById(req, res);
+});
+routerDevice.put("/applications/:id", createApplication); // Обновление заявки
 
 // Роуты для загрузки файлов
 routerDevice.post("/upload/photo", uploadPhoto);

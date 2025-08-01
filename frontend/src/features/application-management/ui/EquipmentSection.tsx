@@ -162,13 +162,13 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   // Проверяем, нужно ли показывать поле количества
   const needsQuantityField = useCallback((equipmentType: string) => {
     const config = EQUIPMENT_CONFIG[equipmentType as keyof typeof EQUIPMENT_CONFIG];
-    return config?.maxQuantity && config.maxQuantity > 1;
+    return 'maxQuantity' in config && config.maxQuantity > 1;
   }, []);
 
   // Получаем максимальное количество единиц для одного элемента
   const getMaxQuantity = useCallback((equipmentType: string) => {
     const config = EQUIPMENT_CONFIG[equipmentType as keyof typeof EQUIPMENT_CONFIG];
-    return config?.maxQuantity || 1;
+    return ('maxQuantity' in config && config.maxQuantity) || 1;
   }, []);
 
   // Проверяем, заполнено ли оборудование

@@ -7,8 +7,8 @@ const prisma = new PrismaClient();
 export const getDrafts = async (req: Request, res: Response) => {
   try {
     // TODO: Получить userId и userRole из токена аутентификации
-    const userId = req.body.userId || 4; // Временно используем ID инженера
-    const userRole = req.body.userRole || 'engineer'; // Временно используем роль инженера
+    const userId = parseInt(req.query.userId as string) || 4; // Временно используем ID инженера
+    const userRole = req.query.userRole as string || 'engineer'; // Временно используем роль инженера
     
     // Администраторы не должны видеть черновики
     if (userRole === 'admin') {

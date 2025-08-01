@@ -5,6 +5,11 @@ const prisma = new PrismaClient();
 
 export const createApplication = async (req: Request, res: Response) => {
   try {
+    console.log("=== Создание/обновление заявки ===");
+    console.log("Request body:", JSON.stringify(req.body, null, 2));
+    console.log("Request method:", req.method);
+    console.log("Request URL:", req.url);
+    
     const {
       id, // Для обновления существующего черновика
       applicationDate,
@@ -23,6 +28,19 @@ export const createApplication = async (req: Request, res: Response) => {
       userRole,
       status = "completed", // По умолчанию завершенная заявка
     } = req.body;
+    
+    console.log("Extracted data:", {
+      id,
+      status,
+      typeWork,
+      trainNumber,
+      carriageType,
+      carriageNumber,
+      userId,
+      userName,
+      userRole,
+      equipmentCount: equipment?.length || 0
+    });
     
     // Валидация обязательных полей для завершенной заявки
     if (status === "completed") {
@@ -101,11 +119,11 @@ export const createApplication = async (req: Request, res: Response) => {
       completedJobRecord,
       locationRecord,
     ] = await Promise.all([
-      prisma.typeWork.findFirst({ where: { name: typeWork } }),
-      prisma.train.findFirst({ where: { number: trainNumber } }),
-      prisma.carriage.findFirst({ where: { number: carriageNumber } }),
-      prisma.completedJob.findFirst({ where: { name: completedJob } }),
-      prisma.currentLocation.findFirst({ where: { name: currentLocation } }),
+      typeWork ? prisma.typeWork.findFirst({ where: { name: typeWork } }) : null,
+      trainNumber ? prisma.train.findFirst({ where: { number: trainNumber } }) : null,
+      carriageNumber ? prisma.carriage.findFirst({ where: { number: carriageNumber } }) : null,
+      completedJob ? prisma.completedJob.findFirst({ where: { name: completedJob } }) : null,
+      currentLocation ? prisma.currentLocation.findFirst({ where: { name: currentLocation } }) : null,
     ]);
 
     if (status === "completed") {
@@ -124,7 +142,7 @@ export const createApplication = async (req: Request, res: Response) => {
       }
     }
 
-    const requestData = {
+    const requestData: any = {
       applicationDate: applicationDate ? new Date(applicationDate) : new Date(),
       typeWorkId: typeWorkRecord?.id || null,
       trainId: trainRecord?.id || null,
@@ -134,9 +152,13 @@ export const createApplication = async (req: Request, res: Response) => {
       carriagePhoto: carriagePhoto || null,
       generalPhoto: generalPhoto || null,
       finalPhoto: finalPhoto || null,
-      userId: parseInt(userId),
       status,
     };
+
+    // Добавляем userId только если он есть
+    if (userId) {
+      requestData.userId = parseInt(userId);
+    }
     let request;
 
     if (id) {
@@ -254,13 +276,18 @@ export const createApplication = async (req: Request, res: Response) => {
       },
     });
 
+    console.log("=== Заявка успешно создана/обновлена ===");
+    console.log("Request ID:", request.id);
+    console.log("Status:", fullRequest?.status);
+    
     res.status(201).json({
       success: true,
       message: id ? "Заявка успешно обновлена" : "Заявка успешно создана",
       data: fullRequest,
     });
   } catch (error) {
-    console.error("Ошибка при создании/обновлении заявки:", error);
+    console.error("=== Ошибка при создании/обновлении заявки ===");
+    console.error("Error details:", error);
     res.status(500).json({
       success: false,
       message: "Внутренняя ошибка сервера при создании/обновлении заявки",
