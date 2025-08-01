@@ -5,7 +5,17 @@ export const getApplications = async (req: Request, res: Response) => {
   try {
     const prisma = new PrismaClient();
     
+    // Получаем userId из query параметров для фильтрации
+    const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+    
+    // Создаем условие фильтрации
+    const whereCondition: any = {};
+    if (userId) {
+      whereCondition.userId = userId;
+    }
+    
     const applications = await prisma.request.findMany({
+      where: whereCondition,
       orderBy: {
         applicationDate: 'desc'
       },

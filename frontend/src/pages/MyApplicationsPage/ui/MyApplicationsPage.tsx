@@ -21,32 +21,35 @@ import {
   Grid,
   Card,
   CardContent,
-  Pagination,
   CircularProgress,
   Alert,
-  Fade,
-  Button,
+  Pagination,
   Tooltip,
+  Button,
   Avatar,
-  Divider
+  Fade,
+  Divider,
 } from '@mui/material';
 import {
-  Search as SearchIcon,
   Visibility as VisibilityIcon,
+  Search as SearchIcon,
   FilterList as FilterIcon,
   Assessment as AssessmentIcon,
+  Build as BuildIcon,
   Description as DescriptionIcon,
   Refresh as RefreshIcon,
   Train as TrainIcon,
   DirectionsCar as CarIcon,
-  Build as BuildIcon,
-  CalendarToday as CalendarIcon
+  CalendarToday as CalendarIcon,
 } from '@mui/icons-material';
 import { applicationApi } from '../../../entities/application/api/applicationApi';
 import type { Application } from '../../../entities/application/model/types';
+import { ApplicationDetailsModal } from '../../../features/application-management/ui/ApplicationDetailsModal';
+import { useUser } from '../../../shared/contexts/UserContext';
 import './MyApplicationsPage.css';
 
 export const MyApplicationsPage: React.FC = () => {
+  const { user } = useUser();
   const [applications, setApplications] = useState<Application[]>([]);
   const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,20 +58,26 @@ export const MyApplicationsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(8);
+  
+  // Состояние для модального окна просмотра заявки
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   useEffect(() => {
     loadApplications();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     filterApplications();
   }, [applications, searchTerm, statusFilter]);
 
   const loadApplications = async () => {
+    if (!user?.id) return;
+    
     try {
       setLoading(true);
       setError(null);
-      const response = await applicationApi.getAll();
+      const response = await applicationApi.getUserApplications(user.id);
       // Убеждаемся, что response - это массив
       const applicationsArray = Array.isArray(response) ? response : [];
       setApplications(applicationsArray);
@@ -145,7 +154,16 @@ export const MyApplicationsPage: React.FC = () => {
   };
 
   const handleViewApplication = (applicationId: string) => {
-    // Здесь будет логика открытия модального окна с деталями заявки
+    const application = applications.find(app => app.id === applicationId);
+    if (application) {
+      setSelectedApplication(application);
+      setDetailsModalOpen(true);
+    }
+  };
+
+  const handleCloseDetailsModal = () => {
+    setDetailsModalOpen(false);
+    setSelectedApplication(null);
   };
 
   // Пагинация
@@ -448,6 +466,13 @@ export const MyApplicationsPage: React.FC = () => {
           )}
         </Box>
       </Fade>
+
+      {/* Модальное окно для просмотра деталей заявки */}
+      <ApplicationDetailsModal
+        open={detailsModalOpen}
+        onClose={handleCloseDetailsModal}
+        application={selectedApplication}
+      />
     </Container>
   );
 };

@@ -116,8 +116,10 @@ export const CreateApplicationForm = ({
 
   // Функция загрузки черновика
   const loadDraft = async (id: number) => {
+    if (!user?.id) return;
+    
     try {
-      const drafts = await applicationApi.getDrafts();
+      const drafts = await applicationApi.getDrafts(user.id, user.role);
       const draft = drafts.find(d => d.id.toString() === id.toString());
       
       if (draft) {

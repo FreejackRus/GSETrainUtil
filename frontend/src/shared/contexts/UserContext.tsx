@@ -36,7 +36,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     // Пока используем моковые данные
     const mockUser: User = {
       id: 2,
-      name: "Инженер Иванов И.И.",
+      name: "Тестовый пользователь 2",
       role: "engineer"
     };
     

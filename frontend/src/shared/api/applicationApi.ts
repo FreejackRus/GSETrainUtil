@@ -32,9 +32,28 @@ export const applicationApi = {
     return response.data;
   },
 
-  getAll: async (): Promise<ApplicationResponse> => {
+  getAll: async (): Promise<any[]> => {
     const response = await apiClient.get('/applications');
-    return response.data;
+    const applications = response.data;
+    
+    // Преобразуем данные из формата API в формат фронтенда
+    return applications.map((app: any) => ({
+      id: app.id.toString(),
+      applicationNumber: app.applicationNumber,
+      applicationDate: app.applicationDate,
+      status: app.status,
+      workType: app.typeWork?.name || '',
+      trainNumber: app.train?.number || '',
+      carriageType: app.carriage?.type || '',
+      carriageNumber: app.carriage?.number || '',
+      equipment: [], // TODO: добавить оборудование когда будет готово
+      workCompleted: app.completedJob?.name || '',
+      location: app.currentLocation?.name || '',
+      carriagePhoto: app.carriagePhoto,
+      generalPhoto: app.generalPhoto,
+      finalPhoto: app.finalPhoto,
+      user: 'Текущий пользователь' // TODO: добавить реального пользователя
+    }));
   },
 
   getById: async (id: number): Promise<ApplicationResponse> => {
@@ -61,11 +80,10 @@ export const applicationApi = {
   updateDraft: async (id: number, data: any): Promise<ApplicationResponse> => {
     const response = await apiClient.put(`/applications/draft/${id}`, data);
     return response.data.data; // Извлекаем данные из структуры { success, message, data }
-  },
-
-  getDrafts: async (): Promise<ApplicationResponse> => {
-    const response = await apiClient.get('/applications/drafts');
-    return response.data.data; // Извлекаем данные из структуры { success, message, data }
+  getDrafts: async (userId: number): Promise<ApplicationResponse> => {
+    const response = await apiClient.get(`/applications/drafts?userId=${userId}&userRole=${userRole}`);
+    return response.data.data;
+  },// Извлекаем данные из структуры { success, message, data }
   },
 
   completeDraft: async (data: any): Promise<ApplicationResponse> => {

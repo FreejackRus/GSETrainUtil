@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import { CreateApplicationForm } from '../../../features/application-management';
 import { applicationApi } from '../../../entities/application/api/applicationApi';
+import { useUser } from '../../../shared/contexts/UserContext';
 import './CreateApplicationPage.css';
 
 interface Draft {
@@ -40,6 +41,7 @@ interface Draft {
 }
 
 export const CreateApplicationPage: React.FC = () => {
+  const { user } = useUser();
   const [showForm, setShowForm] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
@@ -49,12 +51,14 @@ export const CreateApplicationPage: React.FC = () => {
 
   useEffect(() => {
     loadDrafts();
-  }, []);
+  }, [user]);
 
   const loadDrafts = async () => {
+    if (!user?.id) return;
+    
     try {
       setLoading(true);
-      const response = await applicationApi.getDrafts();
+      const response = await applicationApi.getDrafts(user.id, user.role);
       setDrafts(response.map(app => ({
         id: app.id,
         trainNumber: app.trainNumber,

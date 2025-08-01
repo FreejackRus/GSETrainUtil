@@ -9,12 +9,18 @@ export const applicationApi = {
 
   getAll: async (): Promise<Application[]> => {
     const response = await apiClient.get('/applications');
-    return response.data;
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
+  },
+
+  // Получить заявки пользователя
+  getUserApplications: async (userId: number): Promise<Application[]> => {
+    const response = await apiClient.get(`/applications?userId=${userId}`);
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
 
   getById: async (id: string): Promise<Application> => {
     const response = await apiClient.get(`/applications/${id}`);
-    return response.data;
+    return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
 
   update: async (id: string, data: Partial<CreateApplicationRequest>): Promise<Application> => {
@@ -33,8 +39,8 @@ export const applicationApi = {
   },
 
   // Получить все черновики
-  getDrafts: async (): Promise<Application[]> => {
-    const response = await apiClient.get('/applications/drafts');
+  getDrafts: async (userId: number, userRole: string = 'engineer'): Promise<Application[]> => {
+    const response = await apiClient.get(`/applications/drafts?userId=${userId}&userRole=${userRole}`);
     return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
 
