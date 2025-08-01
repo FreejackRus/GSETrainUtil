@@ -61,10 +61,10 @@ export const CreateApplicationPage: React.FC = () => {
       const response = await applicationApi.getDrafts(user.id, user.role);
       setDrafts(response.map(app => ({
         id: app.id,
-        trainNumber: app.trainNumber,
-        routeNumber: app.route?.number ?? '',
-        createdAt: app.createdAt,
-        updatedAt: app.updatedAt ?? ''
+        trainNumber: app.trainNumber || '',
+        routeNumber: '', // В Application нет поля route, используем пустую строку
+        createdAt: app.applicationDate,
+        updatedAt: app.applicationDate
       })));
     } catch (error) {
       console.error('Ошибка загрузки черновиков:', error);

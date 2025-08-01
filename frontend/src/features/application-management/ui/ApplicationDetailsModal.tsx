@@ -27,7 +27,7 @@ import {
   Photo as PhotoIcon,
 } from '@mui/icons-material';
 import styles from './ApplicationDetailsModal.module.css';
-import { Application } from '../../../entities/application/model/types';
+import type { Application } from '../../../entities/application/model/types';
 
 interface ApplicationDetailsModalProps {
   open: boolean;
