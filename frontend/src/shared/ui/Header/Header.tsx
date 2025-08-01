@@ -25,7 +25,8 @@ import {
   Person as PersonIcon,
   Menu as MenuIcon,
   Create as CreateIcon,
-  List as ListIcon
+  List as ListIcon,
+  Archive as ArchiveIcon
 } from '@mui/icons-material';
 import './Header.css';
 
@@ -163,9 +164,24 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
                   />
                 </Tabs>
               ) : (
-                <Box className="header__time">
-                  <TimeIcon sx={{ mr: 1, fontSize: 16 }} />
-                  {formatDate(currentTime)} • {formatTime(currentTime)}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Button
+                    color="inherit"
+                    startIcon={<ArchiveIcon />}
+                    onClick={() => navigate('/archive')}
+                    sx={{
+                      color: location.pathname === '/archive' ? 'white' : 'rgba(255, 255, 255, 0.7)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                      }
+                    }}
+                  >
+                    Архив фото
+                  </Button>
+                  <Box className="header__time">
+                    <TimeIcon sx={{ mr: 1, fontSize: 16 }} />
+                    {formatDate(currentTime)} • {formatTime(currentTime)}
+                  </Box>
                 </Box>
               )}
             </Box>
@@ -271,6 +287,27 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
                 }}
               >
                 Мои заявки
+              </Button>
+            </Box>
+          )}
+
+          {/* Навигация для администраторов в мобильном меню */}
+          {role === 'admin' && (
+            <Box sx={{ mt: 2, mb: 2 }}>
+              <Button
+                fullWidth
+                startIcon={<ArchiveIcon />}
+                onClick={() => {
+                  navigate('/archive');
+                  setMobileMenuOpen(false);
+                }}
+                sx={{
+                  color: 'white',
+                  justifyContent: 'flex-start',
+                  backgroundColor: location.pathname === '/archive' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                }}
+              >
+                Архив фото
               </Button>
             </Box>
           )}

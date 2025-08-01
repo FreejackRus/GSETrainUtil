@@ -5,3 +5,4 @@ export { CarriagesPage } from './CarriagesPage';
 export { WorkLogPage } from './WorkLogPage';
 export { CreateApplicationPage } from './CreateApplicationPage';
 export { MyApplicationsPage } from './MyApplicationsPage';
+export { ArchiveManagementPage } from './ArchiveManagementPage';

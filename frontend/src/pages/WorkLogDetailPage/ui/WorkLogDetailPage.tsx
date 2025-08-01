@@ -371,8 +371,8 @@ export const WorkLogDetailPage: React.FC = () => {
                             },
                           }}
                         >
-                          {workTypes.map((item) => (
-                            <MenuItem value={item}>{item}</MenuItem>
+                          {workTypes.map((item, index) => (
+                            <MenuItem key={`worktype-${index}`} value={item}>{item}</MenuItem>
                           ))}
                           {/*                           
                           <MenuItem value="Установка оборудования">Установка оборудования</MenuItem>
@@ -500,8 +500,8 @@ export const WorkLogDetailPage: React.FC = () => {
                               },
                             }}
                           >
-                            {carriageTypes.map((item) => (
-                              <MenuItem value={item}>{item}</MenuItem>
+                            {carriageTypes.map((item, index) => (
+                              <MenuItem key={`carriagetype-${index}`} value={item}>{item}</MenuItem>
                             ))}
                             {/* <MenuItem value="Плацкартный">Плацкартный</MenuItem>
                             <MenuItem value="Купейный">Купейный</MenuItem>
@@ -729,13 +729,13 @@ export const WorkLogDetailPage: React.FC = () => {
                       <Grid item xs={6} sm={4} md={3} key={key}>
                         <Card
                           className="photo-card"
-                          onClick={() => handlePhotoClick(getFullPhotoUrl(url))}
+                          onClick={() => handlePhotoClick(typeof url === 'string' ? getFullPhotoUrl(url) : getFullPhotoUrl(url[0]))}
                           sx={{ cursor: 'pointer' }}
                         >
                           <CardMedia
                             component="img"
                             height="120"
-                            image={getFullPhotoUrl(url)}
+                            image={getFullPhotoUrl(Array.isArray(url) ? url[0] : url)}
                             alt={`Фото ${key}`}
                             sx={{ objectFit: 'cover' }}
                           />

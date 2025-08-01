@@ -507,7 +507,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         {/* Мини-степпер с улучшенной мобильной навигацией */}
         <Box className={`equipment-stepper ${isMobile ? 'mobile' : ''}`}>
           {equipment.map((item, index) => (
-            <Box key={index} className="stepper-item">
+            <Box key={`equipment-${index}`} className="stepper-item">
               <Chip
                 label={isSmallMobile ? (index + 1) : `${index + 1}${item.equipmentType ? ` - ${item.equipmentType.substring(0, 8)}${item.equipmentType.length > 8 ? '...' : ''}` : ''}`}
                 onClick={() => setActiveEquipmentStep(index)}

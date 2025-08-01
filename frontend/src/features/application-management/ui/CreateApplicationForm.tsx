@@ -310,7 +310,56 @@ export const CreateApplicationForm = ({
       }, 2000);
     } catch (error) {
       console.error("Error creating application:", error);
-      setError("Ошибка при создании заявки. Попробуйте еще раз.");
+      
+      // Детальное логгирование ошибки
+      console.error("=== ДЕТАЛИ ОШИБКИ СОЗДАНИЯ ЗАЯВКИ ===");
+      console.error("Тип ошибки:", error?.constructor?.name);
+      console.error("Сообщение ошибки:", error?.message);
+      console.error("Статус ответа:", error?.response?.status);
+      console.error("Данные ответа:", error?.response?.data);
+      console.error("Заголовки ответа:", error?.response?.headers);
+      console.error("URL запроса:", error?.config?.url);
+      console.error("Метод запроса:", error?.config?.method);
+      console.error("Данные запроса:", error?.config?.data);
+      console.error("Полный стек ошибки:", error?.stack);
+      console.error("Данные формы на момент ошибки:", {
+        isDraft,
+        draftId,
+        formData: form,
+        requestData: {
+          status: 'completed',
+          typeWork: form.workType,
+          trainNumber: form.trainNumber,
+          carriageType: form.carriageType,
+          carriageNumber: form.carriageNumber,
+          equipment: form.equipment,
+          completedJob: form.workCompleted,
+          currentLocation: form.location,
+          userId: user?.id,
+          userName: user?.name,
+          userRole: user?.role
+        }
+      });
+      console.error("=== КОНЕЦ ДЕТАЛЬНОГО ЛОГГИРОВАНИЯ ===");
+      
+      // Определяем более конкретное сообщение об ошибке для пользователя
+      let userErrorMessage = "Ошибка при создании заявки. Попробуйте еще раз.";
+      
+      if (error?.response?.status === 400) {
+        userErrorMessage = "Ошибка валидации данных. Проверьте правильность заполнения формы.";
+      } else if (error?.response?.status === 401) {
+        userErrorMessage = "Ошибка авторизации. Войдите в систему заново.";
+      } else if (error?.response?.status === 403) {
+        userErrorMessage = "Недостаточно прав для создания заявки.";
+      } else if (error?.response?.status === 404) {
+        userErrorMessage = "Сервис недоступен. Обратитесь к администратору.";
+      } else if (error?.response?.status >= 500) {
+        userErrorMessage = "Ошибка сервера. Попробуйте позже или обратитесь к администратору.";
+      } else if (error?.code === 'NETWORK_ERROR' || error?.message?.includes('Network Error')) {
+        userErrorMessage = "Ошибка сети. Проверьте подключение к интернету.";
+      }
+      
+      setError(userErrorMessage);
       setSuccess(null);
     } finally {
       setLoading(false);

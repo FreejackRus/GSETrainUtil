@@ -144,12 +144,12 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary">
-                      Тип работ: <strong>{application.workType || '-'}</strong>
+                      Тип работ: <strong>{application.typeWork?.name || application.workType || '-'}</strong>
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary">
-                      Исполнитель: <strong>{application.user || '-'}</strong>
+                      Исполнитель: <strong>{application.user?.name || application.user || '-'}</strong>
                     </Typography>
                   </Grid>
                 </Grid>
@@ -170,28 +170,28 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                 <Box display="flex" alignItems="center" gap={1} mb={2}>
                   <TrainIcon fontSize="small" color="action" />
                   <Typography variant="body2">
-                    Номер поезда: <strong>{application.trainNumber || '-'}</strong>
+                    Номер поезда: <strong>{application.train?.number || application.trainNumber || '-'}</strong>
                   </Typography>
                 </Box>
                 
                 <Box display="flex" alignItems="center" gap={1} mb={2}>
                   <CarIcon fontSize="small" color="action" />
                   <Typography variant="body2">
-                    Тип вагона: <strong>{application.carriageType || '-'}</strong>
+                    Тип вагона: <strong>{application.carriage?.type || application.carriageType || '-'}</strong>
                   </Typography>
                 </Box>
                 
                 <Box display="flex" alignItems="center" gap={1} mb={2}>
                   <CarIcon fontSize="small" color="action" />
                   <Typography variant="body2">
-                    Номер вагона: <strong>{application.carriageNumber || '-'}</strong>
+                    Номер вагона: <strong>{application.carriage?.number || application.carriageNumber || '-'}</strong>
                   </Typography>
                 </Box>
                 
                 <Box display="flex" alignItems="center" gap={1}>
                   <LocationIcon fontSize="small" color="action" />
                   <Typography variant="body2">
-                    Местоположение: <strong>{application.location || '-'}</strong>
+                    Местоположение: <strong>{application.currentLocation?.name || application.location || '-'}</strong>
                   </Typography>
                 </Box>
               </CardContent>
@@ -209,7 +209,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                 <Divider sx={{ mb: 2 }} />
                 
                 <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                  {application.workCompleted || 'Информация о выполненных работах не указана'}
+                  {application.completedJob?.name || application.workCompleted || 'Информация о выполненных работах не указана'}
                 </Typography>
               </CardContent>
             </Card>

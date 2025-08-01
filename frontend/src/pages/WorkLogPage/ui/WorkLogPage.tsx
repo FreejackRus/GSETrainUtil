@@ -721,7 +721,7 @@ export const WorkLogPage = () => {
                 >
                   <MenuItem value="all">Все типы</MenuItem>
                   {getUniqueWorkTypes().map(type => (
-                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                    <MenuItem key={`worktype-${type}`} value={type}>{type}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -785,7 +785,7 @@ export const WorkLogPage = () => {
             {selectedEntry && (
               <Grid container spacing={2}>
                 {getPhotoEntries(selectedEntry.photos).map((photo, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Grid item xs={12} sm={6} md={4} key={`photo-${photo.key}-${index}`}>
                     <Card>
                       <CardContent>
                         <Typography variant="subtitle2" gutterBottom>

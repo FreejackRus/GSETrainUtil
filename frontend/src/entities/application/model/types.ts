@@ -3,17 +3,46 @@ export interface Application {
   applicationNumber: number;
   applicationDate: string;
   status: 'draft' | 'completed' | 'cancelled';
+  // Связанные объекты с бэкенда
+  typeWork?: {
+    id: number;
+    name: string;
+  };
+  train?: {
+    id: number;
+    number: string;
+  };
+  carriage?: {
+    id: number;
+    number: string;
+    type: string;
+    trainId: number;
+  };
+  completedJob?: {
+    id: number;
+    name: string;
+  };
+  currentLocation?: {
+    id: number;
+    name: string;
+  };
+  user?: {
+    id: number;
+    login: string;
+    role: string;
+    name: string;
+  };
+  // Устаревшие поля для обратной совместимости
   workType?: string;
   trainNumber?: string;
   carriageType?: string;
   carriageNumber?: string;
-  equipment: EquipmentItem[];
   workCompleted?: string;
   location?: string;
+  equipment: EquipmentItem[];
   carriagePhoto?: string | null;
   generalPhoto?: string | null;
   finalPhoto?: string | null;
-  user: string;
 }
 
 // Интерфейс для одного элемента оборудования

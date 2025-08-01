@@ -3,8 +3,29 @@ import type { Application, CreateApplicationRequest } from '../model/types';
 
 export const applicationApi = {
   create: async (data: CreateApplicationRequest): Promise<Application> => {
-    const response = await apiClient.post('/applications', data);
-    return response.data;
+    try {
+      console.log("=== API: Отправка запроса на создание заявки ===");
+      console.log("URL:", '/applications');
+      console.log("Данные запроса:", data);
+      
+      const response = await apiClient.post('/applications', data);
+      
+      console.log("=== API: Успешный ответ ===");
+      console.log("Статус:", response.status);
+      console.log("Данные ответа:", response.data);
+      
+      return response.data;
+    } catch (error) {
+      console.error("=== API: Ошибка при создании заявки ===");
+      console.error("Тип ошибки:", error?.constructor?.name);
+      console.error("Сообщение:", error?.message);
+      console.error("Статус:", error?.response?.status);
+      console.error("Данные ошибки:", error?.response?.data);
+      console.error("Заголовки ошибки:", error?.response?.headers);
+      console.error("Конфигурация запроса:", error?.config);
+      console.error("Полная ошибка:", error);
+      throw error;
+    }
   },
 
   getAll: async (): Promise<Application[]> => {
@@ -52,8 +73,31 @@ export const applicationApi = {
 
   // Завершить черновик (перевести в статус completed)
   completeDraft: async (id: number, data: Partial<CreateApplicationRequest>): Promise<Application> => {
-    const response = await apiClient.put(`/applications/${id}/complete`, { ...data, status: 'completed' });
-    return response.data.data; // Извлекаем данные из структуры { success, message, data }
+    try {
+      console.log("=== API: Отправка запроса на завершение черновика ===");
+      console.log("URL:", `/applications/${id}/complete`);
+      console.log("ID черновика:", id);
+      console.log("Данные запроса:", data);
+      
+      const response = await apiClient.put(`/applications/${id}/complete`, { ...data, status: 'completed' });
+      
+      console.log("=== API: Успешное завершение черновика ===");
+      console.log("Статус:", response.status);
+      console.log("Данные ответа:", response.data);
+      
+      return response.data.data; // Извлекаем данные из структуры { success, message, data }
+    } catch (error) {
+      console.error("=== API: Ошибка при завершении черновика ===");
+      console.error("ID черновика:", id);
+      console.error("Тип ошибки:", error?.constructor?.name);
+      console.error("Сообщение:", error?.message);
+      console.error("Статус:", error?.response?.status);
+      console.error("Данные ошибки:", error?.response?.data);
+      console.error("Заголовки ошибки:", error?.response?.headers);
+      console.error("Конфигурация запроса:", error?.config);
+      console.error("Полная ошибка:", error);
+      throw error;
+    }
   },
 
   // Удалить черновик

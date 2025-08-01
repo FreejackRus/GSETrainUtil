@@ -224,7 +224,7 @@ export const createApplication = async (req: Request, res: Response) => {
           if (item.photos.equipmentPhoto) {
             photoData.push({
               equipmentId: equipmentRecord.id,
-              photoUrl: item.photos.equipmentPhoto,
+              photoPath: item.photos.equipmentPhoto,
               photoType: "equipment",
             });
           }
@@ -232,7 +232,7 @@ export const createApplication = async (req: Request, res: Response) => {
           if (item.photos.serialPhoto) {
             photoData.push({
               equipmentId: equipmentRecord.id,
-              photoUrl: item.photos.serialPhoto,
+              photoPath: item.photos.serialPhoto,
               photoType: "serial",
             });
           }
@@ -240,18 +240,14 @@ export const createApplication = async (req: Request, res: Response) => {
           if (item.photos.macPhoto) {
             photoData.push({
               equipmentId: equipmentRecord.id,
-              photoUrl: item.photos.macPhoto,
+              photoPath: item.photos.macPhoto,
               photoType: "mac",
             });
           }
 
           if (photoData.length > 0) {
             await prisma.equipmentPhoto.createMany({
-              data: photoData.map((photo) => ({
-                equipmentId: photo.equipmentId,
-                photoPath: photo.photoUrl, // Map photoUrl to required photoPath field
-                photoType: photo.photoType,
-              })),
+              data: photoData,
             });
           }
         }

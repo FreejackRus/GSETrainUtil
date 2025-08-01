@@ -6,6 +6,7 @@ import { routerDevice } from "./router/routerDevice";
 import { routerCarriage } from "./router/routerCarriage";
 import { routerWorkLog } from "./router/routerWorkLog";
 import { routerPdfGenerate } from "./router/routerPdfGenerate";
+import archiveRoutes from "./routes/archiveRoutes";
 
 const app = express();
 const port = 3000;
@@ -20,6 +21,16 @@ app.use(
 
 // Middleware для обслуживания статических файлов (изображений)
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+// Middleware для обслуживания статических файлов из корневой директории (для временных файлов)
+app.use(express.static(process.cwd(), {
+  setHeaders: (res, path) => {
+    // Добавляем CORS заголовки для изображений
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  }
+}));
 
 // Middleware для логирования всех запросов
 app.use((req, res, next) => {
@@ -37,6 +48,7 @@ app.use("/api/v1", routerDevice);
 app.use("/api/v1", routerCarriage);
 app.use("/api/v1", routerWorkLog);
 app.use("/api/v1", routerPdfGenerate);
+app.use("/api/v1/archive", archiveRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
