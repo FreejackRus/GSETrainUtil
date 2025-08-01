@@ -107,7 +107,7 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
           id={`photo-input-${label.replace(/\s+/g, '-')}`}
           type="file" 
           accept={accept}
-          style={{ display: 'none' }}
+          className="photo-upload-input-hidden"
           onChange={handleFileChange}
         />
         

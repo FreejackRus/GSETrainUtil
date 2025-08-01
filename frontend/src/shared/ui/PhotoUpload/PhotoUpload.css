@@ -143,3 +143,7 @@
   color: #7b1fa2;
   font-weight: bold;
 }
+
+.photo-upload-input-hidden {
+  display: none;
+}

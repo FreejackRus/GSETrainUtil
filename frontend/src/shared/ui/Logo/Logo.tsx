@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
+import './Logo.css';
 
 interface LogoProps {
   width?: number | string;
@@ -19,17 +20,17 @@ export const Logo: React.FC<LogoProps> = ({
         height={height} 
         viewBox="0 0 200 60" 
         xmlns="http://www.w3.org/2000/svg"
-        style={{ maxWidth: '100%', height: 'auto' }}
+        className="logo-svg"
       >
         <defs>
           <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{stopColor:'#1976d2', stopOpacity:1}} />
-            <stop offset="50%" style={{stopColor:'#42a5f5', stopOpacity:1}} />
-            <stop offset="100%" style={{stopColor:'#2e7d32', stopOpacity:1}} />
+            <stop offset="0%" className="logo-gradient-stop-primary" />
+            <stop offset="50%" className="logo-gradient-stop-secondary" />
+            <stop offset="100%" className="logo-gradient-stop-success" />
           </linearGradient>
           <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{stopColor:'#1565c0', stopOpacity:1}} />
-            <stop offset="100%" style={{stopColor:'#2e7d32', stopOpacity:1}} />
+            <stop offset="0%" className="logo-text-gradient-stop-primary" />
+            <stop offset="100%" className="logo-text-gradient-stop-success" />
           </linearGradient>
         </defs>
         

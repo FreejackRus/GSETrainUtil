@@ -835,11 +835,7 @@ export const WorkLogDetailPage: React.FC = () => {
               <img
                 src={selectedPhoto}
                 alt="Увеличенное фото"
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '70vh',
-                  objectFit: 'contain',
-                }}
+                className="photo-dialog-image"
               />
             </Box>
           )}

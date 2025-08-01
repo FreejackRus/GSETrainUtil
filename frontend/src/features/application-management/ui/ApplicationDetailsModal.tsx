@@ -26,6 +26,7 @@ import {
   Memory as MemoryIcon,
   Photo as PhotoIcon,
 } from '@mui/icons-material';
+import styles from './ApplicationDetailsModal.module.css';
 import { Application } from '../../../entities/application/model/types';
 
 interface ApplicationDetailsModalProps {
@@ -272,13 +273,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                         <img
                           src={application.carriagePhoto}
                           alt="Фото вагона"
-                          style={{
-                            width: '100%',
-                            height: 150,
-                            objectFit: 'cover',
-                            borderRadius: 8,
-                            border: '1px solid #e0e0e0'
-                          }}
+                          className={styles.photoImage}
                         />
                       </Box>
                     </Grid>
@@ -293,13 +288,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                         <img
                           src={application.generalPhoto}
                           alt="Общее фото"
-                          style={{
-                            width: '100%',
-                            height: 150,
-                            objectFit: 'cover',
-                            borderRadius: 8,
-                            border: '1px solid #e0e0e0'
-                          }}
+                          className={styles.photoImage}
                         />
                       </Box>
                     </Grid>
@@ -314,13 +303,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                         <img
                           src={application.finalPhoto}
                           alt="Итоговое фото"
-                          style={{
-                            width: '100%',
-                            height: 150,
-                            objectFit: 'cover',
-                            borderRadius: 8,
-                            border: '1px solid #e0e0e0'
-                          }}
+                          className={styles.photoImage}
                         />
                       </Box>
                     </Grid>

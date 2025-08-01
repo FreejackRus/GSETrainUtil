@@ -1,0 +1,29 @@
+.logo-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.logo-gradient-stop-primary {
+  stop-color: #1976d2;
+  stop-opacity: 1;
+}
+
+.logo-gradient-stop-secondary {
+  stop-color: #42a5f5;
+  stop-opacity: 1;
+}
+
+.logo-gradient-stop-success {
+  stop-color: #2e7d32;
+  stop-opacity: 1;
+}
+
+.logo-text-gradient-stop-primary {
+  stop-color: #1565c0;
+  stop-opacity: 1;
+}
+
+.logo-text-gradient-stop-success {
+  stop-color: #2e7d32;
+  stop-opacity: 1;
+}
