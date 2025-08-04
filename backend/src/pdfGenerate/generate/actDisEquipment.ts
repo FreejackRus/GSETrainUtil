@@ -14,6 +14,7 @@ import {
 import logoBase64 from "../utils/logoBase64";
 import path from "path";
 import { formatRussianDate } from "../utils/stringConvertDate";
+import { ResponseJson } from "../../types/types";
 
 interface EquipmentItem {
   wagonNumber: string;
@@ -21,17 +22,7 @@ interface EquipmentItem {
   serialNumber: string;
   quantity: string;
 }
-interface ResponseJson {
-  applicationNumber: number;
-  carriageNumber: string;
-  equipmentTypes: string[];
-  countEquipments: number[];
-  serialNumbers: string[];
-  applicationDate: string;
-  contractNumber: string;
-  actDate: string;
-  typeWork:string
-}
+
 interface DismantlingActData {
   actNumber: string; // например "9.1"
   actDate: string; // например "«__» июля 2025 г."
@@ -305,6 +296,7 @@ export const createPdfActDisEquipment = async (
       quantity: String(countEquipments[index]) || "-",
     });
   });
+  
   const resultJson: DismantlingActData = {
     actNumber: String(applicationNumber),
     actDate: "«__» июля 2025 г.",

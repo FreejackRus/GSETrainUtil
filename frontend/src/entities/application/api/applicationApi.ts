@@ -28,6 +28,8 @@ export const applicationApi = {
     }
   },
 
+   
+
   getAll: async (): Promise<Application[]> => {
     const response = await apiClient.get('/applications');
     return response.data.data; // Извлекаем данные из структуры { success, message, data }
