@@ -35,6 +35,13 @@ app.use((req, res, next) => {
   }
 });
 
+// Регистрируем API роуты ПЕРЕД статическими файлами
+app.use("/api/v1", routerDevice);
+app.use("/api/v1", routerCarriage);
+app.use("/api/v1", routerWorkLog);
+app.use("/api/v1", routerPdfGenerate);
+app.use("/api/v1/archive", archiveRoutes);
+
 // Middleware для декодирования URL и обслуживания статических файлов (изображений)
 app.use('/uploads', (req, res, next) => {
   try {
@@ -82,51 +89,55 @@ app.use('/uploads', (req, res, next) => {
 
 // Middleware для обслуживания статических файлов из корневой директории (для временных файлов)
 app.use((req, res, next) => {
-  // Только для файлов изображений в корне
-  if (req.url.match(/\.(png|jpg|jpeg|gif|svg|webp)$/i)) {
+  // Только для файлов изображений в корне и НЕ для API запросов
+  if (req.url.match(/\.(png|jpg|jpeg|gif|svg|webp)$/i) && !req.url.startsWith('/api/')) {
     try {
       req.url = decodeURIComponent(req.url);
     } catch (error) {
       console.error('Root URL decode error:', error);
     }
-  }
-  next();
-}, express.static(process.cwd(), {
-  setHeaders: (res, filePath) => {
-    // Добавляем CORS заголовки для изображений
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Range');
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    res.setHeader('Cache-Control', 'public, max-age=31536000');
     
-    // Устанавливаем правильный Content-Type для изображений
-    const ext = path.extname(filePath).toLowerCase();
-    switch (ext) {
-      case '.png':
-        res.setHeader('Content-Type', 'image/png');
-        break;
-      case '.jpg':
-      case '.jpeg':
-        res.setHeader('Content-Type', 'image/jpeg');
-        break;
-      case '.gif':
-        res.setHeader('Content-Type', 'image/gif');
-        break;
-      case '.svg':
-        res.setHeader('Content-Type', 'image/svg+xml');
-        break;
-      case '.webp':
-        res.setHeader('Content-Type', 'image/webp');
-        break;
-      default:
-        res.setHeader('Content-Type', 'application/octet-stream');
-    }
-  },
-  fallthrough: false,
-  index: false,
-  dotfiles: 'ignore'
-}));
+    // Используем express.static только для изображений
+    express.static(process.cwd(), {
+      setHeaders: (res, filePath) => {
+        // Добавляем CORS заголовки для изображений
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Range');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+        
+        // Устанавливаем правильный Content-Type для изображений
+        const ext = path.extname(filePath).toLowerCase();
+        switch (ext) {
+          case '.png':
+            res.setHeader('Content-Type', 'image/png');
+            break;
+          case '.jpg':
+          case '.jpeg':
+            res.setHeader('Content-Type', 'image/jpeg');
+            break;
+          case '.gif':
+            res.setHeader('Content-Type', 'image/gif');
+            break;
+          case '.svg':
+            res.setHeader('Content-Type', 'image/svg+xml');
+            break;
+          case '.webp':
+            res.setHeader('Content-Type', 'image/webp');
+            break;
+          default:
+            res.setHeader('Content-Type', 'application/octet-stream');
+        }
+      },
+      fallthrough: true,
+      index: false,
+      dotfiles: 'ignore'
+    })(req, res, next);
+  } else {
+    next();
+  }
+});
 
 // Middleware для логирования всех запросов
 app.use((req, res, next) => {
@@ -160,12 +171,6 @@ app.use((err: any, req: any, res: any, next: any) => {
   console.error('ERROR:', err);
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
-
-app.use("/api/v1", routerDevice);
-app.use("/api/v1", routerCarriage);
-app.use("/api/v1", routerWorkLog);
-app.use("/api/v1", routerPdfGenerate);
-app.use("/api/v1/archive", archiveRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
