@@ -28,6 +28,7 @@ interface Wagon {
 }
 
 interface TWagonPdf {
+  applicationNumber:number
   wagons: Wagon[];
 }
 
@@ -81,7 +82,7 @@ const generateBody = (data: { wagons: Wagon[] }): string[][] => {
   return body;
 };
 
-export const createRequestForm = (doc: jsPDF, data: { wagons: Wagon[] }) => {
+export const createRequestForm = (doc: jsPDF, data: TWagonPdf) => {
   doc.addFileToVFS(
     nameTimesNewRomanRegular,
     fontRegularData.toString("base64")
@@ -105,7 +106,7 @@ export const createRequestForm = (doc: jsPDF, data: { wagons: Wagon[] }) => {
   let currentY = 20;
 
   doc.setFontSize(16).setFont("Font", "bold");
-  doc.text("Заявка № 7", pageWidth / 2, currentY, { align: "center" });
+  doc.text(`Заявка № ${data.applicationNumber}`, pageWidth / 2, currentY, { align: "center" });
   currentY += 10;
 
   const leftText = "г. Москва";
@@ -279,8 +280,10 @@ export const createPdfAppWork = async (
   });
 
   const resultJson = {
+    applicationNumber:applicationNumber,
     wagons: [
       {
+        
         wagonNumber: carriageNumber,
         wagonType: carriageType,
         workPlace: currentLocation ?? "",
@@ -295,7 +298,7 @@ export const createPdfAppWork = async (
     ],
   };
 
-  createRequestForm(doc, { wagons: resultJson.wagons });
+  createRequestForm(doc,resultJson);
   // Получаем PDF как Uint8Array
   const pdfBytes = doc.output("arraybuffer");
   const buffer = Buffer.from(pdfBytes);

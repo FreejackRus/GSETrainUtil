@@ -327,7 +327,7 @@ export const WorkLogPage = () => {
             countEquipments: entry.countEquipments,
             serialNumbers: entry.serialNumbers,
             applicationDate: entry.applicationDate,
-            contractNumber: 'TESTNUMBER',
+            contractNumber: '____________________',
           },
           {
             responseType: 'blob', // Важно: получаем как файл
@@ -352,8 +352,8 @@ export const WorkLogPage = () => {
           {
             applicationNumber: entry.applicationNumber,
             applicationDate: entry.applicationDate,
-            contractNumber: 'TESTNUMBER',
-            contractDate: '«16» июля 2025 г.',
+            contractNumber: '____________________',
+            contractDate: '«__».____.____ г.',
             carriageNumber: entry.carriageNumber,
             carriageType: entry.carriageType,
             equipmentTypes: entry.equipmentTypes,
@@ -390,14 +390,12 @@ export const WorkLogPage = () => {
             currentLocation: entry.currentLocation,
             equipmentTypes: entry.equipmentTypes,
             countEquipments: entry.countEquipments,
-
           },
           {
             responseType: 'blob', // Важно: получаем как файл
           },
-          
         );
-         const blob = new Blob([response?.data], {
+        const blob = new Blob([response?.data], {
           type: 'application/pdf',
         });
         const url = window.URL.createObjectURL(blob);
@@ -460,12 +458,22 @@ export const WorkLogPage = () => {
       >
         <CardContent sx={{ flexGrow: 1 }}>
           <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-            <Chip
-              label={`#${entry.applicationNumber}`}
-              color="primary"
-              size="small"
-              sx={{ fontWeight: 'bold' }}
-            />
+            <Box >
+              <Chip
+                label={`#${entry.applicationNumber}`}
+                color="primary"
+                size="small"
+                sx={{ fontWeight: 'bold' }}
+              />
+              <Chip
+              sx={{ml:2}}
+                label={entry.typeWork}
+                color={getWorkTypeColor(entry.typeWork)}
+                size="small"
+                variant="outlined"
+              />
+            </Box>
+
             <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
               <MoreVertIcon />
             </IconButton>
@@ -543,13 +551,17 @@ export const WorkLogPage = () => {
             >
               Подробнее
             </Button>
+            <Select
+              value="Скачать"
+              onChange={(e) => handleDownloadPdf(entry, e.target.value as string)}
+            >
+              <MenuItem value="Скачать">Скачать</MenuItem>
+              <MenuItem value="Заявка">Заявка</MenuItem>
+              <MenuItem value="Акт демонтажа/монтажа">Акт демонтажа/монтажа</MenuItem>
+              <MenuItem value="Акт выполненных работ">Акт выполненных работ </MenuItem>
+              <MenuItem value="Технический акт">Технический акт</MenuItem>
+            </Select>
           </Box>
-          <Chip
-            label={entry.typeWork}
-            color={getWorkTypeColor(entry.typeWork)}
-            size="small"
-            variant="outlined"
-          />
         </CardActions>
       </Card>
     </Grid>
@@ -634,7 +646,7 @@ export const WorkLogPage = () => {
         </Grid>
 
         <Grid item xs={12} sm={1}>
-          <Box display="flex" gap={0.5}>
+          <Box display="flex"  gap={0.5}>
             <IconButton
               size="small"
               onClick={() => handleViewPhotos(entry)}

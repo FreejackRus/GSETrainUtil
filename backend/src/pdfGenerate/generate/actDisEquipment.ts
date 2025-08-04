@@ -299,7 +299,7 @@ export const createPdfActDisEquipment = async (
   
   const resultJson: DismantlingActData = {
     actNumber: String(applicationNumber),
-    actDate: "«__» июля 2025 г.",
+    actDate: "«___»______.____г.",
     contractNumber: contractNumber,
     contractDate: formatRussianDate(applicationDate),
     applicationNumber: String(applicationNumber),
