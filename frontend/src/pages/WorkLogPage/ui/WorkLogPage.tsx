@@ -53,6 +53,7 @@ import type { WorkLogEntry } from '../../../entities/application/model/types';
 import './WorkLogPage.css';
 import axios from 'axios';
 import { apiClient } from '../../../shared';
+import { formatRussianDate } from '../../../shared/transformation/stringTransform';
 
 type SortField = keyof WorkLogEntry | 'none';
 type SortDirection = 'asc' | 'desc';
@@ -78,7 +79,6 @@ export const WorkLogPage = () => {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [filterWorkType, setFilterWorkType] = useState<string>('all');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
   useEffect(() => {
     const fetchWorkLog = async () => {
       try {
@@ -311,35 +311,78 @@ export const WorkLogPage = () => {
     setSelectedEntry(entry);
     setPhotoDialogOpen(true);
   };
-  const handleDownloadPdf = async (entry: WorkLogEntry) => {
+  const handleDownloadPdf = async (entry: WorkLogEntry, typePdf: string) => {
     console.log(entry);
-    try {
-      const response = await apiClient.post(
-        '/pdfActDisEquipment',
-        {
-          typeWork: entry.typeWork,
-          applicationNumber: entry.applicationNumber,
-          carriageNumber: entry.carriageNumber,
-          equipmentTypes: entry.equipmentTypes,
-          countEquipments: entry.countEquipments,
-          serialNumbers: entry.serialNumbers,
-          applicationDate: entry.applicationDate,
-          contractNumber: 'TESTNUMBER',
-        },
-        {
-          responseType: 'blob', // Важно: получаем как файл
-        },
-      );
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
+    let response;
 
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Акт демонтажа №${entry.applicationNumber}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+    try {
+      if (typePdf === 'Акт демонтажа/монтажа') {
+        response = await apiClient.post(
+          '/pdfActDisEquipment',
+          {
+            typeWork: entry.typeWork,
+            applicationNumber: entry.applicationNumber,
+            carriageNumber: entry.carriageNumber,
+            equipmentTypes: entry.equipmentTypes,
+            countEquipments: entry.countEquipments,
+            serialNumbers: entry.serialNumbers,
+            applicationDate: entry.applicationDate,
+            contractNumber: 'TESTNUMBER',
+          },
+          {
+            responseType: 'blob', // Важно: получаем как файл
+          },
+        );
+        const blob = new Blob([response?.data], {
+          type: 'application/pdf',
+        });
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Акт демонтажа №${entry.applicationNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        console.log(response);
+        
+      } else if (typePdf === 'Технический акт') {
+        response = await apiClient.post(
+          '/pdfTechnicalActAcceptance',
+          {
+            applicationNumber: entry.applicationNumber,
+            applicationDate: entry.applicationDate,
+            contractNumber: 'TESTNUMBER',
+            contractDate: '«16» июля 2025 г.',
+            carriageNumber: entry.carriageNumber,
+            carriageType: entry.carriageType,
+            equipmentTypes: entry.equipmentTypes,
+            serialNumbers: entry.serialNumbers,
+            countEquipments: entry.countEquipments,
+            typeWork: entry.typeWork,
+            trainNumber: entry.trainNumber,
+          },
+          {
+            responseType: 'blob', // Важно: получаем как файл
+          },
+        );
+        const blob = new Blob([response?.data], {
+          type: 'application/pdf',
+        });
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${entry.trainNumber} от ${formatRussianDate(entry.applicationDate)}pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        console.log(response);
+
+      }
     } catch {
       console.error('Ошибка при скачивании PDF:', error);
     }
@@ -574,19 +617,16 @@ export const WorkLogPage = () => {
             <IconButton size="small" onClick={() => navigate(`/work-log/${entry.id}`)}>
               <ArrowBackIcon sx={{ transform: 'rotate(180deg)' }} />
             </IconButton>
-            <Select value="Скачать">
+            <Select
+              value="Скачать"
+              onChange={(e) => handleDownloadPdf(entry, e.target.value as string)}
+            >
               <MenuItem value="Скачать">Скачать</MenuItem>
               <MenuItem value="Заявка">Заявка</MenuItem>
-              <MenuItem value="Акт демонтажа/монтажа" onClick={() => handleDownloadPdf(entry)}>
-                Акт демонтажа/монтажа
-              </MenuItem>
-              <MenuItem value="Акт выполненных работ ">Акт выполненных работ </MenuItem>
+              <MenuItem value="Акт демонтажа/монтажа">Акт демонтажа/монтажа</MenuItem>
+              <MenuItem value="Акт выполненных работ">Акт выполненных работ </MenuItem>
               <MenuItem value="Технический акт">Технический акт</MenuItem>
             </Select>
-
-            {/* <IconButton size="small" onClick={() => handleDownloadPdf(entry)}>
-              <FileDownloadIcon />
-            </IconButton> */}
           </Box>
         </Grid>
       </Grid>
