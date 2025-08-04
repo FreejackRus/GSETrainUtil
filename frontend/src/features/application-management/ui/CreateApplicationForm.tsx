@@ -588,7 +588,7 @@ export const CreateApplicationForm = ({
           }}
         >
           <CardContent sx={{ p: 3 }}>
-            <Fade in={true} timeout={500}>
+            <Fade in timeout={500}>
               <Box>
                 {renderStep()}
               </Box>

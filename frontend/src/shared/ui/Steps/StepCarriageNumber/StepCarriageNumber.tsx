@@ -37,7 +37,7 @@ export const StepCarriageNumber = ({
         onPhotoChange={handlePhotoChange}
         label="Фотография номера вагона"
         description="Сфотографируйте четко видимый номер вагона для идентификации"
-        required={true}
+        required
       />
     </Box>
   );
