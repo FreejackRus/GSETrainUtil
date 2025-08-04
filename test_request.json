@@ -1,0 +1,28 @@
+{
+  "status": "completed",
+  "typeWork": "Демонтаж",
+  "trainNumber": "002",
+  "carriageType": "Служебный",
+  "carriageNumber": "123123132",
+  "equipment": [
+    {
+      "equipmentType": "Промышленный компьютер БТ-37-НМК (5550.i5 OSUb2204)",
+      "serialNumber": "78878",
+      "macAddress": "",
+      "quantity": 1,
+      "photos": {
+        "equipmentPhoto": "deepseek_mermaid_20250731_8cee5e.png",
+        "serialPhoto": "deepseek_mermaid_20250731_f58abd.png",
+        "macPhoto": null
+      }
+    }
+  ],
+  "completedJob": "Подрядчик",
+  "currentLocation": "Депо №1",
+  "carriagePhoto": "deepseek_mermaid_20250731_8cee5e.png",
+  "generalPhoto": null,
+  "finalPhoto": "deepseek_mermaid_20250731_e4dfa6.png",
+  "userId": 2,
+  "userName": "Тестовый пользователь 2",
+  "userRole": "engineer"
+}

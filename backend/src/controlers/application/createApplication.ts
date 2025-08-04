@@ -119,19 +119,63 @@ export const createApplication = async (req: Request, res: Response) => {
       });
     }
 
+    console.log("=== Поиск/создание записей в справочниках ===");
+    console.log("Searching for:", { typeWork, trainNumber, carriageNumber, completedJob, currentLocation });
+
+    // Находим или создаем записи в справочниках
     const [
       typeWorkRecord,
       trainRecord,
-      carriageRecord,
       completedJobRecord,
       locationRecord,
     ] = await Promise.all([
-      typeWork ? prisma.typeWork.findFirst({ where: { name: typeWork } }) : null,
-      trainNumber ? prisma.train.findFirst({ where: { number: trainNumber } }) : null,
-      carriageNumber ? prisma.carriage.findFirst({ where: { number: carriageNumber } }) : null,
-      completedJob ? prisma.completedJob.findFirst({ where: { name: completedJob } }) : null,
-      currentLocation ? prisma.currentLocation.findFirst({ where: { name: currentLocation } }) : null,
+      typeWork ? prisma.typeWork.upsert({
+        where: { name: typeWork },
+        update: {},
+        create: { name: typeWork }
+      }) : null,
+      trainNumber ? prisma.train.upsert({
+        where: { number: trainNumber },
+        update: {},
+        create: { number: trainNumber }
+      }) : null,
+      completedJob ? prisma.completedJob.upsert({
+        where: { name: completedJob },
+        update: {},
+        create: { name: completedJob }
+      }) : null,
+      currentLocation ? prisma.currentLocation.upsert({
+        where: { name: currentLocation },
+        update: {},
+        create: { name: currentLocation }
+      }) : null,
     ]);
+
+    // Для вагона нужна дополнительная логика, так как нужен trainId
+    let carriageRecord = null;
+    if (carriageNumber && trainRecord) {
+      carriageRecord = await prisma.carriage.upsert({
+        where: { 
+          number_trainId: {
+            number: carriageNumber,
+            trainId: trainRecord.id
+          }
+        },
+        update: {},
+        create: { 
+          number: carriageNumber,
+          type: carriageType || "Неизвестный",
+          trainId: trainRecord.id
+        }
+      });
+    }
+
+    console.log("=== Результаты поиска/создания ===");
+    console.log("typeWorkRecord:", typeWorkRecord);
+    console.log("trainRecord:", trainRecord);
+    console.log("carriageRecord:", carriageRecord);
+    console.log("completedJobRecord:", completedJobRecord);
+    console.log("locationRecord:", locationRecord);
 
     if (status === "completed") {
       if (
@@ -141,10 +185,18 @@ export const createApplication = async (req: Request, res: Response) => {
         !completedJobRecord ||
         !locationRecord
       ) {
+        console.log("=== Ошибка валидации справочников ===");
+        console.log("Missing records:", {
+          typeWork: !typeWorkRecord,
+          train: !trainRecord,
+          carriage: !carriageRecord,
+          completedJob: !completedJobRecord,
+          location: !locationRecord
+        });
+        
         return res.status(400).json({
           success: false,
-          message:
-            "Невозможно найти один из справочников: тип работ, поезд, вагон, выполненная работа или местоположение.",
+          message: "Ошибка валидации данных. Проверьте правильность заполнения формы.",
         });
       }
     }
