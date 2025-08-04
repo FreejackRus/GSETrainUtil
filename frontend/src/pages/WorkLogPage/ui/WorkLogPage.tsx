@@ -382,29 +382,38 @@ export const WorkLogPage = () => {
         console.log(response);
       } else if (typePdf === 'Заявка') {
         response = await apiClient.post(
-          '/pdfTechnicalActAcceptance',
+          '/pdfAppWork',
           {
             applicationNumber: entry.applicationNumber,
-            applicationDate: entry.applicationDate,
-            contractNumber: 'TESTNUMBER',
-            contractDate: '«16» июля 2025 г.',
             carriageNumber: entry.carriageNumber,
             carriageType: entry.carriageType,
+            currentLocation: entry.currentLocation,
             equipmentTypes: entry.equipmentTypes,
-            serialNumbers: entry.serialNumbers,
             countEquipments: entry.countEquipments,
-            typeWork: entry.typeWork,
-            trainNumber: entry.trainNumber,
+
           },
           {
             responseType: 'blob', // Важно: получаем как файл
           },
+          
         );
+         const blob = new Blob([response?.data], {
+          type: 'application/pdf',
+        });
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Заявка_№${entry.applicationNumber}.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
       }
     } catch {
       console.error('Ошибка при скачивании PDF:', error);
     }
-    Заявка;
   };
   const handleClosePhotoDialog = () => {
     setSelectedEntry(null);

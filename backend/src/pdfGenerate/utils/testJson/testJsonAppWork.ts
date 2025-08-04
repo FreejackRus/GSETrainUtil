@@ -1,9 +1,9 @@
-interface Work {
+export interface Work {
   description: string;
   equipment: string[];
   equipmentCount: number[];
 }
-interface Wagon {
+export interface Wagon {
   wagonNumber: string;
   wagonType: string;
   workPlace: string;

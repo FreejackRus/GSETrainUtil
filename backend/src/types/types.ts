@@ -10,6 +10,7 @@ export interface ResponseJson {
   contractNumber: string;
   actDate: string;
   typeWork: string;
-  contractDate?:string,
   trainNumber:string
+  contractDate?:string,
+  currentLocation?:string
 }

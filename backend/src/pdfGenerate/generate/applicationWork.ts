@@ -12,107 +12,76 @@ import {
   nameTimesNewRomanRegular,
 } from "../utils/config";
 import path from "path";
+import { ResponseJson } from "../../types/types";
 
 interface Work {
-  description: string;
-  equipment: string[];
-  equipmentCount: number[];
+  equipment: string;
+  equipmentCount: number;
 }
 
 interface Wagon {
   wagonNumber: string;
   wagonType: string;
   workPlace: string;
-  works: Work[];
+  works: string[];
+  arrEquipment: Work[];
 }
-interface IJson {
-  wagons:Wagon[]
+
+interface TWagonPdf {
+  wagons: Wagon[];
 }
-function generateBody(data: Wagon[]): string[][] {
+
+const generateBody = (data: { wagons: Wagon[] }): string[][] => {
   const body: string[][] = [];
-  let rowIndex = 1;
+  const commonWorks = [
+    "Выезд специалиста в депо",
+    "Дополнительные работы по демонтажу оборудования",
+    "Дополнительные работы по монтажу оборудования",
+  ];
+  commonWorks.forEach((work, i) => {
+    body.push(["", "", "", "", work, "", "", "", ""]);
+  });
+  data.wagons.forEach((wagon, index) => {
+    // 1. Общие работы
 
-  data.forEach((wagon: Wagon) => {
-    const baseRow = [
-      rowIndex.toString(),
-      wagon.wagonNumber,
-      wagon.wagonType,
-      wagon.workPlace,
-      "", // Перечень работ
-      "", // Наименование оборудования
-      "", // Количество оборудования
-      "", // Оборудование для обеспечения резерва
-      "", // Место доставки оборудования для обеспечения резерва
-    ];
-
-    let firstWork = true;
-
-    wagon.works.forEach((work: Work) => {
-      if (firstWork) {
-        if (work.equipment.length === 0) {
-          body.push([...baseRow.slice(0, 4), work.description, "", "", "", ""]);
-        } else {
-          body.push([
-            ...baseRow.slice(0, 4),
-            work.description,
-            work.equipment[0],
-            work.equipmentCount[0]?.toString() || "",
-            "",
-            "",
-          ]);
-          for (let i = 1; i < work.equipment.length; i++) {
-            body.push([
-              "",
-              "",
-              "",
-              "",
-              "",
-              work.equipment[i],
-              work.equipmentCount[i]?.toString() || "",
-              "",
-              "",
-            ]);
-          }
-        }
-        firstWork = false;
-      } else {
-        if (work.equipment.length === 0) {
-          body.push(["", "", "", "", work.description, "", "", "", ""]);
-        } else {
-          body.push([
-            "",
-            "",
-            "",
-            "",
-            work.description,
-            work.equipment[0],
-            work.equipmentCount[0]?.toString() || "",
-            "",
-            "",
-          ]);
-          for (let i = 1; i < work.equipment.length; i++) {
-            body.push([
-              "",
-              "",
-              "",
-              "",
-              "",
-              work.equipment[i],
-              work.equipmentCount[i]?.toString() || "",
-              "",
-              "",
-            ]);
-          }
-        }
-      }
+    // 2. Монтаж работ
+    wagon.arrEquipment.forEach((eq, i) => {
+      body.push([
+        i === 0 ? (index + 1).toString() : "", // № п/п
+        i === 0 ? wagon.wagonNumber : "", // Номер вагона
+        i === 0 ? wagon.wagonType : "", // Тип вагона
+        i === 0 ? wagon.workPlace : "", // Место проведения работ
+        `Монтаж ${eq.equipment}`,
+        "",
+        "",
+        "",
+        "",
+      ]);
     });
 
-    rowIndex++;
+    // 3. Проверка кабельных трасс
+    body.push(["", "", "", "", "Проверка кабельных трасс", "", "", "", ""]);
+
+    // 4. Перечень оборудования
+    wagon.arrEquipment.forEach((eq) => {
+      body.push([
+        "",
+        "",
+        "",
+        "",
+        "", // Первые 5 колонок пустые
+        eq.equipment, // Наименование оборудования
+        eq.equipmentCount.toString(), // Кол-во
+        "",
+        "", // Остальные тоже пустые
+      ]);
+    });
   });
 
   return body;
-}
-export const createRequestForm = (doc: jsPDF, data: Wagon[]) => {
+};
+
+export const createRequestForm = (doc: jsPDF, data: { wagons: Wagon[] }) => {
   doc.addFileToVFS(
     nameTimesNewRomanRegular,
     fontRegularData.toString("base64")
@@ -131,22 +100,23 @@ export const createRequestForm = (doc: jsPDF, data: Wagon[]) => {
   const marginLeft = 15;
   const indent = 10;
   const pageWidth = doc.internal.pageSize.getWidth();
-  const fontSize = 12;
   const marginRight = 15;
+  const fontSize = 12;
   let currentY = 20;
 
-  doc.setFontSize(16);
-  doc.setFont("Font", "bold");
+  doc.setFontSize(16).setFont("Font", "bold");
   doc.text("Заявка № 7", pageWidth / 2, currentY, { align: "center" });
   currentY += 10;
 
   const leftText = "г. Москва";
-  const rightText = "Дата: ____.07.2025";
-  doc.setFontSize(fontSize);
-  doc.setFont("Font", "normal");
+  const rightText = "Дата: ____.__.____";
+  doc.setFontSize(fontSize).setFont("Font", "normal");
   doc.text(leftText, marginLeft, currentY);
-  const rightTextWidth = doc.getTextWidth(rightText);
-  doc.text(rightText, pageWidth - marginRight - rightTextWidth, currentY);
+  doc.text(
+    rightText,
+    pageWidth - marginRight - doc.getTextWidth(rightText),
+    currentY
+  );
 
   doc.text(
     "Дата начала выполнения работ ____________________________________________________",
@@ -158,7 +128,6 @@ export const createRequestForm = (doc: jsPDF, data: Wagon[]) => {
     marginLeft + indent,
     (currentY += 5)
   );
-  doc.setFont("Font", "normal");
   doc.text("От Заказчика:", marginLeft + indent, (currentY += 5));
   currentY += 10;
 
@@ -182,18 +151,10 @@ export const createRequestForm = (doc: jsPDF, data: Wagon[]) => {
       fillColor: [255, 255, 255],
       cellPadding: 0.5,
       lineColor: [221, 221, 221],
-      lineWidth: 0.15,
+      lineWidth: 0.1,
       halign: "center",
     },
-    headStyles: {
-      fillColor: [255, 255, 255],
-      fontStyle: "bold",
-      textColor: [0, 0, 0],
-      halign: "center",
-      lineColor: [0, 0, 0],
-      lineWidth: 0.15,
-    },
-    alternateRowStyles: {
+       alternateRowStyles: {
       fillColor: [255, 255, 255],
     },
     columnStyles: {
@@ -233,15 +194,7 @@ export const createRequestForm = (doc: jsPDF, data: Wagon[]) => {
       lineWidth: 0.15,
       overflow: "linebreak",
     },
-    headStyles: {
-      fillColor: [255, 255, 255],
-      fontStyle: "bold",
-      textColor: [0, 0, 0],
-      halign: "center",
-      lineColor: [0, 0, 0],
-      lineWidth: 0.15,
-    },
-    alternateRowStyles: {
+       alternateRowStyles: {
       fillColor: [255, 255, 255],
     },
     columnStyles: {
@@ -284,48 +237,71 @@ export const createRequestForm = (doc: jsPDF, data: Wagon[]) => {
       lineWidth: 0.15,
       halign: "center",
     },
-    headStyles: {
-      fillColor: [255, 255, 255],
-      fontStyle: "bold",
-      textColor: [0, 0, 0],
-      halign: "center",
-      lineColor: [0, 0, 0],
-      lineWidth: 0.15,
-    },
-    alternateRowStyles: {
+       alternateRowStyles: {
       fillColor: [255, 255, 255],
     },
     columnStyles: {
-      0: { cellWidth: 70 },
+      0: { cellWidth: 60 },
       1: { cellWidth: 60 },
       2: { cellWidth: 60 },
     },
   });
+
   currentY += 30;
-  const text1 = "Дата «____»____________ 20___ года";
-  const text2 = "«____» час. «____» мин.";
-
-  doc.setFont("Font", "italic");
-
-  const text1Width = doc.getTextWidth(text1);
-  doc.text(text1, pageWidth - marginRight - text1Width, currentY);
+  doc.text(
+    "Дата «____»____________ 20___ года",
+    pageWidth - marginRight - 72,
+    currentY
+  );
   currentY += 5;
-  const text2Width = doc.getTextWidth(text2);
-  doc.text(text2, pageWidth - marginRight - text2Width - 24, currentY);
+  doc.text("«____» час. «____» мин.", pageWidth - marginRight - 45, currentY);
 };
-export const createPdfAppWork = async (json: IJson, outputDir: string) => {
+
+export const createPdfAppWork = async (
+  json: ResponseJson,
+  outputDir: string
+) => {
   const doc = new jsPDF();
 
-  createRequestForm(doc, json.wagons);
+  const carriageNumber = json.carriageNumber;
+  const carriageType = json.carriageType;
+  const equipmentTypes = json.equipmentTypes;
+  const countEquipments = json.countEquipments;
+  const currentLocation = json.currentLocation;
+  const applicationNumber = json.applicationNumber;
+
+  let arrEquipment: { equipment: string; equipmentCount: number }[] = [];
+  equipmentTypes.map((item, index) => {
+    arrEquipment.push({
+      equipment: item,
+      equipmentCount: countEquipments[index],
+    });
+  });
+
+  const resultJson = {
+    wagons: [
+      {
+        wagonNumber: carriageNumber,
+        wagonType: carriageType,
+        workPlace: currentLocation ?? "",
+        works: [
+          "Выезд специалиста в депо",
+          "Дополнительные работы по демонтажу оборудования",
+          "Дополнительные Работы по монтажу оборудования",
+          "Проверка кабельных трасс",
+        ],
+        arrEquipment,
+      }
+    ],
+  };
+
+  createRequestForm(doc, { wagons: resultJson.wagons });
   // Получаем PDF как Uint8Array
   const pdfBytes = doc.output("arraybuffer");
   const buffer = Buffer.from(pdfBytes);
   // Формируем путь к файлу
-  const filePath = path.resolve(outputDir, "Заявка_№7.pdf");
+  const filePath = path.resolve(outputDir, `Заявка_№${applicationNumber}.pdf`);
 
   // Записываем файл
   await fs.writeFile(filePath, buffer);
-
 };
-
-  
