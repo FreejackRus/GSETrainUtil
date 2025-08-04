@@ -9,7 +9,6 @@ export const postPdfTechnicalActAcceptance = async (
   req: Request,
   res: Response
 ) => {
-  const body = req.body;
   try {
     await createTechnicalActAcceptance(req.body, "./src/pdfFiles");
 
