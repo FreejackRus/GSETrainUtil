@@ -256,7 +256,7 @@ export const AdminPanelPage = () => {
 
           {/* Статистика */}
           <Grid container spacing={3} className="admin-panel__stats">
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{xs:12,sm:12,md:4}} >
               <Card elevation={4} className="admin-panel__stat-card">
                 <CardContent className="admin-panel__stat-content">
                   <Avatar className="admin-panel__stat-avatar admin-panel__stat-avatar--total">
@@ -274,7 +274,7 @@ export const AdminPanelPage = () => {
               </Card>
             </Grid>
             
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{xs:12,sm:12,md:4}} >
               <Card elevation={4} className="admin-panel__stat-card">
                 <CardContent className="admin-panel__stat-content">
                   <Avatar className="admin-panel__stat-avatar admin-panel__stat-avatar--engineers">
@@ -292,7 +292,7 @@ export const AdminPanelPage = () => {
               </Card>
             </Grid>
             
-            <Grid item xs={12} sm={12} md={4}>
+            <Grid size={{xs:12,sm:12,md:4}} >
               <Card elevation={4} className="admin-panel__stat-card">
                 <CardContent className="admin-panel__stat-content">
                   <Avatar className="admin-panel__stat-avatar admin-panel__stat-avatar--admins">
