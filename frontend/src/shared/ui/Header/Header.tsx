@@ -91,10 +91,14 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
   };
 
   const handleLogout = () => {
+    navigate("/")
     handleUserMenuClose();
     onLogout();
   };
-
+const handleLogoutAdmin = () => {
+    navigate("/")
+    onLogout();
+  };
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     if (newValue === 0) {
       navigate('/create-application');
@@ -203,7 +207,7 @@ export const Header: React.FC<HeaderProps> = ({ role, onLogout }) => {
               <Button
                 color="inherit"
                 startIcon={<LogoutIcon />}
-                onClick={onLogout}
+                onClick={handleLogoutAdmin}
                 sx={{ 
                   color: 'white',
                   '&:hover': {
