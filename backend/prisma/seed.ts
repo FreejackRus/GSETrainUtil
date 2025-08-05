@@ -263,7 +263,12 @@ async function main() {
       applicationNumber: 1001,
       typeWorkId: typeWork1.id,
       trainId: train1.id,
-      carriageId: carriage1.id,
+      requestCarriages: {
+        create: {
+          carriageId: carriage1.id,
+          carriagePhoto: "/uploads/carriages/carriage1.jpg",
+        },
+      },
       requestEquipment: {
         create: {
           equipmentId: equipment1.id,
@@ -281,7 +286,12 @@ async function main() {
       applicationNumber: 1002,
       typeWorkId: typeWork2.id,
       trainId: train2.id,
-      carriageId: carriage3.id,
+      requestCarriages: {
+        create: {
+          carriageId: carriage3.id,
+          carriagePhoto: "/uploads/carriages/carriage3.jpg",
+        },
+      },
       requestEquipment: {
         create: {
           equipmentId: equipment1.id,

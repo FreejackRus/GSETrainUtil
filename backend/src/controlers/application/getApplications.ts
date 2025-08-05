@@ -24,7 +24,24 @@ export const getApplications = async (req: Request, res: Response) => {
         train: true,
         completedJob: true,
         currentLocation: true,
-        carriage: true
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
+        requestEquipment: {
+          include: {
+            equipment: {
+              include: {
+                photos: true,
+              },
+            },
+          },
+        },
       }
     });
 
@@ -66,7 +83,24 @@ export const getApplicationById = async (req: Request, res: Response) => {
         train: true,
         completedJob: true,
         currentLocation: true,
-        carriage: true
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
+        requestEquipment: {
+          include: {
+            equipment: {
+              include: {
+                photos: true,
+              },
+            },
+          },
+        },
       }
     });
 

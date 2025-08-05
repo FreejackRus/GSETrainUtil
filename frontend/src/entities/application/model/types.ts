@@ -12,12 +12,13 @@ export interface Application {
     id: number;
     number: string;
   };
-  carriage?: {
+  carriages?: Array<{
     id: number;
     number: string;
     type: string;
     trainId: number;
-  };
+    carriagePhoto?: string | null;
+  }>;
   completedJob?: {
     id: number;
     name: string;
@@ -40,7 +41,6 @@ export interface Application {
   workCompleted?: string;
   location?: string;
   equipment: EquipmentItem[];
-  carriagePhoto?: string | null;
   generalPhoto?: string | null;
   finalPhoto?: string | null;
 }
@@ -65,6 +65,7 @@ export interface EquipmentFormItem {
   serialNumber: string;
   macAddress: string;
   quantity: number;
+  carriageId?: string; // ID вагона, к которому привязано оборудование
   photos: {
     equipment?: File | null;
     serial?: File | null;
@@ -73,16 +74,23 @@ export interface EquipmentFormItem {
   };
 }
 
+// Интерфейс для вагона в форме
+export interface CarriageFormItem {
+  id?: string; // Уникальный ID для связи с оборудованием
+  carriageNumber: string;
+  carriageType: string;
+  carriagePhoto?: File | null;
+  equipment?: EquipmentFormItem[]; // Оборудование, привязанное к этому вагону
+}
+
 export interface ApplicationFormData {
   id?: number; // Для сохранения черновика
   workType: string;
   trainNumber: string;
-  carriageType: string;
-  carriageNumber: string;
+  carriages: CarriageFormItem[]; // Массив вагонов
   equipment: EquipmentFormItem[]; // Массив оборудования
   workCompleted: string;
   location: string;
-  carriagePhoto?: File | null;
   generalPhoto?: File | null;
   finalPhoto?: File | null;
   status?: 'draft' | 'completed';
@@ -94,9 +102,12 @@ export interface CreateApplicationRequest {
   applicationDate?: string;
   typeWork?: string;
   trainNumber?: string;
-  carriageType?: string;
-  carriageNumber?: string;
-  equipment: Array<{
+  carriages: Array<{
+    carriageNumber: string;
+    carriageType: string;
+    carriagePhoto?: string | null;
+  }>;
+  equipment?: Array<{ // Теперь оборудование может быть привязано к вагонам
     equipmentType: string;
     serialNumber: string;
     macAddress: string;
@@ -109,7 +120,6 @@ export interface CreateApplicationRequest {
   }>;
   completedJob?: string;
   currentLocation?: string;
-  carriagePhoto?: string | null;
   generalPhoto?: string | null;
   finalPhoto?: string | null;
   userId: number;
@@ -122,19 +132,18 @@ export interface CreateApplicationRequest {
 export interface ApplicationStep {
   key: string;
   label: string;
-  type: 'select' | 'input' | 'equipment' | 'photo';
+  type: 'select' | 'input' | 'equipment' | 'carriages' | 'photo';
   photoField?: string;
 }
 
 export type ApplicationStepKey = 
   | 'workType'
   | 'trainNumber'
-  | 'carriageType'
-  | 'equipmentWithPhoto'
-  | 'serialNumber'
-  | 'macAddress'
+  | 'carriages'
+  | 'equipment'
   | 'workCompleted'
-  | 'location';
+  | 'location'
+  | 'finalPhoto';
 
 // Типы для вагонов
 export interface CarriageEquipment {

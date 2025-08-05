@@ -9,14 +9,26 @@ async function checkRequestEquipment() {
     // Проверяем все заявки с оборудованием
     const requestsWithEquipment = await prisma.request.findMany({
       include: {
-        equipment: {
+        requestEquipment: {
           include: {
-            photos: true
+            equipment: {
+              include: {
+                photos: true
+              }
+            }
           }
         },
         typeWork: true,
         train: true,
-        carriage: true,
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
         completedJob: true,
         currentLocation: true,
         user: true
@@ -28,19 +40,21 @@ async function checkRequestEquipment() {
     let requestsWithEquipmentCount = 0;
     let totalEquipmentCount = 0;
     
-    requestsWithEquipment.forEach((request, index) => {
-      const hasEquipment = request.equipment !== null;
+    requestsWithEquipment.forEach((request: any, index: number) => {
+      const hasEquipment = request.requestEquipment.length > 0;
       
       if (hasEquipment) {
         requestsWithEquipmentCount++;
-        totalEquipmentCount += request.countEquipment || 0;
+        totalEquipmentCount += request.requestEquipment.reduce((sum: number, re: any) => sum + re.quantity, 0);
       }
       
       console.log(`Заявка ${request.applicationNumber}: ${hasEquipment ? 'есть оборудование' : 'нет оборудования'}`);
       
-      if (hasEquipment && request.equipment) {
-        console.log(`  - ${request.equipment.type} (S/N: ${request.equipment.serialNumber || 'нет'}, MAC: ${request.equipment.macAddress || 'нет'}, Кол-во: ${request.countEquipment || 0})`);
-        console.log(`  - Фотографий: ${request.equipment.photos.length}`);
+      if (hasEquipment) {
+        request.requestEquipment.forEach((re: any) => {
+          console.log(`  - ${re.equipment.type} (S/N: ${re.equipment.serialNumber || 'нет'}, MAC: ${re.equipment.macAddress || 'нет'}, Кол-во: ${re.quantity})`);
+          console.log(`  - Фотографий: ${re.equipment.photos.length}`);
+        });
       }
     });
     

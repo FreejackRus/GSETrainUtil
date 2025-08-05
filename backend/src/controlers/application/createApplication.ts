@@ -15,12 +15,10 @@ export const createApplication = async (req: Request, res: Response) => {
       applicationDate,
       typeWork,
       trainNumber,
-      carriageType,
-      carriageNumber,
+      carriages, // Массив вагонов
       equipment, // Массив оборудования
       completedJob,
       currentLocation,
-      carriagePhoto,
       generalPhoto,
       finalPhoto,
       userId,
@@ -34,8 +32,7 @@ export const createApplication = async (req: Request, res: Response) => {
       status,
       typeWork,
       trainNumber,
-      carriageType,
-      carriageNumber,
+      carriagesCount: carriages?.length || 0,
       userId,
       userName,
       userRole,
@@ -55,8 +52,9 @@ export const createApplication = async (req: Request, res: Response) => {
       if (
         !typeWork ||
         !trainNumber ||
-        !carriageType ||
-        !carriageNumber ||
+        !carriages ||
+        !Array.isArray(carriages) ||
+        carriages.length === 0 ||
         !equipment ||
         !Array.isArray(equipment) ||
         equipment.length === 0 ||
@@ -70,6 +68,16 @@ export const createApplication = async (req: Request, res: Response) => {
           message:
             "Все обязательные поля должны быть заполнены для завершенной заявки",
         });
+      }
+
+      // Валидация каждого вагона
+      for (const carriage of carriages) {
+        if (!carriage.carriageType || !carriage.carriageNumber) {
+          return res.status(400).json({
+            success: false,
+            message: "Тип и номер вагона обязательны для заполнения",
+          });
+        }
       }
 
       // Валидация каждого элемента оборудования
@@ -103,7 +111,6 @@ export const createApplication = async (req: Request, res: Response) => {
     if (id) {
       const existingRequest = await prisma.request.findUnique({
         where: { id: parseInt(id) },
-        include: { requestEquipment: true },
       });
 
       if (!existingRequest) {
@@ -113,14 +120,19 @@ export const createApplication = async (req: Request, res: Response) => {
         });
       }
 
-      // Удаляем старые связи с оборудованием
-      await prisma.requestEquipment.deleteMany({
-        where: { requestId: parseInt(id) },
-      });
+      // Удаляем старые связи с оборудованием и вагонами
+      await Promise.all([
+        prisma.requestEquipment.deleteMany({
+          where: { requestId: parseInt(id) },
+        }),
+        prisma.requestCarriage.deleteMany({
+          where: { requestId: parseInt(id) },
+        }),
+      ]);
     }
 
     console.log("=== Поиск/создание записей в справочниках ===");
-    console.log("Searching for:", { typeWork, trainNumber, carriageNumber, completedJob, currentLocation });
+    console.log("Searching for:", { typeWork, trainNumber, carriagesCount: carriages?.length || 0, completedJob, currentLocation });
 
     // Находим или создаем записи в справочниках
     const [
@@ -151,29 +163,32 @@ export const createApplication = async (req: Request, res: Response) => {
       }) : null,
     ]);
 
-    // Для вагона нужна дополнительная логика, так как нужен trainId
-    let carriageRecord = null;
-    if (carriageNumber && trainRecord) {
-      carriageRecord = await prisma.carriage.upsert({
-        where: { 
-          number_trainId: {
-            number: carriageNumber,
+    // Создаем записи для всех вагонов
+    const carriageRecords = [];
+    if (carriages && carriages.length > 0 && trainRecord) {
+      for (const carriage of carriages) {
+        const carriageRecord = await prisma.carriage.upsert({
+          where: { 
+            number_trainId: {
+              number: carriage.carriageNumber,
+              trainId: trainRecord.id
+            }
+          },
+          update: {},
+          create: { 
+            number: carriage.carriageNumber,
+            type: carriage.carriageType || "Неизвестный",
             trainId: trainRecord.id
           }
-        },
-        update: {},
-        create: { 
-          number: carriageNumber,
-          type: carriageType || "Неизвестный",
-          trainId: trainRecord.id
-        }
-      });
+        });
+        carriageRecords.push(carriageRecord);
+      }
     }
 
     console.log("=== Результаты поиска/создания ===");
     console.log("typeWorkRecord:", typeWorkRecord);
     console.log("trainRecord:", trainRecord);
-    console.log("carriageRecord:", carriageRecord);
+    console.log("carriageRecords:", carriageRecords.map(c => ({ id: c.id, number: c.number, type: c.type })));
     console.log("completedJobRecord:", completedJobRecord);
     console.log("locationRecord:", locationRecord);
 
@@ -181,7 +196,7 @@ export const createApplication = async (req: Request, res: Response) => {
       if (
         !typeWorkRecord ||
         !trainRecord ||
-        !carriageRecord ||
+        carriageRecords.length === 0 ||
         !completedJobRecord ||
         !locationRecord
       ) {
@@ -189,7 +204,7 @@ export const createApplication = async (req: Request, res: Response) => {
         console.log("Missing records:", {
           typeWork: !typeWorkRecord,
           train: !trainRecord,
-          carriage: !carriageRecord,
+          carriages: carriageRecords.length === 0,
           completedJob: !completedJobRecord,
           location: !locationRecord
         });
@@ -205,10 +220,8 @@ export const createApplication = async (req: Request, res: Response) => {
       applicationDate: applicationDate ? new Date(applicationDate) : new Date(),
       typeWorkId: typeWorkRecord?.id || null,
       trainId: trainRecord?.id || null,
-      carriageId: carriageRecord?.id || null,
       completedJobId: completedJobRecord?.id || null,
       currentLocationId: locationRecord?.id || null,
-      carriagePhoto: carriagePhoto || null,
       generalPhoto: generalPhoto || null,
       finalPhoto: finalPhoto || null,
       status,
@@ -227,6 +240,22 @@ export const createApplication = async (req: Request, res: Response) => {
       request = await prisma.request.create({
         data: requestData,
       });
+    }
+
+    // Создаем связи с вагонами
+    if (carriageRecords.length > 0) {
+      for (let i = 0; i < carriageRecords.length; i++) {
+        const carriageRecord = carriageRecords[i];
+        const carriageData = carriages[i];
+        
+        await prisma.requestCarriage.create({
+          data: {
+            requestId: request.id,
+            carriageId: carriageRecord.id,
+            carriagePhoto: carriageData.carriagePhoto || null,
+          },
+        });
+      }
     }
 
     // Создаем связи с оборудованием
@@ -310,6 +339,15 @@ export const createApplication = async (req: Request, res: Response) => {
     const fullRequest = await prisma.request.findUnique({
       where: { id: request.id },
       include: {
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
         requestEquipment: {
           include: {
             equipment: {
@@ -321,7 +359,6 @@ export const createApplication = async (req: Request, res: Response) => {
         },
         typeWork: true,
         train: true,
-        carriage: true,
         completedJob: true,
         currentLocation: true,
       },

@@ -35,7 +35,15 @@ export class PhotoArchiver {
         where: { id: applicationId },
         include: {
           train: true,
-          carriage: true,
+          requestCarriages: {
+            include: {
+              carriage: {
+                include: {
+                  train: true,
+                },
+              },
+            },
+          },
           typeWork: true,
           currentLocation: true,
           user: true
@@ -81,8 +89,8 @@ export class PhotoArchiver {
           typeWork: application.typeWork?.name,
           train: application.train?.number,
           carriage: {
-            number: application.carriage?.number,
-            type: application.carriage?.type
+            number: application.requestCarriages[0]?.carriage?.number,
+            type: application.requestCarriages[0]?.carriage?.type
           },
           location: application.currentLocation?.name,
           user: application.user?.name,
@@ -101,10 +109,11 @@ export class PhotoArchiver {
         }
 
         // Добавляем отдельные фотографии из БД если они есть
-        if (application.carriagePhoto) {
-          const carriagePhotoPath = path.join(process.cwd(), application.carriagePhoto);
+        const carriagePhoto = application.requestCarriages[0]?.carriagePhoto;
+        if (carriagePhoto) {
+          const carriagePhotoPath = path.join(process.cwd(), carriagePhoto);
           if (fs.existsSync(carriagePhotoPath)) {
-            archive.file(carriagePhotoPath, { name: `photos/carriage_photo_${path.basename(application.carriagePhoto)}` });
+            archive.file(carriagePhotoPath, { name: `photos/carriage_photo_${path.basename(carriagePhoto)}` });
           }
         }
 
@@ -147,7 +156,15 @@ export class PhotoArchiver {
         },
         include: {
           train: true,
-          carriage: true,
+          requestCarriages: {
+            include: {
+              carriage: {
+                include: {
+                  train: true,
+                },
+              },
+            },
+          },
           typeWork: true,
           currentLocation: true,
           user: true
@@ -198,8 +215,8 @@ export class PhotoArchiver {
             typeWork: app.typeWork?.name,
             train: app.train?.number,
             carriage: {
-              number: app.carriage?.number,
-              type: app.carriage?.type
+              number: app.requestCarriages[0]?.carriage?.number,
+              type: app.requestCarriages[0]?.carriage?.type
             },
             location: app.currentLocation?.name,
             user: app.user?.name
@@ -217,11 +234,12 @@ export class PhotoArchiver {
           }
 
           // Добавляем отдельные фотографии из БД
-          if (application.carriagePhoto) {
-            const carriagePhotoPath = path.join(process.cwd(), application.carriagePhoto);
+          const carriagePhoto = application.requestCarriages[0]?.carriagePhoto;
+          if (carriagePhoto) {
+            const carriagePhotoPath = path.join(process.cwd(), carriagePhoto);
             if (fs.existsSync(carriagePhotoPath)) {
               archive.file(carriagePhotoPath, { 
-                name: `application_${application.applicationNumber}/carriage_photo_${path.basename(application.carriagePhoto)}` 
+                name: `application_${application.applicationNumber}/carriage_photo_${path.basename(carriagePhoto)}` 
               });
             }
           }
