@@ -30,7 +30,7 @@ export const postPdfActDisEquipment = async (req: Request, res: Response) => {
         res.status(500).send("Не удалось скачать файл");
       }
     });
-
+    
   } catch (err) {
     console.error("Ошибка генерации PDF:", err);
     res.status(500).send("Ошибка при генерации PDF");

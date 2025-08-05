@@ -1,0 +1,158 @@
+/* Основной контейнер поиска */
+.search-autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+/* Поле ввода */
+.search-input {
+  width: 100%;
+}
+
+.search-input .MuiOutlinedInput-root {
+  border-radius: 24px;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px 1px rgba(64, 60, 67, 0.16);
+}
+
+.search-input .MuiOutlinedInput-root:hover {
+  box-shadow: 0 2px 8px 1px rgba(64, 60, 67, 0.24);
+}
+
+.search-input .MuiOutlinedInput-root.Mui-focused {
+  box-shadow: 0 2px 8px 1px rgba(64, 60, 67, 0.24);
+}
+
+/* Когда выпадающий список открыт, меняем радиус поля ввода */
+.search-autocomplete.dropdown-open .search-input .MuiOutlinedInput-root {
+  border-radius: 24px 24px 0 0;
+}
+
+.search-input .MuiOutlinedInput-input {
+  padding: 12px 14px 12px 0;
+  font-size: 16px;
+}
+
+/* Иконка поиска */
+.search-icon {
+  color: #9aa0a6;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+/* Выпадающий список */
+.search-dropdown {
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 6px rgba(32, 33, 36, 0.28);
+  border: 1px solid #dadce0;
+  border-top: none;
+  background-color: #fff;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Список результатов */
+.search-results {
+  padding: 8px 0;
+}
+
+/* Элемент результата поиска */
+.search-result-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  transition: background-color 0.1s ease;
+}
+
+.search-result-item:hover,
+.search-result-item.highlighted {
+  background-color: #f8f9fa;
+}
+
+.search-result-item.Mui-selected {
+  background-color: #e8f0fe;
+}
+
+/* Иконка предложения */
+.suggestion-icon {
+  color: #9aa0a6;
+  margin-right: 12px;
+  font-size: 20px;
+}
+
+/* Текст результата */
+.search-result-text {
+  margin: 0;
+}
+
+.search-result-text .MuiListItemText-primary {
+  font-size: 14px;
+  color: #202124;
+  line-height: 1.4;
+}
+
+/* Подсветка совпадений */
+.autocomplete-highlight {
+  font-weight: 600;
+  color: #1a73e8;
+  background-color: transparent;
+}
+
+/* Сообщение об отсутствии результатов */
+.no-results {
+  padding: 12px 16px;
+  cursor: default;
+}
+
+.no-results .MuiListItemText-primary {
+  font-size: 14px;
+  color: #5f6368;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .search-input .MuiOutlinedInput-input {
+    font-size: 16px; /* Предотвращает зум на iOS */
+  }
+  
+  .search-dropdown {
+    max-height: 300px;
+  }
+}
+
+/* Анимация появления */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-dropdown {
+  animation: fadeInDown 0.2s ease-out;
+}
+
+/* Скроллбар */
+.search-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search-dropdown::-webkit-scrollbar-thumb {
+  background-color: #dadce0;
+  border-radius: 3px;
+}
+
+.search-dropdown::-webkit-scrollbar-thumb:hover {
+  background-color: #bdc1c6;
+}

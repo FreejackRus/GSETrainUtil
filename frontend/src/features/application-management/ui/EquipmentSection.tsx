@@ -16,11 +16,7 @@ import {
   Collapse,
   IconButton,
   Divider,
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  Grid
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -31,7 +27,7 @@ import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import CheckIcon from '@mui/icons-material/Check';
 import WarningIcon from '@mui/icons-material/Warning';
 import type { EquipmentFormItem } from '../../../entities/application';
-import { PhotoUpload } from '../../../shared/ui';
+import { PhotoUpload, AutocompleteField } from '../../../shared/ui';
 import './EquipmentSection.css';
 
 interface EquipmentSectionProps {
@@ -162,13 +158,13 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   // Проверяем, нужно ли показывать поле количества
   const needsQuantityField = useCallback((equipmentType: string) => {
     const config = EQUIPMENT_CONFIG[equipmentType as keyof typeof EQUIPMENT_CONFIG];
-    return 'maxQuantity' in config && config.maxQuantity > 1;
+    return config && 'maxQuantity' in config && config.maxQuantity > 1;
   }, []);
 
   // Получаем максимальное количество единиц для одного элемента
   const getMaxQuantity = useCallback((equipmentType: string) => {
     const config = EQUIPMENT_CONFIG[equipmentType as keyof typeof EQUIPMENT_CONFIG];
-    return ('maxQuantity' in config && config.maxQuantity) || 1;
+    return (config && 'maxQuantity' in config && config.maxQuantity) || 1;
   }, []);
 
   // Проверяем, заполнено ли оборудование
@@ -273,42 +269,27 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
           <Grid container spacing={isMobile ? 2 : 3}>
             {/* Форма выбора типа и количества с адаптивной сеткой */}
-            <Grid item={true} xs={12}>
-              <FormControl fullWidth size={isMobile ? "small" : "medium"}>
-                <InputLabel>Тип оборудования</InputLabel>
-                <Select
-                  value={item.equipmentType}
-                  onChange={(e) => updateEquipment(index, 'equipmentType', e.target.value)}
-                  label="Тип оборудования"
-                  MenuProps={{
-                    PaperProps: {
-                      style: {
-                        maxHeight: isMobile ? 200 : 300,
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="">
-                    <em>Выберите тип оборудования</em>
-                  </MenuItem>
-                  {/* Показываем текущий выбранный тип, даже если он недоступен для новых */}
-                  {item.equipmentType && !getAvailableEquipmentTypes.includes(item.equipmentType) && (
-                    <MenuItem key={item.equipmentType} value={item.equipmentType}>
-                      {item.equipmentType} (выбрано)
-                    </MenuItem>
-                  )}
-                  {getAvailableEquipmentTypes
-                    .map((type) => (
-                      <MenuItem key={type} value={type}>
-                        {type}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
+            <Grid item xs={12}>
+              <AutocompleteField
+                label="Тип оборудования"
+                value={item.equipmentType}
+                onChange={(newValue) => updateEquipment(index, 'equipmentType', newValue)}
+                options={[
+                  // Показываем текущий выбранный тип, даже если он недоступен для новых
+                  ...(item.equipmentType && !getAvailableEquipmentTypes.includes(item.equipmentType) 
+                    ? [item.equipmentType] 
+                    : []
+                  ),
+                  ...getAvailableEquipmentTypes
+                ]}
+                placeholder="Выберите тип оборудования"
+                fullWidth
+                size={isMobile ? "small" : "medium"}
+              />
             </Grid>
 
             {/* Серийный номер */}
-            <Grid item={true} xs={12} md={hasMac ? 6 : 12}>
+            <Grid item xs={12} md={hasMac ? 6 : 12}>
               <TextField
                 fullWidth
                 size={isMobile ? "small" : "medium"}
@@ -322,7 +303,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
             {/* MAC-адрес - только для определенных типов */}
             {hasMac && (
-              <Grid item={true} xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   size={isMobile ? "small" : "medium"}
@@ -338,7 +319,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
             {/* Количество - только для коннекторов */}
             {hasQuantity && (
-              <Grid item={true} xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   size={isMobile ? "small" : "medium"}
@@ -356,7 +337,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
               </Grid>
             )}
 
-            <Grid item={true} xs={12}>
+            <Grid item xs={12}>
               <Divider className={`photo-divider ${isMobile ? 'mobile' : ''}`} />
               <Box 
                 className={`photo-section-header ${isMobile ? 'mobile' : ''}`}
@@ -380,7 +361,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             <Collapse in={isPhotosExpanded} timeout="auto" unmountOnExit>
               <Grid container spacing={isMobile ? 1 : 2}>
                 {/* Фото оборудования */}
-                <Grid item={true} xs={12} sm={6} md={hasMac ? 4 : 6}>
+                <Grid item xs={12} sm={6} md={hasMac ? 4 : 6}>
                   <PhotoUpload
                     label="Фото оборудования"
                     photo={item.photos.equipment ?? null}
@@ -391,7 +372,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                 </Grid>
 
                 {/* Фото серийного номера */}
-                <Grid item={true} xs={12} sm={6} md={hasMac ? 4 : 6}>
+                <Grid item xs={12} sm={6} md={hasMac ? 4 : 6}>
                   <PhotoUpload
                     label="Фото серийного номера"
                     photo={item.photos.serial ?? null}
@@ -403,7 +384,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
                 {/* Фото MAC-адреса - только для определенных типов */}
                 {hasMac && (
-                  <Grid item={true} xs={12} sm={hasMac ? 12 : 6} md={4}>
+                  <Grid item xs={12} sm={hasMac ? 12 : 6} md={4}>
                     <PhotoUpload
                       label="Фото MAC-адреса"
                       photo={item.photos.mac ?? null}
@@ -576,7 +557,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
       {/* Плавающая кнопка добавления для мобильных */}
       {isMobile && getAvailableEquipmentTypes.length > 0 && (
-        <Zoom in={true}>
+        <Zoom in>
           <Fab
             color="primary"
             aria-label="добавить оборудование"

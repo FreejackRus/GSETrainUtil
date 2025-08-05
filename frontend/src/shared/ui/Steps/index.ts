@@ -2,6 +2,7 @@ export { StepWorkType } from './StepWorkType/StepWorkType';
 export { StepTrainNumber } from './StepTrainNumber/StepTrainNumber';
 export { StepCarriageType } from './StepCarriageType/StepCarriageType';
 export { StepCarriageNumber } from './StepCarriageNumber/StepCarriageNumber';
+export { StepCarriages } from './StepCarriages';
 export { StepEquipmentWithPhoto } from './StepEquipmentWithPhoto/StepEquipmentWithPhoto';
 export { StepSerialNumber } from './StepSerialNumber/StepSerialNumber';
 export { StepMacAddress } from './StepMacAddress/StepMacAddress';

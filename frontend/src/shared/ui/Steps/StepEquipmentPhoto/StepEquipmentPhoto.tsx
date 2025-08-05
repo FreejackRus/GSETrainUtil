@@ -48,7 +48,7 @@ export const StepEquipmentPhoto: React.FC<StepEquipmentPhotoProps> = ({
           onPhotoChange={handlePhotoChange}
           label="Фотография оборудования"
           description="Сделайте фото установленного оборудования"
-          required={true}
+          required
         />
       </Box>
     </Box>

@@ -11,8 +11,24 @@ async function checkImportedData() {
       include: {
         typeWork: true,
         train: true,
-        carriage: true,
-        equipment: true,
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
+        requestEquipment: {
+          include: {
+            equipment: {
+              include: {
+                photos: true
+              }
+            }
+          }
+        },
         completedJob: true,
         currentLocation: true,
         user: true
@@ -28,19 +44,26 @@ async function checkImportedData() {
       console.log(`- Дата: ${firstRequest.applicationDate}`);
       console.log(`- Тип работ: ${firstRequest.typeWork?.name || 'не указан'}`);
       console.log(`- Номер поезда: ${firstRequest.train?.number || 'не указан'}`);
-      console.log(`- Тип вагона: ${firstRequest.carriage?.type || 'не указан'}`);
-      console.log(`- Номер вагона: ${firstRequest.carriage?.number || 'не указан'}`);
+      if (firstRequest.requestCarriages.length > 0) {
+        console.log(`- Тип вагона: ${firstRequest.requestCarriages[0].carriage?.type || 'не указан'}`);
+        console.log(`- Номер вагона: ${firstRequest.requestCarriages[0].carriage?.number || 'не указан'}`);
+      } else {
+        console.log(`- Тип вагона: не указан`);
+        console.log(`- Номер вагона: не указан`);
+      }
       console.log(`- Выполнил: ${firstRequest.completedJob?.name || 'не указан'}`);
       console.log(`- Текущее место: ${firstRequest.currentLocation?.name || 'не указан'}`);
       console.log(`- Пользователь: ${firstRequest.user?.name || 'не указан'}`);
-      console.log(`- Количество оборудования: ${firstRequest.countEquipment || 0}`);
+      console.log(`- Количество оборудования: ${firstRequest.requestEquipment.length}`);
       
-      if (firstRequest.equipment) {
+      if (firstRequest.requestEquipment.length > 0) {
+        const firstEquipment = firstRequest.requestEquipment[0].equipment;
         console.log('\nОборудование:');
-        console.log(`  Тип: ${firstRequest.equipment.type}`);
-        console.log(`  S/N: ${firstRequest.equipment.serialNumber || 'не указан'}`);
-        console.log(`  MAC: ${firstRequest.equipment.macAddress || 'не указан'}`);
-        console.log(`  Статус: ${firstRequest.equipment.status}`);
+        console.log(`  Тип: ${firstEquipment.type}`);
+        console.log(`  S/N: ${firstEquipment.serialNumber || 'не указан'}`);
+        console.log(`  MAC: ${firstEquipment.macAddress || 'не указан'}`);
+        console.log(`  Статус: ${firstEquipment.status}`);
+        console.log(`  Фотографий: ${firstEquipment.photos.length}`);
       }
     }
     

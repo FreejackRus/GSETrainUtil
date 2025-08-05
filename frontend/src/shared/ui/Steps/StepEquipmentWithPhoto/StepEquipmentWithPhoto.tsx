@@ -51,7 +51,7 @@ export const StepEquipmentWithPhoto: React.FC<StepEquipmentWithPhotoProps> = ({
             className="step-equipment-select"
           >
             {(equipmentOptions || []).map((equipment, index) => (
-              <MenuItem key={`${equipment}-${index}`} value={equipment} className="step-equipment-menu-item">
+              <MenuItem key={index} value={equipment} className="step-equipment-menu-item">
                 {equipment}
               </MenuItem>
             ))}
@@ -103,7 +103,7 @@ export const StepEquipmentWithPhoto: React.FC<StepEquipmentWithPhotoProps> = ({
             onPhotoChange={handlePhotoChange}
             label="Фотография оборудования"
             description="Сделайте фото установленного оборудования"
-            required={true}
+            required
           />
         </Box>
       )}

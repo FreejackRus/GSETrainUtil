@@ -37,7 +37,15 @@ export const getDrafts = async (req: Request, res: Response) => {
         },
         typeWork: true,
         train: true,
-        carriage: true,
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
         completedJob: true,
         currentLocation: true,
         user: true
@@ -85,70 +93,153 @@ export const completeDraft = async (req: Request, res: Response) => {
     }
 
     // Валидация обязательных полей для завершенной заявки
-    const { typeWork, trainNumber, carriageType, carriageNumber, equipment, completedJob, currentLocation } = requestData;
+    const { typeWork, trainNumber, carriages, equipment, completedJob, currentLocation } = requestData;
     
-    if (!typeWork || !trainNumber || !carriageType || !carriageNumber || 
+    console.log('=== ВАЛИДАЦИЯ ДАННЫХ ===');
+    console.log('typeWork:', typeWork);
+    console.log('trainNumber:', trainNumber);
+    console.log('carriages:', carriages);
+    console.log('equipment:', equipment);
+    console.log('completedJob:', completedJob);
+    console.log('currentLocation:', currentLocation);
+    
+    if (!typeWork || !trainNumber || !carriages || !Array.isArray(carriages) || carriages.length === 0 ||
         !equipment || !Array.isArray(equipment) || equipment.length === 0 ||
         !completedJob || !currentLocation) {
+      console.log('=== ОШИБКА ВАЛИДАЦИИ ===');
+      console.log('typeWork valid:', !!typeWork);
+      console.log('trainNumber valid:', !!trainNumber);
+      console.log('carriages valid:', !!(carriages && Array.isArray(carriages) && carriages.length > 0));
+      console.log('equipment valid:', !!(equipment && Array.isArray(equipment) && equipment.length > 0));
+      console.log('completedJob valid:', !!completedJob);
+      console.log('currentLocation valid:', !!currentLocation);
+      
       return res.status(400).json({
         success: false,
         message: 'Все обязательные поля должны быть заполнены для завершения заявки'
       });
     }
 
+    console.log('=== ВАЛИДАЦИЯ ВАГОНОВ ===');
+    // Проверяем, что у каждого вагона есть обязательные поля
+    for (const carriage of carriages) {
+      console.log('Проверяем вагон:', carriage);
+      if (!carriage.carriageType || !carriage.carriageNumber) {
+        console.log('ОШИБКА: Вагон не прошел валидацию');
+        return res.status(400).json({
+          success: false,
+          message: 'Все вагоны должны иметь тип и номер'
+        });
+      }
+    }
+    console.log('Все вагоны прошли валидацию');
+
+    console.log('=== ВАЛИДАЦИЯ ОБОРУДОВАНИЯ ===');
+    // Проверяем, что у каждого оборудования есть обязательные поля
+    for (const item of equipment) {
+      console.log('Проверяем оборудование:', item);
+      if (!item.equipmentType || !item.serialNumber || item.quantity === undefined) {
+        console.log('ОШИБКА: Оборудование не прошло валидацию');
+        return res.status(400).json({
+          success: false,
+          message: 'Все оборудование должно иметь тип, серийный номер и количество'
+        });
+      }
+
+      // Проверяем MAC-адрес для сетевого оборудования
+      const networkEquipmentTypes = ['точка доступа', 'маршрутизатор', 'коммутатор'];
+      const isNetworkEquipment = networkEquipmentTypes.some(type => 
+        item.equipmentType.toLowerCase().includes(type.toLowerCase())
+      );
+      
+      console.log('Сетевое оборудование?', isNetworkEquipment, 'MAC:', item.macAddress);
+      
+      if (isNetworkEquipment && !item.macAddress) {
+        console.log('ОШИБКА: MAC-адрес отсутствует для сетевого оборудования');
+        return res.status(400).json({
+          success: false,
+          message: `MAC-адрес обязателен для оборудования типа "${item.equipmentType}"`
+        });
+      }
+    }
+    console.log('Все оборудование прошло валидацию');
+
+    console.log('=== ПОИСК СВЯЗАННЫХ ЗАПИСЕЙ ===');
     // Находим или создаем связанные записи
     const [typeWorkRecord, trainRecord, completedJobRecord, currentLocationRecord] = await Promise.all([
       // TypeWork
-      prisma.typeWork.upsert({
-        where: { name: typeWork },
-        update: {},
-        create: { name: typeWork }
-      }),
+      (async () => {
+        console.log('Ищем тип работы:', typeWork);
+        const record = await prisma.typeWork.upsert({
+          where: { name: typeWork },
+          update: {},
+          create: { name: typeWork }
+        });
+        console.log('Тип работы найден/создан:', record.id);
+        return record;
+      })(),
       // Train
-      prisma.train.upsert({
-        where: { number: trainNumber },
-        update: {},
-        create: { number: trainNumber }
-      }),
+      (async () => {
+        console.log('Ищем поезд:', trainNumber);
+        const record = await prisma.train.upsert({
+          where: { number: trainNumber },
+          update: {},
+          create: { number: trainNumber }
+        });
+        console.log('Поезд найден/создан:', record.id);
+        return record;
+      })(),
       // CompletedJob
-      prisma.completedJob.upsert({
-        where: { name: completedJob },
-        update: {},
-        create: { name: completedJob }
-      }),
+      (async () => {
+        console.log('Ищем выполненную работу:', completedJob);
+        const record = await prisma.completedJob.upsert({
+          where: { name: completedJob },
+          update: {},
+          create: { name: completedJob }
+        });
+        console.log('Выполненная работа найдена/создана:', record.id);
+        return record;
+      })(),
       // CurrentLocation
-      prisma.currentLocation.upsert({
-        where: { name: currentLocation },
-        update: {},
-        create: { name: currentLocation }
-      })
+      (async () => {
+        console.log('Ищем текущее местоположение:', currentLocation);
+        const record = await prisma.currentLocation.upsert({
+          where: { name: currentLocation },
+          update: {},
+          create: { name: currentLocation }
+        });
+        console.log('Текущее местоположение найдено/создано:', record.id);
+        return record;
+      })()
     ]);
 
-    // Находим или создаем вагон
-    const carriageRecord = await prisma.carriage.upsert({
-      where: { 
-        number_trainId: { 
-          number: carriageNumber, 
+    // Находим или создаем вагоны
+    const carriageRecords = [];
+    for (const carriage of carriages) {
+      const carriageRecord = await prisma.carriage.upsert({
+        where: { 
+          number_trainId: { 
+            number: carriage.carriageNumber, 
+            trainId: trainRecord.id 
+          } 
+        },
+        update: { type: carriage.carriageType },
+        create: { 
+          number: carriage.carriageNumber, 
+          type: carriage.carriageType, 
           trainId: trainRecord.id 
-        } 
-      },
-      update: { type: carriageType },
-      create: { 
-        number: carriageNumber, 
-        type: carriageType, 
-        trainId: trainRecord.id 
-      }
-    });
+        }
+      });
+      carriageRecords.push(carriageRecord);
+    }
 
     // Подготавливаем данные для обновления заявки
     const updateData = {
       status: 'completed',
       typeWorkId: typeWorkRecord.id,
       trainId: trainRecord.id,
-      carriageId: carriageRecord.id,
       completedJobId: completedJobRecord.id,
       currentLocationId: currentLocationRecord.id,
-      carriagePhoto: requestData.carriagePhoto,
       generalPhoto: requestData.generalPhoto,
       finalPhoto: requestData.finalPhoto,
       userId: requestData.userId,
@@ -170,12 +261,39 @@ export const completeDraft = async (req: Request, res: Response) => {
         },
         typeWork: true,
         train: true,
-        carriage: true,
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
         completedJob: true,
         currentLocation: true,
         user: true
       }
     });
+
+    // Удаляем старые связи с вагонами
+    await prisma.requestCarriage.deleteMany({
+      where: { requestId: parseInt(id) }
+    });
+
+    // Создаем связи с вагонами
+    for (let i = 0; i < carriageRecords.length; i++) {
+      const carriageRecord = carriageRecords[i];
+      const carriageData = carriages[i];
+      
+      await prisma.requestCarriage.create({
+        data: {
+          requestId: parseInt(id),
+          carriageId: carriageRecord.id,
+          carriagePhoto: carriageData.carriagePhoto || null,
+        },
+      });
+    }
 
     // Обрабатываем оборудование
     if (equipment && Array.isArray(equipment)) {
@@ -192,8 +310,7 @@ export const completeDraft = async (req: Request, res: Response) => {
             type: equipmentItem.equipmentType,
             serialNumber: equipmentItem.serialNumber || null,
             macAddress: equipmentItem.macAddress || null,
-            status: 'active',
-            carriageId: carriageRecord.id
+            status: 'active'
           }
         });
 
@@ -261,7 +378,15 @@ export const completeDraft = async (req: Request, res: Response) => {
         },
         typeWork: true,
         train: true,
-        carriage: true,
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
         completedJob: true,
         currentLocation: true,
         user: true

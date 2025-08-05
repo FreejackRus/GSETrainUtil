@@ -267,9 +267,6 @@ async function importJournalData(workbook: XLSX.WorkBook) {
         applicationDate: requestData.applicationDate,
         typeWorkId: typeWork.id,
         trainId: train.id,
-        carriageId: carriage.id,
-        ...(equipmentId && { equipmentId: equipmentId }),
-        // countEquipment: requestData.equipment.length > 0 ? requestData.equipment[0].countEquipment : 1,
         completedJobId: completedJob.id,
         currentLocationId: currentLocation.id,
         userId: requestData.userId
@@ -279,14 +276,46 @@ async function importJournalData(workbook: XLSX.WorkBook) {
         applicationDate: requestData.applicationDate,
         typeWorkId: typeWork.id,
         trainId: train.id,
-        carriageId: carriage.id,
-        ...(equipmentId && { equipmentId: equipmentId }),
-        // countEquipment: requestData.equipment.length > 0 ? requestData.equipment[0].countEquipment : 1,
         completedJobId: completedJob.id,
         currentLocationId: currentLocation.id,
         userId: requestData.userId
       }
     });
+
+    // Создаем связь с вагоном
+    await prisma.requestCarriage.upsert({
+      where: {
+        requestId_carriageId: {
+          requestId: request.id,
+          carriageId: carriage.id
+        }
+      },
+      update: {},
+      create: {
+        requestId: request.id,
+        carriageId: carriage.id
+      }
+    });
+
+    // Создаем связь с оборудованием (если есть)
+    if (equipmentId) {
+      await prisma.requestEquipment.upsert({
+        where: {
+          requestId_equipmentId: {
+            requestId: request.id,
+            equipmentId: equipmentId
+          }
+        },
+        update: {
+          quantity: requestData.equipment.length > 0 ? requestData.equipment[0].countEquipment || 1 : 1
+        },
+        create: {
+          requestId: request.id,
+          equipmentId: equipmentId,
+          quantity: requestData.equipment.length > 0 ? requestData.equipment[0].countEquipment || 1 : 1
+        }
+      });
+    }
   }
   
   console.log('Импорт данных из листа Journal завершен успешно');

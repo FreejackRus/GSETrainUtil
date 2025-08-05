@@ -23,7 +23,6 @@ model Request {
   // Связи с нормализованными таблицами
   typeWorkId        Int?
   trainId           Int?
-  carriageId        Int?
   completedJobId    Int?
   currentLocationId Int?
   userId            Int
@@ -31,16 +30,17 @@ model Request {
   // Связи
   typeWork          TypeWork?        @relation(fields: [typeWorkId], references: [id])
   train             Train?           @relation(fields: [trainId], references: [id])
-  carriage          Carriage?        @relation(fields: [carriageId], references: [id])
   completedJob      CompletedJob?    @relation(fields: [completedJobId], references: [id])
   currentLocation   CurrentLocation? @relation(fields: [currentLocationId], references: [id])
   user              User             @relation(fields: [userId], references: [id])
+  
+  // Связь с вагонами через промежуточную таблицу
+  requestCarriages  RequestCarriage[]
   
   // Связь с оборудованием через промежуточную таблицу
   requestEquipment  RequestEquipment[]
   
   // Общие фотографии заявки
-  carriagePhoto     String?
   generalPhoto      String?
   finalPhoto        String?
   
@@ -48,6 +48,23 @@ model Request {
   updatedAt         DateTime @updatedAt
 
   @@map("requests")
+}
+
+// Промежуточная таблица для связи заявки с вагонами
+model RequestCarriage {
+  id          Int       @id @default(autoincrement())
+  requestId   Int
+  carriageId  Int
+  
+  // Фотография конкретного вагона
+  carriagePhoto String?
+  
+  // Связи
+  request     Request   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  carriage    Carriage  @relation(fields: [carriageId], references: [id])
+  
+  @@unique([requestId, carriageId])
+  @@map("request_carriages")
 }
 
 // Промежуточная таблица для связи заявки с оборудованием
@@ -85,7 +102,7 @@ model Carriage {
   // Связи
   train       Train       @relation(fields: [trainId], references: [id])
   equipment   Equipment[]
-  requests    Request[]
+  requestCarriages RequestCarriage[]
 
   @@unique([number, trainId]) // Уникальность номера вагона в рамках поезда
   @@map("carriages")

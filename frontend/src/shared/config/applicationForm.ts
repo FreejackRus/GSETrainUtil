@@ -3,9 +3,7 @@ import type { ApplicationStep, ApplicationFormData } from '../../entities/applic
 export const APPLICATION_STEPS: ApplicationStep[] = [
   { key: "workType", label: "Тип работ", type: "select" },
   { key: "trainNumber", label: "Номер поезда", type: "select" },
-  { key: "carriageType", label: "Тип вагона", type: "select" },
-  { key: "carriageNumber", label: "Номер вагона", type: "input", photoField: "carriagePhoto" },
-  { key: "equipment", label: "Оборудование", type: "equipment" }, // Новый тип для множественного оборудования
+  { key: "carriages", label: "Вагоны и оборудование", type: "carriages" }, // Объединенный шаг для вагонов и оборудования
   { key: "workCompleted", label: "Работы выполнены", type: "select" },
   { key: "location", label: "Текущее место (депо/станция)", type: "select" },
   { key: "finalPhoto", label: "Общая фотография", type: "photo" },
@@ -14,14 +12,12 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
 export const INITIAL_FORM_DATA: ApplicationFormData = {
   workType: '',
   trainNumber: '',
-  carriageType: '',
-  carriageNumber: '',
+  carriages: [], // Массив вагонов
   equipment: [], // Массив оборудования
   workCompleted: '',
   location: '',
   
   // Пути к изображениям
-  carriagePhoto: null,
   generalPhoto: null,
   finalPhoto: null,
 };

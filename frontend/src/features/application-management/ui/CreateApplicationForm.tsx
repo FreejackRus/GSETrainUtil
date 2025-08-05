@@ -33,16 +33,28 @@ import { INITIAL_FORM_DATA } from "../../../shared/config";
 import { applicationApi } from "../../../entities/application";
 import type { CreateApplicationRequest, ApplicationFormData } from "../../../entities/application";
 import { referenceApi } from "../../../shared/api/reference";
-import { EquipmentSection } from "./EquipmentSection";
+
 import {
   StepWorkType,
   StepTrainNumber,
   StepCarriageNumber,
   StepCarriageType,
+  StepCarriages,
   StepLocation,
   StepWorkCompleted, 
   StepFinalPhoto
 } from "../../../shared/ui";
+
+// Определяем типы оборудования
+const EQUIPMENT_TYPES = [
+  'Промышленный компьютер БТ-37-НМК (5550.i5 OSUb2204)',
+  'Маршрутизатор Mikrotik Hex RB750Gr3',
+  'Коммутатор, черт. ТСФВ.467000.008',
+  'Источник питания (24V, 150W)',
+  'Коннектор SUPRLAN 8P8C STP Cat.6A (RJ-45)',
+  'Выключатель автоматический двухполюсный MD63 2P 16А C 6kA',
+  'Точка доступа ТСФВ.465000.006-005'
+];
 import { useUser } from "../../../shared/contexts/UserContext";
 
 export const CreateApplicationForm = ({
@@ -126,24 +138,15 @@ export const CreateApplicationForm = ({
         setForm({
           workType: draft.workType || '',
           trainNumber: draft.trainNumber || '',
-          carriageType: draft.carriageType || '',
-          carriageNumber: draft.carriageNumber || '',
-          equipment: (draft.equipment || []).map(item => ({
-            equipmentType: item.type || '',
-            quantity: item.quantity || 1,
-            serialNumber: item.serialNumber || '',
-            macAddress: item.macAddress || '',
-            photos: {
-              equipment: null, // Файлы из черновика пока не загружаем
-              serial: null,
-              mac: null,
-              general: null
-            }
+          carriages: (draft.carriages || []).map(carriage => ({
+            carriageType: carriage.type || '',
+            carriageNumber: carriage.number || '',
+            carriagePhoto: null, // TODO: загрузка файлов из черновика
+            equipment: [] // Оборудование теперь хранится внутри вагонов
           })),
+          equipment: [], // Убираем отдельный массив оборудования
           workCompleted: draft.workCompleted || '',
           location: draft.location || '',
-          carriagePhoto: null, // TODO: загрузка файлов из черновика
-          generalPhoto: null,
           finalPhoto: null
         });
         setIsDraft(true);
@@ -164,16 +167,17 @@ export const CreateApplicationForm = ({
   // TODO: Как дойдут руки сделать абстрактный метод через Object
   // Проверяем, есть ли прогресс в форме
   const hasFormProgress = () => {
-    return activeStep > 0 || 
+    const hasEquipmentInCarriages = form.carriages?.some(carriage =>
+      carriage.equipment && carriage.equipment.length > 0
+    );
+
+    return activeStep > 0 ||
            form.workType !== "" || 
            form.trainNumber !== "" || 
-           form.carriageType !== "" || 
-           form.carriageNumber !== "" || 
-           (form.equipment && form.equipment.length > 0) || 
+           (form.carriages && form.carriages.length > 0) ||
+           hasEquipmentInCarriages ||
            form.workCompleted !== "" || 
            form.location !== "" ||
-           form.carriagePhoto !== null ||
-           form.generalPhoto !== null ||
            form.finalPhoto !== null;
   };
 
@@ -203,13 +207,9 @@ export const CreateApplicationForm = ({
     setSuccess(null);
     
     try {
-      const draftData: CreateApplicationRequest = {
-        status: 'draft' as const,
-        typeWork: form.workType,
-        trainNumber: form.trainNumber,
-        carriageType: form.carriageType,
-        carriageNumber: form.carriageNumber,
-        equipment: (form.equipment || []).map(item => ({
+      // Собираем все оборудование из вагонов в общий массив для черновика
+      const allEquipment = (form.carriages || []).flatMap(carriage =>
+        (carriage.equipment || []).map(item => ({
           equipmentType: item.equipmentType || '',
           serialNumber: item.serialNumber || '',
           macAddress: item.macAddress || '',
@@ -219,11 +219,21 @@ export const CreateApplicationForm = ({
             serialPhoto: item.photos?.serial ? item.photos.serial.name : null,
             macPhoto: item.photos?.mac ? item.photos.mac.name : null,
           }
+        }))
+      );
+
+      const draftData: CreateApplicationRequest = {
+        status: 'draft' as const,
+        typeWork: form.workType,
+        trainNumber: form.trainNumber,
+        carriages: (form.carriages || []).map(carriage => ({
+          carriageType: carriage.carriageType,
+          carriageNumber: carriage.carriageNumber,
+          carriagePhoto: carriage.carriagePhoto ? carriage.carriagePhoto.name : null,
         })),
+        equipment: allEquipment,
         completedJob: form.workCompleted,
         currentLocation: form.location,
-        carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
-        generalPhoto: form.generalPhoto ? form.generalPhoto.name : null,
         finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
         userId: user?.id || 0,
         userName: user?.name || '',
@@ -277,13 +287,9 @@ export const CreateApplicationForm = ({
     setSuccess(null);
     setError(null);
     try {
-      const requestData: CreateApplicationRequest = {
-        status: 'completed' as const,
-        typeWork: form.workType,
-        trainNumber: form.trainNumber,
-        carriageType: form.carriageType,
-        carriageNumber: form.carriageNumber,
-        equipment: (form.equipment || []).map(item => ({
+      // Собираем все оборудование из вагонов в общий массив
+      const allEquipment = (form.carriages || []).flatMap(carriage =>
+        (carriage.equipment || []).map(item => ({
           equipmentType: item.equipmentType || '',
           serialNumber: item.serialNumber || '',
           macAddress: item.macAddress || '',
@@ -293,11 +299,21 @@ export const CreateApplicationForm = ({
             serialPhoto: item.photos?.serial ?? null,
             macPhoto: item.photos?.mac ?? null,
           }
+        }))
+      );
+
+      const requestData: CreateApplicationRequest = {
+        status: 'completed' as const,
+        typeWork: form.workType,
+        trainNumber: form.trainNumber,
+        carriages: (form.carriages || []).map(carriage => ({
+          carriageType: carriage.carriageType,
+          carriageNumber: carriage.carriageNumber,
+          carriagePhoto: carriage.carriagePhoto ? carriage.carriagePhoto.name : null,
         })),
+        equipment: allEquipment,
         completedJob: form.workCompleted,
         currentLocation: form.location,
-        carriagePhoto: form.carriagePhoto ?? null,
-        generalPhoto: form.generalPhoto ?? null,
         finalPhoto: form.finalPhoto ?? null,
         userId: user?.id || 0,
         userName: user?.name || '',
@@ -341,8 +357,7 @@ export const CreateApplicationForm = ({
           status: 'completed',
           typeWork: form.workType,
           trainNumber: form.trainNumber,
-          carriageType: form.carriageType,
-          carriageNumber: form.carriageNumber,
+          carriages: form.carriages,
           equipment: form.equipment,
           completedJob: form.workCompleted,
           currentLocation: form.location,
@@ -386,33 +401,60 @@ export const CreateApplicationForm = ({
         return !form.workType;
       case "trainNumber":
         return !form.trainNumber;
-      case "carriageType":
-        return !form.carriageType;
-      case "carriageNumber":
-        return !form.carriageNumber || !form.carriagePhoto;
-      case "equipment":
-        return !form.equipment || form.equipment.length === 0 || 
-               form.equipment.some(item => {
-                 // Базовая валидация - тип оборудования и фото оборудования обязательны
-                 if (!item.equipmentType || !item.photos?.equipment) {
-                   return true;
-                 }
-                 
-                 // Серийный номер и его фото обязательны
-                 if (!item.serialNumber || !item.photos?.serial) {
-                   return true;
-                 }
-                 
-                 // MAC адрес и его фото обязательны только для определенных типов оборудования
-                 const needsMac = item.equipmentType.toLowerCase().includes('точка доступа') || 
-                                  item.equipmentType.toLowerCase().includes('маршрутизатор') ||
-                                  item.equipmentType.toLowerCase().includes('коммутатор');
-                 if (needsMac && (!item.macAddress || !item.photos?.mac)) {
-                   return true;
-                 }
-                 
-                 return false;
-               });
+      case "carriages":
+        // Проверяем базовые поля вагонов
+        if (!form.carriages || form.carriages.length === 0) {
+          return true;
+        }
+
+        return form.carriages.some(carriage => {
+          // Проверяем обязательные поля вагона
+          if (!carriage.carriageNumber || !carriage.carriageType || !carriage.carriagePhoto) {
+            return true;
+          }
+
+          // Проверяем оборудование вагона (если есть)
+          if (carriage.equipment && carriage.equipment.length > 0) {
+            return carriage.equipment.some(item => {
+              // Базовая валидация - тип оборудования и серийный номер обязательны
+              if (!item.equipmentType || !item.serialNumber) {
+                return true;
+              }
+
+              // Фото серийного номера обязательно
+              if (!item.photos?.serial) {
+                return true;
+              }
+
+              // MAC адрес обязателен только для определенных типов оборудования
+              const needsMac = item.equipmentType.toLowerCase().includes('точка доступа') ||
+                               item.equipmentType.toLowerCase().includes('маршрутизатор') ||
+                               item.equipmentType.toLowerCase().includes('коммутатор');
+
+              if (needsMac) {
+                // Проверяем наличие MAC адреса
+                if (!item.macAddress) {
+                  return true;
+                }
+
+                // Проверяем валидность MAC адреса
+                const macRegex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
+                if (!macRegex.test(item.macAddress)) {
+                  return true;
+                }
+
+                // Фото MAC адреса обязательно для оборудования с MAC
+                if (!item.photos?.mac) {
+                  return true;
+                }
+              }
+
+              return false;
+            });
+          }
+
+          return false;
+        });
       case "workCompleted":
         return !form.workCompleted;
       case "location":
@@ -442,46 +484,14 @@ export const CreateApplicationForm = ({
             options={trainNumbers}
           />
         );
-      case "carriageType":
+      case "carriages":
         return (
-          <StepCarriageType 
-            value={form.carriageType}
-            onChange={handleChange}
-            options={carriageTypes}
+          <StepCarriages
+            carriages={form.carriages || []}
+            onCarriagesChange={(carriages) => setForm(prev => ({ ...prev, carriages }))}
           />
         );
-      case "carriageNumber":
-        return (
-            <>
-              1231231231
-              <StepCarriageNumber
-                  formData={{
-                    ...form,
-                    carriagePhoto: form.carriagePhoto || null
-                  }}
-                  onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-              />
-            </>
-          // <StepCarriageNumber
-          //   formData={{
-          //     ...form,
-          //     carriagePhoto: form.carriagePhoto || null
-          //   }}
-          //   onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-          // />
-        );
-      case "equipment":
-        return (
-            <>
-              987987987
-              {/*<img src={URL.createObjectURL(form.carriagePhoto!)} />*/}
-              <EquipmentSection
-                  equipment={form.equipment || []}
-                  equipmentTypes={[]}
-                  onChange={(equipment) => setForm(prev => ({ ...prev, equipment }))}
-              />
-            </>
-        );
+
       case "workCompleted":
         return (
           <StepWorkCompleted 
@@ -620,7 +630,7 @@ export const CreateApplicationForm = ({
           }}
         >
           <CardContent sx={{ p: 3 }}>
-            <Fade in={true} timeout={500}>
+            <Fade in timeout={500}>
               <Box>
                 {renderStep()}
               </Box>

@@ -9,7 +9,15 @@ export const getWorkLog = async (req: Request, res: Response) => {
       include: {
         typeWork: true,
         train: true,
-        carriage: true,
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
         completedJob: true,
         currentLocation: true,
         user: true,
@@ -28,30 +36,30 @@ export const getWorkLog = async (req: Request, res: Response) => {
       },
     });
 
-    const formattedEntries = workLogEntries.map((entry) => {
+    const formattedEntries = workLogEntries.map((entry: any) => {
       const equipmentDetails =
-        entry.requestEquipment?.map((reqEq) => ({
+        entry.requestEquipment?.map((reqEq: any) => ({
           type: reqEq.equipment?.type || "Не указано",
           serialNumber: reqEq.equipment?.serialNumber || "Не указано",
           macAddress: reqEq.equipment?.macAddress || "Не указано",
           quantity: reqEq.quantity || 0,
           photos:
-            reqEq.equipment?.photos?.map((p) => ({
+            reqEq.equipment?.photos?.map((p: any) => ({
               type: p.photoType,
               path: p.photoPath,
               description: p.description,
             })) || [],
         })) || [];
 
-      const allPhotos = equipmentDetails.flatMap((eq) => eq.photos);
+      const allPhotos = equipmentDetails.flatMap((eq: any) => eq.photos);
 
       const getPhotoPaths = (type: string) =>
-        allPhotos.filter((p) => p.type === type).map((p) => p.path);
+        allPhotos.filter((p: any) => p.type === type).map((p: any) => p.path);
 
-      const equipmentTypes = equipmentDetails.map((eq) => eq.type);
-      const serialNumbers = equipmentDetails.map((eq) => eq.serialNumber);
-      const macAddresses = equipmentDetails.map((eq) => eq.macAddress);
-      const countEquipments = equipmentDetails.map((eq) => eq.quantity);
+      const equipmentTypes = equipmentDetails.map((eq: any) => eq.type);
+      const serialNumbers = equipmentDetails.map((eq: any) => eq.serialNumber);
+      const macAddresses = equipmentDetails.map((eq: any) => eq.macAddress);
+      const countEquipments = equipmentDetails.map((eq: any) => eq.quantity);
 
       return {
         id: entry.id,
@@ -59,8 +67,8 @@ export const getWorkLog = async (req: Request, res: Response) => {
         applicationDate: entry.applicationDate.toISOString(),
         typeWork: entry.typeWork?.name || "Не указано",
         trainNumber: entry.train?.number || "Не указано",
-        carriageType: entry.carriage?.type || "Не указано",
-        carriageNumber: entry.carriage?.number || "Не указано",
+        carriageType: entry.requestCarriages[0]?.carriage?.type || "Не указано",
+        carriageNumber: entry.requestCarriages[0]?.carriage?.number || "Не указано",
 
         // Для совместимости
         equipment: equipmentTypes[0] || "Не указано",
@@ -73,7 +81,7 @@ export const getWorkLog = async (req: Request, res: Response) => {
         macAddress: macAddresses[0] || "Не указано",
         macAddresses,
 
-        countEquipment: countEquipments.reduce((a, b) => a + b, 0),
+        countEquipment: countEquipments.reduce((a: number, b: number) => a + b, 0),
         countEquipments,
 
         equipmentDetails,
@@ -147,15 +155,22 @@ export const updateWorkLogById = async (req: Request, res: Response) => {
           : undefined,
         typeWorkId: typeWork?.id,
         trainId: train?.id,
-        carriageId: carriage?.id,
         completedJobId: completedJob?.id,
-        currentLocationId:currentLocation?.id,
+        currentLocationId: currentLocation?.id,
         userId: otherUpdateData.userId,
       },
       include: {
         typeWork: true,
         train: true,
-        carriage: true,
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
         completedJob: true,
         currentLocation: true,
         user: true,
@@ -168,7 +183,15 @@ export const updateWorkLogById = async (req: Request, res: Response) => {
       include: {
         typeWork: true,
         train: true,
-        carriage: true,
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
         completedJob: true,
         currentLocation: true,
         user: true,
@@ -184,29 +207,29 @@ export const updateWorkLogById = async (req: Request, res: Response) => {
 
     // 4. Формируем ответ
     const equipmentDetails =
-      fullUpdatedEntry?.requestEquipment.map((reqEq) => ({
+      fullUpdatedEntry?.requestEquipment.map((reqEq: any) => ({
         id: reqEq.id,
         type: reqEq.equipment?.type || "Не указано",
         serialNumber: reqEq.equipment?.serialNumber || "Не указано",
         macAddress: reqEq.equipment?.macAddress || "Не указано",
         quantity: reqEq.quantity || 0,
         photos:
-          reqEq.equipment?.photos?.map((photo) => ({
+          reqEq.equipment?.photos?.map((photo: any) => ({
             type: photo.photoType,
             path: photo.photoPath,
             description: photo.description,
           })) || [],
       })) || [];
 
-    const allPhotos = equipmentDetails.flatMap((eq) => eq.photos);
+    const allPhotos = equipmentDetails.flatMap((eq: any) => eq.photos);
 
     const getPhotoPaths = (type: string) =>
-      allPhotos.filter((p) => p.type === type).map((p) => p.path);
+      allPhotos.filter((p: any) => p.type === type).map((p: any) => p.path);
 
-    const equipmentTypes = equipmentDetails.map((eq) => eq.type);
-    const serialNumbers = equipmentDetails.map((eq) => eq.serialNumber);
-    const macAddresses = equipmentDetails.map((eq) => eq.macAddress);
-    const countEquipments = equipmentDetails.map((eq) => eq.quantity);
+    const equipmentTypes = equipmentDetails.map((eq: any) => eq.type);
+    const serialNumbers = equipmentDetails.map((eq: any) => eq.serialNumber);
+    const macAddresses = equipmentDetails.map((eq: any) => eq.macAddress);
+    const countEquipments = equipmentDetails.map((eq: any) => eq.quantity);
 
     const formattedEntry = {
       id: fullUpdatedEntry?.id,
@@ -214,8 +237,8 @@ export const updateWorkLogById = async (req: Request, res: Response) => {
       applicationDate: fullUpdatedEntry?.applicationDate?.toISOString(),
       typeWork: fullUpdatedEntry?.typeWork?.name || "Не указано",
       trainNumber: fullUpdatedEntry?.train?.number || "Не указано",
-      carriageType: fullUpdatedEntry?.carriage?.type || "Не указано",
-      carriageNumber: fullUpdatedEntry?.carriage?.number || "Не указано",
+      carriageType: fullUpdatedEntry?.requestCarriages[0]?.carriage?.type || "Не указано",
+      carriageNumber: fullUpdatedEntry?.requestCarriages[0]?.carriage?.number || "Не указано",
 
       equipment: equipmentTypes[0] || "Не указано",
       equipmentType: equipmentTypes.join(", ") || "Не указано",
@@ -227,7 +250,7 @@ export const updateWorkLogById = async (req: Request, res: Response) => {
       macAddress: macAddresses[0] || "Не указано",
       macAddresses,
 
-      countEquipment: countEquipments.reduce((acc, val) => acc + val, 0),
+      countEquipment: countEquipments.reduce((acc: number, val: number) => acc + val, 0),
       countEquipments,
 
       equipmentDetails,
@@ -274,7 +297,15 @@ export const getWorkLogById = async (req: Request, res: Response) => {
       include: {
         typeWork: true,
         train: true,
-        carriage: true,
+        requestCarriages: {
+          include: {
+            carriage: {
+              include: {
+                train: true,
+              },
+            },
+          },
+        },
         completedJob: true,
         currentLocation: true,
         user: true,
@@ -301,45 +332,45 @@ export const getWorkLogById = async (req: Request, res: Response) => {
 
     // Формируем агрегированные поля из requestEquipment
     const equipmentTypes = workLogEntry.requestEquipment.map(
-      (re) => re.equipment?.type || "Не указано"
+      (re: any) => re.equipment?.type || "Не указано"
     );
     const serialNumbers = workLogEntry.requestEquipment.map(
-      (re) => re.equipment?.serialNumber || ""
+      (re: any) => re.equipment?.serialNumber || ""
     );
     const macAddresses = workLogEntry.requestEquipment.map(
-      (re) => re.equipment?.macAddress || ""
+      (re: any) => re.equipment?.macAddress || ""
     );
     const countEquipments = workLogEntry.requestEquipment.map(
-      (re) => re.quantity || 0
+      (re: any) => re.quantity || 0
     );
 
     // Собираем все фотографии по категориям
     const carriagePhoto = workLogEntry.requestEquipment
-      .flatMap((re) => re.equipment?.photos || [])
-      .find((p) => p.photoType === "carriage")?.photoPath;
+      .flatMap((re: any) => re.equipment?.photos || [])
+      .find((p: any) => p.photoType === "carriage")?.photoPath;
 
     const equipmentPhotos = workLogEntry.requestEquipment
-      .flatMap((re) => re.equipment?.photos || [])
-      .filter((p) => p.photoType === "equipment")
-      .map((p) => p.photoPath);
+      .flatMap((re: any) => re.equipment?.photos || [])
+      .filter((p: any) => p.photoType === "equipment")
+      .map((p: any) => p.photoPath);
 
     const serialPhotos = workLogEntry.requestEquipment
-      .flatMap((re) => re.equipment?.photos || [])
-      .filter((p) => p.photoType === "serial")
-      .map((p) => p.photoPath);
+      .flatMap((re: any) => re.equipment?.photos || [])
+      .filter((p: any) => p.photoType === "serial")
+      .map((p: any) => p.photoPath);
 
     const macPhotos = workLogEntry.requestEquipment
-      .flatMap((re) => re.equipment?.photos || [])
-      .filter((p) => p.photoType === "mac")
-      .map((p) => p.photoPath);
+      .flatMap((re: any) => re.equipment?.photos || [])
+      .filter((p: any) => p.photoType === "mac")
+      .map((p: any) => p.photoPath);
 
     const generalPhoto = workLogEntry.requestEquipment
-      .flatMap((re) => re.equipment?.photos || [])
-      .find((p) => p.photoType === "general")?.photoPath;
+      .flatMap((re: any) => re.equipment?.photos || [])
+      .find((p: any) => p.photoType === "general")?.photoPath;
 
     const finalPhoto = workLogEntry.requestEquipment
-      .flatMap((re) => re.equipment?.photos || [])
-      .find((p) => p.photoType === "final")?.photoPath;
+      .flatMap((re: any) => re.equipment?.photos || [])
+      .find((p: any) => p.photoType === "final")?.photoPath;
 
     const formattedEntry = {
       id: workLogEntry.id,
@@ -347,8 +378,8 @@ export const getWorkLogById = async (req: Request, res: Response) => {
       applicationDate: workLogEntry.applicationDate?.toISOString() || "",
       typeWork: workLogEntry.typeWork?.name || "Не указано",
       trainNumber: workLogEntry.train?.number || "Не указано",
-      carriageType: workLogEntry.carriage?.type || "Не указано",
-      carriageNumber: workLogEntry.carriage?.number || "Не указано",
+      carriageType: workLogEntry.requestCarriages[0]?.carriage?.type || "Не указано",
+      carriageNumber: workLogEntry.requestCarriages[0]?.carriage?.number || "Не указано",
 
       equipment: equipmentTypes.join(", ") || "Не указано",
       equipmentType: equipmentTypes.join(", ") || "Не указано",
@@ -360,10 +391,10 @@ export const getWorkLogById = async (req: Request, res: Response) => {
       macAddress: macAddresses.join(", "),
       macAddresses,
 
-      countEquipment: countEquipments.reduce((a, b) => a + b, 0),
+      countEquipment: countEquipments.reduce((a: number, b: number) => a + b, 0),
       countEquipments,
 
-      equipmentDetails: workLogEntry.requestEquipment.map((re) => ({
+      equipmentDetails: workLogEntry.requestEquipment.map((re: any) => ({
         equipmentType: re.equipment?.type || "Не указано",
         serialNumber: re.equipment?.serialNumber || "",
         macAddress: re.equipment?.macAddress || "",

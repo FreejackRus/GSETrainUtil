@@ -48,7 +48,7 @@ export const StepFinalPhoto: React.FC<StepFinalPhotoProps> = ({
         onPhotoChange={handlePhotoChange}
         label="Финальная фотография работ"
         description="Загрузите фотографию завершенных работ для отчета"
-        required={true}
+        required
       />
     </Box>
   );

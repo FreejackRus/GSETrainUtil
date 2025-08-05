@@ -8,7 +8,7 @@ export const postUser = async (req: Request, res: Response) => {
   console.log(login, password, role, name);
 
   try {
-    if (!login || !password || !name) {
+    if (!login || !password ) {
       return res.status(400).json({ error: "не все поля указаны в json" });
     }
     const prisma = new PrismaClient();
@@ -23,7 +23,7 @@ export const postUser = async (req: Request, res: Response) => {
     }
     const hashPassword = await bcrypt.hash(password, 10);
     await prisma.user.create({
-      data: { login: login, password: hashPassword, role: role || "user", name: name },
+      data: { login: login, password: hashPassword, role: role || "user", name: name || "" },
     });
     await prisma.$disconnect();
     res.sendStatus(200);

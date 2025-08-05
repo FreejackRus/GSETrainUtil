@@ -1,8 +1,15 @@
+export interface equipmentDetails {
+  macAddress?: string;
+  quantity?: number;
+  serialNumber?: string;
+  carriageNumber?: string;
+  type?: string;
+}[];
 
 export interface ResponseJson {
   applicationNumber: number;
   carriageNumber: string;
-  carriageType:string;
+  carriageType: string;
   equipmentTypes: string[];
   countEquipments: number[];
   serialNumbers: string[];
@@ -10,6 +17,8 @@ export interface ResponseJson {
   contractNumber: string;
   actDate: string;
   typeWork: string;
-  contractDate?:string,
-  trainNumber:string
+  trainNumber: string;
+  contractDate?: string;
+  currentLocation?: string;
+  equipmentDetails?: equipmentDetails[]
 }

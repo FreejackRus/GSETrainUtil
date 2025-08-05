@@ -323,11 +323,12 @@ export const WorkLogPage = () => {
             typeWork: entry.typeWork,
             applicationNumber: entry.applicationNumber,
             carriageNumber: entry.carriageNumber,
-            equipmentTypes: entry.equipmentTypes,
-            countEquipments: entry.countEquipments,
-            serialNumbers: entry.serialNumbers,
+            equipmentDetails:entry.equipmentDetails?.map(({ photos,...rest})=>rest),
+            // equipmentTypes: entry.equipmentTypes,
+            // countEquipments: entry.countEquipments,
+            // serialNumbers: entry.serialNumbers,
             applicationDate: entry.applicationDate,
-            contractNumber: 'TESTNUMBER',
+            contractNumber: '____________________',
           },
           {
             responseType: 'blob', // Важно: получаем как файл
@@ -346,15 +347,14 @@ export const WorkLogPage = () => {
         link.remove();
         window.URL.revokeObjectURL(url);
         console.log(response);
-        
       } else if (typePdf === 'Технический акт') {
         response = await apiClient.post(
           '/pdfTechnicalActAcceptance',
           {
             applicationNumber: entry.applicationNumber,
             applicationDate: entry.applicationDate,
-            contractNumber: 'TESTNUMBER',
-            contractDate: '«16» июля 2025 г.',
+            contractNumber: '____________________',
+            contractDate: '«__».____.____ г.',
             carriageNumber: entry.carriageNumber,
             carriageType: entry.carriageType,
             equipmentTypes: entry.equipmentTypes,
@@ -381,7 +381,34 @@ export const WorkLogPage = () => {
         link.remove();
         window.URL.revokeObjectURL(url);
         console.log(response);
+      } else if (typePdf === 'Заявка') {
+        response = await apiClient.post(
+          '/pdfAppWork',
+          {
+            applicationNumber: entry.applicationNumber,
+            carriageNumber: entry.carriageNumber,
+            carriageType: entry.carriageType,
+            currentLocation: entry.currentLocation,
+            equipmentTypes: entry.equipmentTypes,
+            countEquipments: entry.countEquipments,
+          },
+          {
+            responseType: 'blob', // Важно: получаем как файл
+          },
+        );
+        const blob = new Blob([response?.data], {
+          type: 'application/pdf',
+        });
+        const url = window.URL.createObjectURL(blob);
 
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Заявка_№${entry.applicationNumber}.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
       }
     } catch {
       console.error('Ошибка при скачивании PDF:', error);
@@ -432,12 +459,22 @@ export const WorkLogPage = () => {
       >
         <CardContent sx={{ flexGrow: 1 }}>
           <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-            <Chip
-              label={`#${entry.applicationNumber}`}
-              color="primary"
-              size="small"
-              sx={{ fontWeight: 'bold' }}
-            />
+            <Box >
+              <Chip
+                label={`#${entry.applicationNumber}`}
+                color="primary"
+                size="small"
+                sx={{ fontWeight: 'bold' }}
+              />
+              <Chip
+              sx={{ml:2}}
+                label={entry.typeWork}
+                color={getWorkTypeColor(entry.typeWork)}
+                size="small"
+                variant="outlined"
+              />
+            </Box>
+
             <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
               <MoreVertIcon />
             </IconButton>
@@ -515,13 +552,17 @@ export const WorkLogPage = () => {
             >
               Подробнее
             </Button>
+            <Select
+              value="Скачать"
+              onChange={(e) => handleDownloadPdf(entry, e.target.value as string)}
+            >
+              <MenuItem value="Скачать">Скачать</MenuItem>
+              <MenuItem value="Заявка">Заявка</MenuItem>
+              <MenuItem value="Акт демонтажа/монтажа">Акт демонтажа/монтажа</MenuItem>
+              <MenuItem value="Акт выполненных работ">Акт выполненных работ </MenuItem>
+              <MenuItem value="Технический акт">Технический акт</MenuItem>
+            </Select>
           </Box>
-          <Chip
-            label={entry.typeWork}
-            color={getWorkTypeColor(entry.typeWork)}
-            size="small"
-            variant="outlined"
-          />
         </CardActions>
       </Card>
     </Grid>
@@ -606,7 +647,7 @@ export const WorkLogPage = () => {
         </Grid>
 
         <Grid item xs={12} sm={1}>
-          <Box display="flex" gap={0.5}>
+          <Box display="flex"  gap={0.5}>
             <IconButton
               size="small"
               onClick={() => handleViewPhotos(entry)}
