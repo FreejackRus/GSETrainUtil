@@ -297,6 +297,8 @@ export const getWorkLogById = async (req: Request, res: Response) => {
       });
     }
 
+    console.log('workLogEntry', workLogEntry);
+
     // Формируем агрегированные поля из requestEquipment
     const equipmentTypes = workLogEntry.requestEquipment.map(
       (re) => re.equipment?.type || "Не указано"

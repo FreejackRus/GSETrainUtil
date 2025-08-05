@@ -102,16 +102,16 @@ export interface CreateApplicationRequest {
     macAddress: string;
     quantity: number;
     photos: {
-      equipmentPhoto?: string | null;
-      serialPhoto?: string | null;
-      macPhoto?: string | null;
+      equipmentPhoto?: File | null;
+      serialPhoto?: File | null;
+      macPhoto?: File | null;
     };
   }>;
   completedJob?: string;
   currentLocation?: string;
-  carriagePhoto?: string | null;
-  generalPhoto?: string | null;
-  finalPhoto?: string | null;
+  carriagePhoto?: File | null;
+  generalPhoto?: File | null;
+  finalPhoto?: File | null;
   userId: number;
   userName: string;
   userRole: string;

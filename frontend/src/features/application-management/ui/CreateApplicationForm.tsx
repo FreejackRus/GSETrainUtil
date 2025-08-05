@@ -161,6 +161,7 @@ export const CreateApplicationForm = ({
     }));
   };
 
+  // TODO: Как дойдут руки сделать абстрактный метод через Object
   // Проверяем, есть ли прогресс в форме
   const hasFormProgress = () => {
     return activeStep > 0 || 
@@ -258,7 +259,17 @@ export const CreateApplicationForm = ({
     }
   };
 
-  const handleNext = () => setActiveStep((prev) => prev + 1);
+  const handleNext = () => setActiveStep((prev) => {
+    console.log('form', form);
+    const fd = new FormData();
+    fd.append('photo', form.carriagePhoto ?? '');
+    console.log('form Data', fd.get('photo'));
+    console.log('form Data', fd.get('nichego'));
+
+    // handleSubmit().then(r => console.log('eeeeee', r));
+
+    return prev + 1;
+  });
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
   const handleSubmit = async () => {
@@ -278,16 +289,16 @@ export const CreateApplicationForm = ({
           macAddress: item.macAddress || '',
           quantity: item.quantity || 1,
           photos: {
-            equipmentPhoto: item.photos?.equipment ? item.photos.equipment.name : null,
-            serialPhoto: item.photos?.serial ? item.photos.serial.name : null,
-            macPhoto: item.photos?.mac ? item.photos.mac.name : null,
+            equipmentPhoto: item.photos?.equipment ?? null,
+            serialPhoto: item.photos?.serial ?? null,
+            macPhoto: item.photos?.mac ?? null,
           }
         })),
         completedJob: form.workCompleted,
         currentLocation: form.location,
-        carriagePhoto: form.carriagePhoto ? form.carriagePhoto.name : null,
-        generalPhoto: form.generalPhoto ? form.generalPhoto.name : null,
-        finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
+        carriagePhoto: form.carriagePhoto ?? null,
+        generalPhoto: form.generalPhoto ?? null,
+        finalPhoto: form.finalPhoto ?? null,
         userId: user?.id || 0,
         userName: user?.name || '',
         userRole: user?.role || ''
@@ -441,21 +452,35 @@ export const CreateApplicationForm = ({
         );
       case "carriageNumber":
         return (
-          <StepCarriageNumber
-            formData={{
-              ...form,
-              carriagePhoto: form.carriagePhoto || null
-            }}
-            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-          />
+            <>
+              1231231231
+              <StepCarriageNumber
+                  formData={{
+                    ...form,
+                    carriagePhoto: form.carriagePhoto || null
+                  }}
+                  onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
+              />
+            </>
+          // <StepCarriageNumber
+          //   formData={{
+          //     ...form,
+          //     carriagePhoto: form.carriagePhoto || null
+          //   }}
+          //   onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
+          // />
         );
       case "equipment":
         return (
-          <EquipmentSection 
-            equipment={form.equipment || []}
-            equipmentTypes={[]}
-            onChange={(equipment) => setForm(prev => ({ ...prev, equipment }))}
-          />
+            <>
+              987987987
+              {/*<img src={URL.createObjectURL(form.carriagePhoto!)} />*/}
+              <EquipmentSection
+                  equipment={form.equipment || []}
+                  equipmentTypes={[]}
+                  onChange={(equipment) => setForm(prev => ({ ...prev, equipment }))}
+              />
+            </>
         );
       case "workCompleted":
         return (
@@ -474,10 +499,17 @@ export const CreateApplicationForm = ({
         );
       case "finalPhoto":
         return (
-          <StepFinalPhoto 
-            formData={form}
-            onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
-          />
+            <>
+              adasdads
+              <StepFinalPhoto
+                  formData={form}
+                  onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
+              />
+            </>
+          // <StepFinalPhoto
+          //   formData={form}
+          //   onFormDataChange={(data) => setForm(prev => ({ ...prev, ...data }))}
+          // />
         );
       default:
         return <div>Неизвестный шаг</div>;

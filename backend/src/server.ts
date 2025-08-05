@@ -7,11 +7,16 @@ import { routerCarriage } from "./router/routerCarriage";
 import { routerWorkLog } from "./router/routerWorkLog";
 import { routerPdfGenerate } from "./router/routerPdfGenerate";
 import archiveRoutes from "./routes/archiveRoutes";
+import multer from "multer";
 
 const app = express();
+const upload = multer();
 const port = 3000;
 
 app.use(bodyParser.json());
+
+app.use(upload.any());
+app.use(express.static('public'));
 
 app.use(
   cors({

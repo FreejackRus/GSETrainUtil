@@ -7,8 +7,55 @@ export const applicationApi = {
       console.log("=== API: Отправка запроса на создание заявки ===");
       console.log("URL:", '/applications');
       console.log("Данные запроса:", data);
-      
-      const response = await apiClient.post('/applications', data);
+
+      // TODO: сделать через абстрактную функцию
+      const fd = new FormData();
+
+      if (data.id != null) fd.append('id', String(data.id));
+      if (data.applicationDate) fd.append('applicationDate', data.applicationDate);
+      if (data.typeWork) fd.append('typeWork', data.typeWork);
+      if (data.trainNumber) fd.append('trainNumber', data.trainNumber);
+      if (data.carriageType) fd.append('carriageType', data.carriageType);
+      if (data.carriageNumber) fd.append('carriageNumber', data.carriageNumber);
+      if (data.completedJob) fd.append('completedJob', data.completedJob);
+      if (data.currentLocation) fd.append('currentLocation', data.currentLocation);
+      fd.append('userId',   String(data.userId));
+      fd.append('userName', data.userName);
+      fd.append('userRole', data.userRole);
+      fd.append('status',   data.status);
+
+      data.equipment.forEach((item, index) => {
+        fd.append(`equipment[${index}][equipmentType]`, item.equipmentType);
+        fd.append(`equipment[${index}][serialNumber]`, item.serialNumber);
+        fd.append(`equipment[${index}][macAddress]`, item.macAddress);
+        fd.append(`equipment[${index}][quantity]`, String(item.quantity));
+        if (item.photos.equipmentPhoto) {
+          fd.append(
+              `equipment[${index}][photos][equipmentPhoto]`,
+              item.photos.equipmentPhoto
+          );
+        }
+        if (item.photos.serialPhoto) {
+          fd.append(
+              `equipment[${index}][photos][serialPhoto]`,
+              item.photos.serialPhoto
+          );
+        }
+        if (item.photos.macPhoto) {
+          fd.append(
+              `equipment[${index}][photos][macPhoto]`,
+              item.photos.macPhoto
+          );
+        }
+      });
+      fd.append('equipmentLength', String(data.equipment.length));
+
+      if (data.carriagePhoto) fd.append('carriagePhoto', data.carriagePhoto);
+      if (data.generalPhoto) fd.append('generalPhoto', data.generalPhoto);
+      if (data.finalPhoto) fd.append('finalPhoto', data.finalPhoto);
+
+      // TODO: Проверить тут
+      const response = await apiClient.post('/applications', fd);
       
       console.log("=== API: Успешный ответ ===");
       console.log("Статус:", response.status);
