@@ -86,9 +86,9 @@ export const HomePage = () => {
   };
 
   return (
-    <Container maxWidth="xl" className="home-page">
+    <Container maxWidth="xl" className="home-page" >
       <Fade in timeout={800}>
-        <Box>
+        <Box className="home-page__box" >
           {/* Заголовок страницы */}
           <Paper elevation={6} className="home-page__header">
             <Box className="home-page__header-content">
@@ -121,7 +121,7 @@ export const HomePage = () => {
 
           {/* Статистические карточки */}
           <Grid container spacing={{ xs: 2, md: 3 }} className="home-page__stats">
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{xs:12,sm:6,md:4}}>
               <Card
                 elevation={4}
                 className="home-page__stat-card home-page__stat-card--analytics"
@@ -154,7 +154,7 @@ export const HomePage = () => {
               </Card>
             </Grid>
             
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{xs:12,sm:6,md:4}}>
               <Card
                 elevation={4}
                 className="home-page__stat-card home-page__stat-card--settings"
@@ -187,7 +187,7 @@ export const HomePage = () => {
               </Card>
             </Grid>
             
-            <Grid item xs={12} sm={12} md={4}>
+            <Grid size={{xs:12,sm:12,md:4}}>
               <Card
                 elevation={4}
                 className="home-page__stat-card home-page__stat-card--monitoring"
@@ -235,14 +235,14 @@ export const HomePage = () => {
                   Управление системой
                 </Typography>
               </Box>
-              <Box className="home-page__button-container">
+              <Box className="home-page__button-container" >
                 <Button 
                   startIcon={<PeopleIcon />}
                   variant="contained"
                   color="secondary"
                   className="home-page__user-management-button"
                   onClick={handleUserManagement}
-                  sx={{ mr: 2 }}
+                  // sx={{ mr: 2}}
                 >
                   Управление пользователями
                 </Button>
@@ -260,7 +260,7 @@ export const HomePage = () => {
             {/* Новые кнопки для вагонов и журнала работ */}
             <Box className="home-page__main-actions">
               <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{xs:12,md:6}}>
                   <Card
                     elevation={4}
                     className="home-page__action-card home-page__action-card--carriages"
@@ -289,7 +289,7 @@ export const HomePage = () => {
                   </Card>
                 </Grid>
                 
-                <Grid item xs={12} md={6}>
+                <Grid  size={{xs:12,md:6}}>
                   <Card
                     elevation={4}
                     className="home-page__action-card home-page__action-card--worklog"
