@@ -14,14 +14,7 @@ import {
 import logoBase64 from "../utils/logoBase64";
 import path from "path";
 import { formatRussianDate } from "../utils/stringConvertDate";
-import { ResponseJson } from "../../types/types";
-
-interface EquipmentItem {
-  wagonNumber: string;
-  equipmentName: string;
-  serialNumber: string;
-  quantity: string;
-}
+import { equipmentDetails, ResponseJson } from "../../types/types";
 
 interface DismantlingActData {
   actNumber: string; // например "9.1"
@@ -29,7 +22,7 @@ interface DismantlingActData {
   contractNumber: string; // например "214-СИОИТ/ГСЭ25"
   contractDate: string; // например "«09» июня 2025 г."
   applicationNumber: string; // например "9"
-  equipment: EquipmentItem[];
+  equipment: equipmentDetails[];
 }
 
 function createDismantlingAct(doc: jsPDF, data: DismantlingActData): number {
@@ -108,10 +101,10 @@ function createDismantlingAct(doc: jsPDF, data: DismantlingActData): number {
   // Формируем тело таблицы с автоматической нумерацией
   const bodyData = data.equipment.map((item, index) => [
     (index + 1).toString(),
-    item.wagonNumber,
-    item.equipmentName,
-    item.serialNumber,
-    item.quantity,
+    item.carriageNumber ?? "-",
+    item.type ?? "-",
+    item.serialNumber ?? "-",
+    item.quantity ?? "-",
   ]);
 
   autoTable(doc, {
@@ -282,37 +275,38 @@ export const createPdfActDisEquipment = async (
   const doc = new jsPDF();
   const applicationNumber = json.applicationNumber;
   const carriageNumber = json.carriageNumber;
-  const equipmentTypes = json.equipmentTypes;
-  const countEquipments = json.countEquipments;
-  const serialNumbers = json.serialNumbers;
-  const applicationDate = json.applicationDate;
-  const contractNumber = json.contractNumber;
-  let arrEquipment: EquipmentItem[] = [];
-  equipmentTypes.map((item, index) => {
-    arrEquipment.push({
-      wagonNumber: carriageNumber,
-      equipmentName: item,
-      serialNumber: serialNumbers[index] || "-",
-      quantity: String(countEquipments[index]) || "-",
-    });
-  });
-  
+  const applicationDate = json.applicationDate || "«___»______.____г.";
+  const contractNumber = json.contractNumber || "____________________";
+  const equipmentDetails = json.equipmentDetails;
+  const actDate = "«___»______.____г.";
+
+  const infoEquipmentAndCarriageNumber =
+    equipmentDetails?.map((item) => ({
+      ...item,
+      carriageNumber: carriageNumber,
+    })) ?? [];
+
   const resultJson: DismantlingActData = {
     actNumber: String(applicationNumber),
-    actDate: "«___»______.____г.",
+    actDate: actDate,
     contractNumber: contractNumber,
     contractDate: formatRussianDate(applicationDate),
     applicationNumber: String(applicationNumber),
-    equipment: arrEquipment,
+    equipment: infoEquipmentAndCarriageNumber,
   };
-  
+
+  // createDismantlingAct(doc, resultJson);
   createDismantlingAct(doc, resultJson);
+
   // Получаем PDF как Uint8Array
   const pdfBytes = doc.output("arraybuffer");
   const buffer = Buffer.from(pdfBytes);
   // Формируем путь к файлу
-  
-  const filePath = path.resolve(outputDir, `Акт демонтажа№${applicationNumber}.pdf`);
+
+  const filePath = path.resolve(
+    outputDir,
+    `Акт демонтажа№${applicationNumber}.pdf`
+  );
 
   // Записываем файл
   await fs.writeFile(filePath, buffer);

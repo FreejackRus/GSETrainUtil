@@ -136,7 +136,7 @@ export interface ApplicationStep {
   photoField?: string;
 }
 
-export type ApplicationStepKey = 
+export type ApplicationStepKey =
   | 'workType'
   | 'trainNumber'
   | 'carriages'
@@ -169,10 +169,21 @@ export interface CarriageResponse {
 
 // Типы для журнала работ
 export interface WorkLogEntry {
-  countEquipments?:number[]
-  equipmentTypes?:string[]
-  serialNumbers?:string[]
+  countEquipments?: number[];
+  equipmentTypes?: string[];
+  serialNumbers?: string[];
   id: number;
+  equipmentDetails?: {
+    macAddress?: string;
+    quantity?: number;
+    serialNumber?: string;
+    type?: string;
+    photos?: {
+      description?: string;
+      path?: string;
+      type?: string;
+    }[];
+  }[];
   applicationNumber: number;
   applicationDate: string;
   typeWork: string;
