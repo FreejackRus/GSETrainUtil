@@ -13,13 +13,11 @@ export const INITIAL_FORM_DATA: ApplicationFormData = {
   workType: '',
   trainNumber: '',
   carriages: [], // Массив вагонов
-  equipment: [], // Массив оборудования
   workCompleted: '',
   location: '',
   
   // Пути к изображениям
-  generalPhoto: null,
-  finalPhoto: null,
+  photo: null
 };
 
 export const FALLBACK_DATA = {

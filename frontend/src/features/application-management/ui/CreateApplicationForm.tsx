@@ -87,8 +87,7 @@ export const CreateApplicationForm = ({
     if (!open) return;
     setActiveStep(0);
     setForm({
-      ...INITIAL_FORM_DATA,
-      equipment: INITIAL_FORM_DATA.equipment || [], // Ensure equipment is always an array
+      ...INITIAL_FORM_DATA, // Ensure equipment is always an array
     });
     setSuccess(null);
     setError(null);
@@ -136,18 +135,17 @@ export const CreateApplicationForm = ({
 
       if (draft) {
         setForm({
-          workType: draft.workType || '',
-          trainNumber: draft.trainNumber || '',
+          workType: draft.carriages[0].equipment[0].typeWork || '',
+          trainNumber: draft.trainNumbers[0] || '',
           carriages: (draft.carriages || []).map((carriage) => ({
             carriageType: carriage.type || '',
             carriageNumber: carriage.number || '',
             carriagePhoto: null, // TODO: загрузка файлов из черновика
             equipment: [], // Оборудование теперь хранится внутри вагонов
           })),
-          equipment: [], // Убираем отдельный массив оборудования
-          workCompleted: draft.workCompleted || '',
-          location: draft.location || '',
-          finalPhoto: null,
+          workCompleted: draft.status || '',
+          location: draft.currentLocation || '',
+          photo: null,
         });
         setIsDraft(true);
       }
@@ -171,14 +169,16 @@ export const CreateApplicationForm = ({
       (carriage) => carriage.equipment && carriage.equipment.length > 0,
     );
 
-    return activeStep > 0 ||
-           form.workType !== "" ||
-           form.trainNumber !== "" ||
-           (form.carriages && form.carriages.length > 0) ||
-           hasEquipmentInCarriages ||
-           form.workCompleted !== "" || 
-           form.location !== "" ||
-           form.finalPhoto !== null;
+    return (
+      activeStep > 0 ||
+      form.workType !== '' ||
+      form.trainNumber !== '' ||
+      (form.carriages && form.carriages.length > 0) ||
+      hasEquipmentInCarriages ||
+      form.workCompleted !== '' ||
+      form.location !== '' ||
+      form.photo !== null
+    );
   };
 
   // Обработка закрытия с подтверждением
@@ -222,19 +222,47 @@ export const CreateApplicationForm = ({
         })),
       );
 
+      // const draftData: CreateApplicationRequest = {
+      //   status: 'draft' as const,
+      //   typeWork: form.workType,
+      //   trainNumber: form.trainNumber,
+      //   carriages: (form.carriages || []).map((carriage) => ({
+      //     carriageType: carriage.carriageType,
+      //     carriageNumber: carriage.carriageNumber,
+      //     carriagePhoto: carriage.carriagePhoto ? carriage.carriagePhoto.name : null,
+      //   })),
+      //   equipment: allEquipment,
+      //   completedJob: form.workCompleted,
+      //   currentLocation: form.location,
+      //   finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
+      //   userId: user?.id || 0,
+      //   userName: user?.name || '',
+      //   userRole: user?.role || '',
+      // };
       const draftData: CreateApplicationRequest = {
-        status: 'draft' as const,
-        typeWork: form.workType,
-        trainNumber: form.trainNumber,
-        carriages: (form.carriages || []).map((carriage) => ({
-          carriageType: carriage.carriageType,
-          carriageNumber: carriage.carriageNumber,
-          carriagePhoto: carriage.carriagePhoto ? carriage.carriagePhoto.name : null,
+        id: draftId,
+        status: 'draft',
+        trainNumbers: [form.trainNumber], // теперь массив поездов
+        carriages: (form.carriages || []).map((c) => ({
+          carriageNumber: c.carriageNumber,
+          carriageType: c.carriageType,
+          carriagePhoto: c.carriagePhoto ?? null,
+          equipment: (c.equipment || []).map((e) => ({
+            equipmentName: e.equipmentType, // поле name у Equipment
+            serialNumber: e.serialNumber,
+            macAddress: e.macAddress,
+            typeWork: form.workType, // тип работ на уровне оборудования
+            quantity: e.quantity,
+            photos: {
+              equipmentPhoto: e.photos?.equipment ?? null,
+              serialPhoto: e.photos?.serial ?? null,
+              macPhoto: e.photos?.mac ?? null,
+            },
+          })),
         })),
-        equipment: allEquipment,
         completedJob: form.workCompleted,
         currentLocation: form.location,
-        finalPhoto: form.finalPhoto ? form.finalPhoto.name : null,
+        photo: form.photo ?? null, // единое фото заявки
         userId: user?.id || 0,
         userName: user?.name || '',
         userRole: user?.role || '',
@@ -269,17 +297,18 @@ export const CreateApplicationForm = ({
     }
   };
 
-  const handleNext = () => setActiveStep((prev) => {
-    console.log('form', form);
-    const fd = new FormData();
-    fd.append('photo', form.carriagePhoto ?? '');
-    console.log('form Data', fd.get('photo'));
-    console.log('form Data', fd.get('nichego'));
+  const handleNext = () =>
+    setActiveStep((prev) => {
+      console.log('form', form);
+      const fd = new FormData();
+      // fd.append('photo', form.carriagePhoto ?? '');
+      console.log('form Data', fd.get('photo'));
+      console.log('form Data', fd.get('nichego'));
 
-    // handleSubmit().then(r => console.log('eeeeee', r));
+      // handleSubmit().then(r => console.log('eeeeee', r));
 
-    return prev + 1;
-  });
+      return prev + 1;
+    });
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
   const handleSubmit = async () => {
@@ -298,23 +327,33 @@ export const CreateApplicationForm = ({
             equipmentPhoto: item.photos?.equipment ?? null,
             serialPhoto: item.photos?.serial ?? null,
             macPhoto: item.photos?.mac ?? null,
-          }
-        }))
+          },
+        })),
       );
 
       const requestData: CreateApplicationRequest = {
         status: 'completed' as const,
-        typeWork: form.workType,
-        trainNumber: form.trainNumber,
+        trainNumbers: [form.trainNumber],
         carriages: (form.carriages || []).map((carriage) => ({
           carriageType: carriage.carriageType,
           carriageNumber: carriage.carriageNumber,
           carriagePhoto: carriage.carriagePhoto ?? null,
+          equipment: (carriage.equipment || []).map((item) => ({
+            equipmentName: item.equipmentType,
+            serialNumber: item.serialNumber,
+            macAddress: item.macAddress,
+            typeWork: form.workType,
+            quantity: item.quantity,
+            photos: {
+              equipmentPhoto: item.photos.equipment,
+              serialPhoto: item.photos.serial,
+              macPhoto: item.photos.mac,
+            },
+          })),
         })),
-        equipment: allEquipment,
         completedJob: form.workCompleted,
         currentLocation: form.location,
-        finalPhoto: form.finalPhoto ?? null,
+        photo: form.photo ?? null,
         userId: user?.id || 0,
         userName: user?.name || '',
         userRole: user?.role || '',
@@ -326,7 +365,7 @@ export const CreateApplicationForm = ({
       } else {
         // Создаем новую заявку
         console.log(requestData);
-        
+
         await applicationApi.create(requestData);
       }
 
@@ -360,7 +399,6 @@ export const CreateApplicationForm = ({
           typeWork: form.workType,
           trainNumber: form.trainNumber,
           carriages: form.carriages,
-          equipment: form.equipment,
           completedJob: form.workCompleted,
           currentLocation: form.location,
           userId: user?.id,
@@ -463,7 +501,7 @@ export const CreateApplicationForm = ({
       case 'location':
         return !form.location;
       case 'finalPhoto':
-        return !form.finalPhoto;
+        return !form.photo;
       default:
         return false;
     }
@@ -610,7 +648,7 @@ export const CreateApplicationForm = ({
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ bgcolor: 'white', color: 'black',p: {xs:1,sm:3}  }}>
+        <DialogContent sx={{ bgcolor: 'white', color: 'black', p: { xs: 1, sm: 3 } }}>
           <Card
             elevation={0}
             sx={{
@@ -619,7 +657,7 @@ export const CreateApplicationForm = ({
               borderRadius: 3,
             }}
           >
-            <CardContent sx={{ p: {xs:1,sm:2} }}>
+            <CardContent sx={{ p: { xs: 1, sm: 2 } }}>
               <Fade in timeout={500}>
                 <Box>{renderStep()}</Box>
               </Fade>
@@ -695,8 +733,12 @@ export const CreateApplicationForm = ({
               Назад
             </Button>
 
-            <Box display="flex" gap={{xs:0.2,sm:2}} alignItems="center">
-              <Typography variant="body2" color="text.secondary" fontSize={{xs:"0.65rem",sm:"0.75rem"}}>
+            <Box display="flex" gap={{ xs: 0.2, sm: 2 }} alignItems="center">
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                fontSize={{ xs: '0.65rem', sm: '0.75rem' }}
+              >
                 {APPLICATION_STEPS[activeStep].label}
               </Typography>
               <Button
@@ -714,7 +756,7 @@ export const CreateApplicationForm = ({
                 }
                 sx={{
                   borderRadius: 3,
-                  fontSize:{xs:"0.58rem",sm:"0.88rem"},
+                  fontSize: { xs: '0.58rem', sm: '0.88rem' },
                   px: 4,
                   py: 1.5,
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -742,7 +784,7 @@ export const CreateApplicationForm = ({
             У вас есть несохраненные изменения в заявке. Что вы хотите сделать?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{px:{xs:0.4,sm:1},pt:0,pb:{xs:0.4,sm:1}}}>
+        <DialogActions sx={{ px: { xs: 0.4, sm: 1 }, pt: 0, pb: { xs: 0.4, sm: 1 } }}>
           <Button
             onClick={handleCancelExit}
             variant="outlined"
@@ -760,8 +802,8 @@ export const CreateApplicationForm = ({
             disabled={savingDraft}
             sx={{
               fontSize: { xs: '0.45rem', sm: '0.88rem' },
-              width:{xs:120,sm:"auto"},
-              height:{xs:57,sm:"auto"},
+              width: { xs: 120, sm: 'auto' },
+              height: { xs: 57, sm: 'auto' },
             }}
           >
             {savingDraft ? 'Сохранение...' : 'Сохранить черновик и выйти'}

@@ -48,56 +48,46 @@
 import type { WorkLogEntry } from "../../worklog/model/types";
 
 // Интерфейс для одного элемента оборудования
+export interface EquipmentPhoto {
+  type: string;
+  path: string;
+}
+
+export interface EquipmentDetail {
+  id: number;
+  name: string;
+  deviceType: string;
+  typeWork: string;
+  serialNumber: string;
+  macAddress: string;
+  quantity: number;
+  photos: EquipmentPhoto[];
+}
+
+export interface CarriageWithEquipment {
+  number: string;
+  type: string;
+  train: string;
+  photo: string | null;
+  equipment: EquipmentDetail[];
+}
+
 export interface Application {
   id: number;
-  photo: string;
-  status:  string;
-
-  trainNumbers: string[];
-  carriages: Array<{
-    number: string;
-    type: string;
-    train: string;
-    photo: string;
-  }>;
-
-  equipmentDetails: Array<{
-    id: number;
-    name: string;
-    deviceType: string;
-    typeWork: string;
-    serialNumber: string;
-    macAddress: string;
-    quantity: number;
-    photos: Array<{
-      type: string;
-      path: string;
-    }>;
-  }>;
-
-  countEquipment: number;
-  equipmentTypes: string[];
-  serialNumbers: string[];
-  macAddresses: string[];
-
-  equipmentPhoto: string;
-  equipmentPhotos: string[];
-  serialPhoto: string | null;
-  serialPhotos: string[];
-  macPhoto: string;
-  macPhotos: string[];
-
+  photo: string | null;           // фото самой заявки
+  status: string;
+  trainNumbers: string[];         // массив номеров поездов
+  carriages: CarriageWithEquipment[];
+  countEquipment: number;         // суммарное количество
   completedJob: string;
   currentLocation: string;
-
   user: {
     id: number;
     name: string;
     role: string;
   };
-
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string;              // ISO
+  updatedAt: string;              // ISO
 }
 
 
@@ -125,7 +115,6 @@ export interface EquipmentFormItem {
     equipment?: File | null;
     serial?: File | null;
     mac?: File | null;
-    general?: File | null;
   };
 }
 
@@ -145,37 +134,65 @@ export interface ApplicationFormData {
   carriages: CarriageFormItem[]; // Массив вагонов
   workCompleted: string;
   location: string;
-  generalPhoto?: File | null;
-  finalPhoto?: File | null;
+  photo?: File | null;
   status?: 'draft' | 'completed';
 }
 
 // Интерфейс для создания заявки (соответствует бэкенду)
+// export interface CreateApplicationRequest {
+//   id?: number; // Для обновления черновика
+//   applicationDate?: string;
+//   typeWork?: string;
+//   trainNumber?: string;
+//   carriages: Array<{
+//     carriageNumber: string;
+//     carriageType: string;
+//     carriagePhoto?: File | null;
+//     equipment?: Array<{ // Теперь оборудование может быть привязано к вагонам
+//       equipmentType: string;
+//       serialNumber: string;
+//       macAddress: string;
+//       quantity: number;
+//       photos: {
+//         equipmentPhoto?: File | null;
+//         serialPhoto?: File | null;
+//         macPhoto?: File | null;
+//       };
+//     }>;
+//   }>;
+//   completedJob?: string;
+//   currentLocation?: string;
+//   generalPhoto?: File | null;
+//   finalPhoto?: File | null;
+//   userId: number;
+//   userName: string;
+//   userRole: string;
+//   status: 'draft' | 'completed';
+// }
+
 export interface CreateApplicationRequest {
-  id?: number; // Для обновления черновика
-  applicationDate?: string;
-  typeWork?: string;
-  trainNumber?: string;
+  id?: number;
+  trainNumbers: string[];
   carriages: Array<{
     carriageNumber: string;
     carriageType: string;
     carriagePhoto?: File | null;
-    equipment?: Array<{ // Теперь оборудование может быть привязано к вагонам
-      equipmentType: string;
+    equipment: Array<{
+      equipmentName: string;
       serialNumber: string;
-      macAddress: string;
+      macAddress?: string;
+      typeWork: string;
       quantity: number;
-      photos: {
+      photos?: {
         equipmentPhoto?: File | null;
         serialPhoto?: File | null;
         macPhoto?: File | null;
       };
     }>;
   }>;
-  completedJob?: string;
-  currentLocation?: string;
-  generalPhoto?: File | null;
-  finalPhoto?: File | null;
+  completedJob: string;
+  currentLocation: string;
+  photo?: File | null;
   userId: number;
   userName: string;
   userRole: string;

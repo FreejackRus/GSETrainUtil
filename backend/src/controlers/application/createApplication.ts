@@ -20,39 +20,54 @@ const UPLOAD_ROOT = path.join(__dirname, '../../../uploads');
 //   macPhoto: 'mac',
 // };
 //
-// async function generateUniqueFilename(
-//     dir: string,
-//     ext: string,
-//     scope: 'request' | 'equipment',
-//     column?: 'carriagePhoto' | 'generalPhoto' | 'finalPhoto'
-// ): Promise<string> {
-//   let name: string;
-//   let fullPath: string;
-//   let relPath: string;
-//   do {
-//     name = v4() + ext;
-//     fullPath = path.join(dir, name);
-//     relPath = path.relative(UPLOAD_ROOT, fullPath);
-//
-//     try {
-//       await fs.access(fullPath);
-//       continue;
-//     } catch { }
-//
-//     if (scope === 'equipment') {
-//       const exists = await prisma.equipmentPhoto.findFirst({ where: { photoPath: relPath } });
-//       if (exists) continue;
-//     } else if (scope === 'request' && column) {
-//       const exists = await prisma.request.findFirst({ where: { [column]: relPath } });
-//       if (exists) continue;
-//     }
-//     break;
-//   } while (true);
-//   return name;
-// }
+
+const requestFolder = 'request';
+
+const carriageFolder = 'carriage';
+
+const equipmentPhotoTypeMap: Record<string, string> = {
+  equipmentPhoto: 'equipment',
+  serialPhoto: 'serial',
+  macPhoto: 'mac',
+};
+
+async function generateUniqueFilename(
+  dir: string,
+  ext: string,
+  scope: 'request' | 'carriage' | 'equipment'
+): Promise<string> {
+  let name: string;
+  let fullPath: string;
+  let relPath: string;
+  do {
+    name = v4() + ext;
+    fullPath = path.join(dir, name);
+    relPath = path.relative(UPLOAD_ROOT, fullPath);
+
+    try {
+      await fs.access(fullPath);
+      continue;
+    } catch { }
+
+    if (scope === 'request') {
+      const exists = await prisma.request.findFirst({ where: { photo: relPath } });
+      if (exists) continue;
+    } else if (scope === 'carriage') {
+      const exists = await prisma.requestCarriage.findFirst({ where: { carriagePhoto: relPath } });
+      if (exists) continue;
+    } else if (scope === 'equipment') {
+      const exists = await prisma.requestEquipmentPhoto.findFirst({ where: { photoPath: relPath } });
+      if (exists) continue;
+    }
+
+    break;
+  } while (true);
+  return name;
+}
 
 export const createApplication = async (req: Request, res: Response) => {
   // const prisma = new PrismaClient();
+  // const cleanupPaths: string[] = [];
 
   try {
     console.log("=== Создание/обновление заявки ===");
@@ -222,3 +237,135 @@ export const createApplication = async (req: Request, res: Response) => {
     await prisma.$disconnect();
   }
 };
+
+// export const createApplication = async (req: Request, res: Response) => {
+//   const cleanupPaths: string[] = [];
+//   try {
+//     // 1. Extract and validate form fields before file ops
+//     const {
+//       id,
+//       status = 'draft',
+//       userId,
+//       currentLocationId,
+//       completedJobId,
+//       equipmentLength,
+//     } = req.body as Record<string, string>;
+
+//     if (!userId) {
+//       return res.status(400).json({ success: false, message: 'userId обязателен' });
+//     }
+
+//     // Prepare DTO
+//     const dto: any = {
+//       status,
+//       userId: parseInt(userId, 10),
+//       currentLocationId: currentLocationId ? parseInt(currentLocationId, 10) : null,
+//       completedJobId: completedJobId ? parseInt(completedJobId, 10) : null,
+//     };
+//     if (id) dto.id = parseInt(id, 10);
+
+//     // 2. Save files after validation
+//     const files = (req.files as Express.Multer.File[]) || [];
+//     let requestPhoto: string | null = null;
+//     const carriagePhotos: Record<number, string> = {};
+//     const equipmentPhotos: Record<number, Record<string, string>> = {};
+
+//     for (const file of files) {
+//       if (file.fieldname === 'photo') {
+//         // Request-level photo
+//         const dir = path.join(UPLOAD_ROOT, requestFolder);
+//         await fs.mkdir(dir, { recursive: true });
+//         const ext = path.extname(file.originalname) || '';
+//         const name = await generateUniqueFilename(dir, ext, 'request');
+//         const target = path.join(dir, name);
+//         await fs.writeFile(target, file.buffer);
+//         cleanupPaths.push(target);
+//         requestPhoto = path.posix.join(requestFolder, name);
+//       } else if (file.fieldname.startsWith('carriage[')) {
+//         // f.fieldname = carriage[<idx>][carriageId] or carriage[<idx>][photo]
+//         const m = file.fieldname.match(/^carriage\[(\d+)\]\[photo\]$/);
+//         if (m) {
+//           const idx = parseInt(m[1], 10);
+//           const dir = path.join(UPLOAD_ROOT, carriageFolder);
+//           await fs.mkdir(dir, { recursive: true });
+//           const ext = path.extname(file.originalname) || '';
+//           const name = await generateUniqueFilename(dir, ext, 'carriage');
+//           const target = path.join(dir, name);
+//           await fs.writeFile(target, file.buffer);
+//           cleanupPaths.push(target);
+//           carriagePhotos[idx] = path.posix.join(carriageFolder, name);
+//         }
+//       } else {
+//         // Equipment photos: equipment[<i>][photos][<type>]
+//         const m = file.fieldname.match(/^equipment\[(\d+)\]\[photos\]\[(\w+)\]$/);
+//         if (m) {
+//           const idx = parseInt(m[1], 10);
+//           const key = m[2];
+//           const sub = equipmentPhotoTypeMap[key];
+//           const dir = path.join(UPLOAD_ROOT, 'equipment', sub);
+//           await fs.mkdir(dir, { recursive: true });
+//           const ext = path.extname(file.originalname) || '';
+//           const name = await generateUniqueFilename(dir, ext, 'equipment');
+//           const target = path.join(dir, name);
+//           await fs.writeFile(target, file.buffer);
+//           cleanupPaths.push(target);
+//           equipmentPhotos[idx] = equipmentPhotos[idx] || {};
+//           equipmentPhotos[idx][key] = path.posix.join('equipment', sub, name);
+//         }
+//       }
+//     }
+
+//     // 3. Assign saved photo path to DTO
+//     dto.photo = requestPhoto;
+
+//     // 4. Create or update Request
+//     let requestRecord;
+//     if (dto.id) {
+//       requestRecord = await prisma.request.update({ where: { id: dto.id }, data: dto });
+//     } else {
+//       requestRecord = await prisma.request.create({ data: dto });
+//     }
+
+//     // 5. Process RequestCarriage entries and photos
+//     const carrLen = Object.keys(carriagePhotos).length;
+//     for (let i = 0; i < carrLen; i++) {
+//       const carriageId = parseInt(req.body[`carriage[${i}][carriageId]`], 10);
+//       const photoPath = carriagePhotos[i] || null;
+//       await prisma.requestCarriage.upsert({
+//         where: { requestId_carriageId: { requestId: requestRecord.id, carriageId } },
+//         create: { requestId: requestRecord.id, carriageId, carriagePhoto: photoPath },
+//         update: { carriagePhoto: photoPath }
+//       });
+//     }
+
+//     // 6. Process RequestEquipment and photos
+//     const eqLen = parseInt(equipmentLength || '0', 10);
+//     for (let i = 0; i < eqLen; i++) {
+//       const prefix = `equipment[${i}]`;
+//       const equipmentId = parseInt(req.body[`${prefix}[equipmentId]`], 10);
+//       const typeWorkId = parseInt(req.body[`${prefix}[typeWorkId]`], 10);
+//       const quantity = parseInt(req.body[`${prefix}[quantity]`], 10) || 1;
+//       const rep = await prisma.requestEquipment.upsert({
+//         where: { requestId_equipmentId: { requestId: requestRecord.id, equipmentId } },
+//         create: { requestId: requestRecord.id, equipmentId, typeWorkId, quantity },
+//         update: { typeWorkId, quantity }
+//       });
+//       const photos = equipmentPhotos[i] || {};
+//       for (const [key, relPath] of Object.entries(photos)) {
+//         await prisma.requestEquipmentPhoto.upsert({
+//           where: { requestEquipmentId_photoType: { requestEquipmentId: rep.id, photoType: key } },
+//           create: { requestEquipmentId: rep.id, photoType: key, photoPath: relPath },
+//           update: { photoPath: relPath }
+//         });
+//       }
+//     }
+
+//     return res.status(201).json({ success: true, data: requestRecord });
+//   } catch (error) {
+//     console.error('createApplication error:', error);
+//     await Promise.all(cleanupPaths.map(p => fs.unlink(p).catch(() => {})));
+//     return res.status(500).json({ success: false, message: 'Server error' });
+//   } finally {
+//     await prisma.$disconnect();
+//   }
+// };
