@@ -3,6 +3,7 @@ import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { AppRouter } from './providers/AppRouter/ui/AppRouter';
 import { LoginForm } from "../features/auth";
 import { UserProvider } from "../shared/contexts/UserContext";
+// import { applicationApi } from "../entities";
 
 const theme = createTheme({
   palette: {
@@ -234,6 +235,9 @@ function App() {
       </ThemeProvider>
     );
   }
+  // archiveApi.getAll().then((data)=>{
+  //   console.log(data);
+  // })
 
   return (
     <ThemeProvider theme={theme}>

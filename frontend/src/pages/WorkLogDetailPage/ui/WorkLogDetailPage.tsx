@@ -220,7 +220,7 @@ export const WorkLogDetailPage: React.FC = () => {
   return (
     <Container maxWidth="lg" className="work-log-detail-page">
       {/* Заголовок */}
-      <Paper className="detail-header"  elevation={0} >
+      <Paper className="detail-header" elevation={0}>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Box display="flex" alignItems="center" gap={2}>
             <IconButton onClick={() => navigate('/work-log')} className="back-button">
@@ -235,18 +235,26 @@ export const WorkLogDetailPage: React.FC = () => {
                 className="detail-title"
                 sx={{
                   fontSize: {
-                     xs: '0.8rem',sm:"1.5rem"
+                    xs: '0.8rem',
+                    sm: '1.5rem',
                   },
                 }}
               >
-                Заявка №{workLog.applicationNumber}
+                Заявка №{workLog.id}
               </Typography>
-              <Typography variant="subtitle1" className="detail-subtitle" sx={{
+              <Typography
+                variant="subtitle1"
+                className="detail-subtitle"
+                sx={{
                   fontSize: {
-                    xs: '0.8rem',sm:"1rem"
+                    xs: '0.8rem',
+                    sm: '1rem',
                   },
-                }}>
-                {workLog.typeWork} • {workLog.trainNumber} • Вагон {workLog.carriageNumber}
+                }}
+              >
+                {/* {workLog.typeWork} • {workLog.trainNumber} • Вагон {workLog.carriageNumber} */}
+                {workLog.trainNumbers[0]} • Вагон{' '}
+                {workLog.carriages.map((item) => item.number).join(', ')}
               </Typography>
             </Box>
           </Box>
@@ -258,6 +266,7 @@ export const WorkLogDetailPage: React.FC = () => {
                   size="medium"
                   onClick={() => setIsEditing(true)}
                   className="edit-fab"
+                  disabled
                 >
                   <EditIcon />
                 </Fab>
@@ -296,7 +305,7 @@ export const WorkLogDetailPage: React.FC = () => {
             }
             className="status-chip"
           />
-          <Chip
+          {/* <Chip
             label={workLog.typeWork}
             color={
               getWorkTypeColor(workLog.typeWork) as
@@ -309,7 +318,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 | 'default'
             }
             variant="outlined"
-          />
+          /> */}
         </Box>
       </Paper>
 
@@ -342,59 +351,12 @@ export const WorkLogDetailPage: React.FC = () => {
                       </Typography>
                     </Box>
                     <Typography variant="h6" fontWeight={700} color="#0d47a1">
-                      {new Date(workLog.applicationDate).toLocaleDateString('ru-RU', {
+                      {new Date(workLog.createdAt).toLocaleDateString('ru-RU', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
                       })}
                     </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Card
-                  sx={{
-                    background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
-                    border: '1px solid #9c27b0',
-                    borderRadius: 2,
-                    height: '100%',
-                  }}
-                >
-                  <CardContent sx={{ p: 2 }}>
-                    <Box display="flex" alignItems="center" mb={1}>
-                      <WorkIcon sx={{ color: '#7b1fa2', mr: 1, fontSize: 20 }} />
-                      <Typography variant="subtitle2" color="#7b1fa2" fontWeight={600}>
-                        Тип работы
-                      </Typography>
-                    </Box>
-                    {isEditing ? (
-                      <FormControl fullWidth size="small">
-                        <Select
-                          value={editedWorkLog?.typeWork || ''}
-                          onChange={(e) =>
-                            setEditedWorkLog((prev) =>
-                              prev ? { ...prev, typeWork: e.target.value } : null,
-                            )
-                          }
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              backgroundColor: 'rgba(255,255,255,0.8)',
-                            },
-                          }}
-                        >
-                          {workTypes.map((item, index) => (
-                            <MenuItem key={`worktype-${index}`} value={item}>
-                              {item}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    ) : (
-                      <Typography variant="body1" fontWeight={600} color="#4a148c">
-                        {workLog.typeWork}
-                      </Typography>
-                    )}
                   </CardContent>
                 </Card>
               </Grid>
@@ -467,7 +429,7 @@ export const WorkLogDetailPage: React.FC = () => {
                       {isEditing ? (
                         <TextField
                           fullWidth
-                          value={editedWorkLog?.trainNumber || ''}
+                          value={editedWorkLog?.trainNumbers[0] || ''}
                           onChange={(e) =>
                             setEditedWorkLog((prev) =>
                               prev ? { ...prev, trainNumber: e.target.value } : null,
@@ -482,7 +444,7 @@ export const WorkLogDetailPage: React.FC = () => {
                         />
                       ) : (
                         <Typography variant="h5" fontWeight={700} color="#d84315">
-                          №{workLog.trainNumber}
+                          №{workLog.trainNumbers[0]}
                         </Typography>
                       )}
                     </Box>
@@ -491,12 +453,16 @@ export const WorkLogDetailPage: React.FC = () => {
                   <Grid size={{ xs: 12, sm: 4 }}>
                     <Box>
                       <Typography variant="subtitle2" color="#bf360c" fontWeight={600} gutterBottom>
-                        Тип вагона
+                        Номера вагонов
                       </Typography>
-                      {isEditing ? (
+                      <Typography variant="body1" fontWeight={600} color="#d84315">
+                        {workLog.carriages.map((item)=>item.number).join(", ")}
+                      </Typography>
+
+                      {/* {isEditing ? (
                         <FormControl fullWidth size="small">
                           <Select
-                            value={editedWorkLog?.carriageType || ''}
+                            // value={editedWorkLog?.carriageType || ''}
                             onChange={(e) =>
                               setEditedWorkLog((prev) =>
                                 prev ? { ...prev, carriageType: e.target.value } : null,
@@ -513,22 +479,18 @@ export const WorkLogDetailPage: React.FC = () => {
                                 {item}
                               </MenuItem>
                             ))}
-                            {/* <MenuItem value="Плацкартный">Плацкартный</MenuItem>
-                            <MenuItem value="Купейный">Купейный</MenuItem>
-                            <MenuItem value="СВ">СВ</MenuItem>
-                            <MenuItem value="Общий">Общий</MenuItem> */}
+
                           </Select>
                         </FormControl>
                       ) : (
                         <Typography variant="body1" fontWeight={600} color="#d84315">
-                          {workLog.carriageType}
                         </Typography>
-                      )}
+                      )} */}
                     </Box>
                   </Grid>
 
                   <Grid size={{ xs: 12, sm: 4 }}>
-                    <Box>
+                    {/* <Box>
                       <Typography variant="subtitle2" color="#bf360c" fontWeight={600} gutterBottom>
                         Номер вагона
                       </Typography>
@@ -553,7 +515,7 @@ export const WorkLogDetailPage: React.FC = () => {
                           №{workLog.carriageNumber}
                         </Typography>
                       )}
-                    </Box>
+                    </Box> */}
                   </Grid>
                 </Grid>
               </CardContent>
@@ -577,16 +539,14 @@ export const WorkLogDetailPage: React.FC = () => {
                                   Тип оборудования
                                 </Typography>
                                 <Typography variant="body1" fontWeight={500}>
-                                  {equipment.equipmentType}
+                                  {equipment.deviceType}
                                 </Typography>
                               </Grid>
                               <Grid size={{ xs: 12, sm: 6 }}>
                                 <Typography variant="subtitle2" color="textSecondary">
                                   Количество
                                 </Typography>
-                                <Typography variant="body1">
-                                  {equipment.countEquipment} ед.
-                                </Typography>
+                                <Typography variant="body1">{equipment.quantity} ед.</Typography>
                               </Grid>
                               <Grid size={{ xs: 12, sm: 6 }}>
                                 <Typography variant="subtitle2" color="textSecondary">
@@ -602,6 +562,14 @@ export const WorkLogDetailPage: React.FC = () => {
                                 </Typography>
                                 <Typography variant="body1">
                                   {equipment.macAddress || 'Не указан'}
+                                </Typography>
+                              </Grid>
+                              <Grid size={{ xs: 12, sm: 6 }}>
+                                <Typography variant="subtitle2" color="textSecondary">
+                                  Тип работы
+                                </Typography>
+                                <Typography variant="body1">
+                                  {equipment.typeWork || 'Не указан'}
                                 </Typography>
                               </Grid>
                             </Grid>
@@ -624,7 +592,7 @@ export const WorkLogDetailPage: React.FC = () => {
                               <Typography variant="subtitle2" color="textSecondary">
                                 Тип оборудования
                               </Typography>
-                              {isEditing ? (
+                              {/* {isEditing ? (
                                 <TextField
                                   fullWidth
                                   value={editedWorkLog?.equipmentType || ''}
@@ -637,7 +605,7 @@ export const WorkLogDetailPage: React.FC = () => {
                                 />
                               ) : (
                                 <Typography variant="body1">{workLog.equipmentType}</Typography>
-                              )}
+                              )} */}
                             </Grid>
                             <Grid size={{ xs: 12, sm: 6 }}>
                               <Typography variant="subtitle2" color="textSecondary">
@@ -649,7 +617,7 @@ export const WorkLogDetailPage: React.FC = () => {
                               <Typography variant="subtitle2" color="textSecondary">
                                 Серийный номер
                               </Typography>
-                              {isEditing ? (
+                              {/* {isEditing ? (
                                 <TextField
                                   fullWidth
                                   value={editedWorkLog?.serialNumber || ''}
@@ -662,13 +630,13 @@ export const WorkLogDetailPage: React.FC = () => {
                                 />
                               ) : (
                                 <Typography variant="body1">{workLog.serialNumber}</Typography>
-                              )}
+                              )} */}
                             </Grid>
                             <Grid size={{ xs: 12, sm: 6 }}>
                               <Typography variant="subtitle2" color="textSecondary">
                                 MAC-адрес
                               </Typography>
-                              {isEditing ? (
+                              {/* {isEditing ? (
                                 <TextField
                                   fullWidth
                                   value={editedWorkLog?.macAddress || ''}
@@ -681,7 +649,7 @@ export const WorkLogDetailPage: React.FC = () => {
                                 />
                               ) : (
                                 <Typography variant="body1">{workLog.macAddress}</Typography>
-                              )}
+                              )} */}
                             </Grid>
                           </Grid>
                         </CardContent>
@@ -721,7 +689,7 @@ export const WorkLogDetailPage: React.FC = () => {
 
           {/* Фотографии */}
           {(() => {
-            const photos = Object.entries(workLog.photos)
+            const photos = Object.entries(workLog.photo)
               .filter(([, url]) => url)
               .map(([key, url]) => ({ key, url: url! }));
 
@@ -781,13 +749,13 @@ export const WorkLogDetailPage: React.FC = () => {
             <Divider sx={{ mb: 2 }} />
 
             <Box display="flex" alignItems="center" gap={2} mb={2}>
-              <Avatar className="user-avatar">{workLog.userName.charAt(0).toUpperCase()}</Avatar>
+              <Avatar className="user-avatar">{workLog.user.name.charAt(0).toUpperCase()}</Avatar>
               <Box>
                 <Typography variant="subtitle1" fontWeight={600}>
-                  {workLog.userName}
+                  {workLog.user.name}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  {workLog.userRole}
+                  {workLog.user.role}
                 </Typography>
               </Box>
             </Box>
@@ -796,7 +764,7 @@ export const WorkLogDetailPage: React.FC = () => {
               <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                 Роль
               </Typography>
-              <Typography variant="body1">{workLog.userRole}</Typography>
+              <Typography variant="body1">{workLog.user.role}</Typography>
             </Box>
           </Paper>
 
@@ -813,7 +781,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 Дата заявки
               </Typography>
               <Typography variant="body1">
-                {new Date(workLog.applicationDate).toLocaleDateString('ru-RU', {
+                {new Date(workLog.createdAt).toLocaleDateString('ru-RU', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',

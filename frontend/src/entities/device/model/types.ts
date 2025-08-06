@@ -1,8 +1,14 @@
 export interface Device {
   id: number;
-  count: number;
   name: string;
-  status: string;
+  deviceType: string;
+  snNumber: string;
+  mac: string;
+  lastService: string;
+  isActive: boolean;
+  carriageType: string;
+  carriageNumber: string;
+  trainNumber: string;
 }
 
 export interface DeviceResponse {

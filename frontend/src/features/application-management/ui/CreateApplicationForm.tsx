@@ -325,6 +325,8 @@ export const CreateApplicationForm = ({
         await applicationApi.completeDraft(draftId, requestData);
       } else {
         // Создаем новую заявку
+        console.log(requestData);
+        
         await applicationApi.create(requestData);
       }
 

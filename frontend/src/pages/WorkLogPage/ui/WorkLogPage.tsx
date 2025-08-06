@@ -49,11 +49,12 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { workLogApi } from '../../../entities/worklog';
-import type { WorkLogEntry } from '../../../entities/application/model/types';
+// import type { WorkLogEntry } from '../../../entities/application/model/types';
 import './WorkLogPage.css';
 import axios from 'axios';
 import { apiClient } from '../../../shared';
 import { formatRussianDate } from '../../../shared/transformation/stringTransform';
+import type { WorkLogEntry } from '../../../entities/worklog/model/types';
 
 type SortField = keyof WorkLogEntry | 'none';
 type SortDirection = 'asc' | 'desc';
@@ -110,46 +111,48 @@ export const WorkLogPage = () => {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter((entry) => {
         // Поиск по номеру заявки
-        if (entry.applicationNumber?.toString().toLowerCase().includes(searchLower)) {
-          return true;
-        }
+        // if (entry.applicationNumber?.toString().toLowerCase().includes(searchLower)) {
+        //   return true;
+        // }
 
         // Поиск по типу работ
-        if (entry.typeWork?.toLowerCase().includes(searchLower)) {
-          return true;
-        }
+        // if (entry.typeWork?.toLowerCase().includes(searchLower)) {
+        //   return true;
+        // }
 
         // Поиск по номеру поезда
-        if (entry.trainNumber?.toLowerCase().includes(searchLower)) {
+        if (entry.trainNumbers.map((item) => item.toLowerCase()).includes(searchLower)) {
           return true;
         }
 
         // Поиск по номеру вагона
-        if (entry.carriageNumber?.toLowerCase().includes(searchLower)) {
+        if (entry.carriages.map((item) => item.number.toLowerCase()).includes(searchLower)) {
           return true;
         }
 
         // Поиск по серийному номеру
-        if (entry.serialNumber?.toLowerCase().includes(searchLower)) {
+        if (entry.serialNumbers.map((item) => item.toLowerCase()).includes(searchLower)) {
           return true;
         }
 
         // Поиск по MAC-адресу только для точек доступа и маршрутизаторов
-        if (entry.macAddress && entry.equipment) {
-          const equipmentType = entry.equipment.toLowerCase();
+        for (const equipment of entry.equipmentDetails) {
+          const equipmentType = equipment.deviceType.toLowerCase();
+          const mac = equipment.macAddress?.toLowerCase();
+
           if (
             (equipmentType.includes('точка доступа') ||
               equipmentType.includes('маршрутизатор') ||
               equipmentType.includes('router') ||
               equipmentType.includes('access point')) &&
-            entry.macAddress.toLowerCase().includes(searchLower)
+            mac?.includes(searchLower)
           ) {
             return true;
           }
         }
 
         // Поиск по исполнителю
-        if (entry.completedBy?.toLowerCase().includes(searchLower)) {
+        if (entry.completedJob?.toLowerCase().includes(searchLower)) {
           return true;
         }
 
@@ -171,36 +174,50 @@ export const WorkLogPage = () => {
     }
 
     // Применяем фильтр по типу работ
-    if (filterWorkType !== 'all') {
-      filtered = filtered.filter((entry) => entry.typeWork === filterWorkType);
-    }
+  if (filterWorkType !== 'all') {
+  filtered = filtered.filter((entry) =>
+    entry.equipmentDetails?.some((detail) => detail.typeWork === filterWorkType)
+  );
+}
 
     // Применяем сортировку
     if (sortConfig.key) {
       filtered.sort((a, b) => {
-        const aValue = a[sortConfig.key as keyof WorkLogEntry];
-        const bValue = b[sortConfig.key as keyof WorkLogEntry];
+        let aValue = a[sortConfig.key as keyof WorkLogEntry];
+        let bValue = b[sortConfig.key as keyof WorkLogEntry];
 
-        if (sortConfig.key === 'applicationDate') {
-          const aDate = new Date((aValue as string) || 0);
-          const bDate = new Date((bValue as string) || 0);
-          return sortConfig.direction === 'asc'
-            ? aDate.getTime() - bDate.getTime()
-            : bDate.getTime() - aDate.getTime();
+        // Специальная обработка по ключу
+        switch (sortConfig.key) {
+          case 'createdAt':
+            return sortConfig.direction === 'asc'
+              ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+              : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+          case 'trainNumbers':
+            aValue = parseInt(a.trainNumbers?.[0] || '0', 10);
+            bValue = parseInt(b.trainNumbers?.[0] || '0', 10);
+            return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+
+          case 'carriages':
+            aValue = parseInt(a.carriages?.[0]?.number || '0', 10);
+            bValue = parseInt(b.carriages?.[0]?.number || '0', 10);
+            return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+
+          case 'user':
+            aValue = a.user?.name?.toLowerCase() || '';
+            bValue = b.user?.name?.toLowerCase() || '';
+            return sortConfig.direction === 'asc'
+              ? aValue.localeCompare(bValue)
+              : bValue.localeCompare(aValue);
+
+          default:
+            // Универсальная строковая сортировка
+            aValue = (aValue ?? '').toString().toLowerCase();
+            bValue = (bValue ?? '').toString().toLowerCase();
+            if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
         }
-
-        if (sortConfig.key === 'trainNumber' || sortConfig.key === 'carriageNumber') {
-          const aNum = parseInt((aValue as string) || '0', 10);
-          const bNum = parseInt((bValue as string) || '0', 10);
-          return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
-        }
-
-        const aStr = (aValue || '').toString().toLowerCase();
-        const bStr = (bValue || '').toString().toLowerCase();
-
-        if (aStr < bStr) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aStr > bStr) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
       });
     }
 
@@ -209,8 +226,15 @@ export const WorkLogPage = () => {
 
   // Функции для определения статуса и цветов
   const getEntryStatus = (entry: WorkLogEntry): FilterStatus => {
-    if (entry.photos.finalPhoto) return 'completed';
-    if (entry.photos.generalPhoto) return 'in-progress';
+    if (entry.equipmentPhoto || entry.equipmentPhotos?.length) return 'completed';
+    if (
+      entry.serialPhoto ||
+      entry.serialPhotos?.length ||
+      entry.macPhoto ||
+      entry.macPhotos?.length
+    ) {
+      return 'in-progress';
+    }
     return 'started';
   };
 
@@ -320,14 +344,12 @@ export const WorkLogPage = () => {
         response = await apiClient.post(
           '/pdfActDisEquipment',
           {
-            typeWork: entry.typeWork,
-            applicationNumber: entry.applicationNumber,
-            carriageNumber: entry.carriageNumber,
+            // Если typeWork и applicationNumber есть в equipmentDetails[0], можно взять оттуда
+            typeWork: entry.equipmentDetails?.[0]?.typeWork || '',
+            applicationNumber: entry.id.toString(), // или замени на корректное поле, если нужно
+            carriageNumber: entry.carriages?.[0]?.number || '',
             equipmentDetails: entry.equipmentDetails?.map(({ photos, ...rest }) => rest),
-            // equipmentTypes: entry.equipmentTypes,
-            // countEquipments: entry.countEquipments,
-            // serialNumbers: entry.serialNumbers,
-            applicationDate: entry.applicationDate,
+            applicationDate: entry.createdAt,
             contractNumber: '____________________',
           },
           {
@@ -341,7 +363,7 @@ export const WorkLogPage = () => {
 
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Акт демонтажа №${entry.applicationNumber}.pdf`;
+        link.download = `Акт демонтажа №${entry.id.toString()}.pdf`;
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -351,17 +373,17 @@ export const WorkLogPage = () => {
         response = await apiClient.post(
           '/pdfTechnicalActAcceptance',
           {
-            applicationNumber: entry.applicationNumber,
-            applicationDate: entry.applicationDate,
+            applicationNumber: entry.id.toString(), // или подставь правильное поле
+            applicationDate: entry.createdAt,
             contractNumber: '____________________',
             contractDate: '«__».____.____ г.',
-            carriageNumber: entry.carriageNumber,
-            carriageType: entry.carriageType,
+            carriageNumber: entry.carriages?.[0]?.number || '',
+            carriageType: entry.carriages?.[0]?.type || '',
             equipmentTypes: entry.equipmentTypes,
             serialNumbers: entry.serialNumbers,
-            countEquipments: entry.countEquipments,
-            typeWork: entry.typeWork,
-            trainNumber: entry.trainNumber,
+            countEquipments: entry.countEquipment, // исправлено имя поля
+            typeWork: entry.equipmentDetails?.[0]?.typeWork || '', // если больше негде
+            trainNumber: entry.trainNumbers?.[0] || '',
           },
           {
             responseType: 'blob', // Важно: получаем как файл
@@ -374,7 +396,7 @@ export const WorkLogPage = () => {
 
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${entry.trainNumber} от ${formatRussianDate(entry.applicationDate)}pdf`;
+        link.download = `${entry.trainNumbers?.[0]} от ${formatRussianDate(entry.createdAt)}pdf`;
 
         document.body.appendChild(link);
         link.click();
@@ -385,12 +407,12 @@ export const WorkLogPage = () => {
         response = await apiClient.post(
           '/pdfAppWork',
           {
-            applicationNumber: entry.applicationNumber,
-            carriageNumber: entry.carriageNumber,
-            carriageType: entry.carriageType,
+            applicationNumber:  entry.id.toString(),
+                  carriageNumber: entry.carriages?.[0]?.number || '',
+            carriageType: entry.carriages?.[0]?.type || '',
             currentLocation: entry.currentLocation,
             equipmentTypes: entry.equipmentTypes,
-            countEquipments: entry.countEquipments,
+            countEquipments: entry.countEquipment,
           },
           {
             responseType: 'blob', // Важно: получаем как файл
@@ -403,7 +425,7 @@ export const WorkLogPage = () => {
 
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Заявка_№${entry.applicationNumber}.pdf`;
+        link.download = `Заявка_№${entry.id.toString()}.pdf`;
 
         document.body.appendChild(link);
         link.click();
@@ -419,12 +441,15 @@ export const WorkLogPage = () => {
     setPhotoDialogOpen(false);
   };
 
-  const getUniqueWorkTypes = () => {
-    const types = [...new Set(workLogEntries.map((entry) => entry.typeWork).filter(Boolean))];
-    return types;
-  };
+const getUniqueWorkTypes = () => {
+  const allTypes = workLogEntries
+    .flatMap(entry => entry.equipmentDetails.map(detail => detail.typeWork))
+    .filter(Boolean);
 
-  const getPhotoEntries = (photos: WorkLogEntry['photos']) => {
+  return Array.from(new Set(allTypes));
+};
+
+  const getPhotoEntries = (photos: WorkLogEntry['photo']) => {
     const photoLabels = {
       carriagePhoto: 'Фото вагона',
       equipmentPhoto: 'Фото оборудования',
@@ -461,18 +486,18 @@ export const WorkLogPage = () => {
           <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
             <Box>
               <Chip
-                label={`#${entry.applicationNumber}`}
+                label={`#${entry.id}`}
                 color="primary"
                 size="small"
                 sx={{ fontWeight: 'bold' }}
               />
-              <Chip
+              {/* <Chip
                 sx={{ ml: 2 }}
-                label={entry.typeWork}
-                color={getWorkTypeColor(entry.typeWork)}
+                // label={entry.typeWork}
+                // color={getWorkTypeColor(entry.typeWork)}
                 size="small"
                 variant="outlined"
-              />
+              /> */}
             </Box>
 
             <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
@@ -480,14 +505,14 @@ export const WorkLogPage = () => {
             </IconButton>
           </Box>
 
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+          {/* <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
             {entry.typeWork}
-          </Typography>
+          </Typography> */}
 
           <Box display="flex" alignItems="center" mb={1}>
             <TrainIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
             <Typography variant="body2" color="text.secondary">
-              Поезд {entry.trainNumber}, Вагон {entry.carriageNumber}
+              Поезд {entry.trainNumbers[0]}, Вагоны {entry.carriages.map((item)=>item.number).join(", ")}
             </Typography>
           </Box>
 
@@ -501,7 +526,7 @@ export const WorkLogPage = () => {
           <Box display="flex" alignItems="center" mb={2}>
             <CalendarTodayIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
             <Typography variant="body2" color="text.secondary">
-              {formatDate(entry.applicationDate)}
+              {formatDate(entry.createdAt)}
             </Typography>
           </Box>
 
@@ -519,17 +544,17 @@ export const WorkLogPage = () => {
             />
           </Box>
 
-          {entry.equipment && (
+          {entry.equipmentDetails && (
             <Typography variant="body2" color="text.secondary" mb={1}>
-              <strong>Оборудование:</strong> {entry.equipment}
+              <strong>Оборудования:</strong> {entry.equipmentDetails.map((item)=>item.name).join(", ")}
             </Typography>
           )}
 
-          {entry.completedBy && (
+          {entry.completedJob && (
             <Box display="flex" alignItems="center">
               <PersonIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
               <Typography variant="body2" color="text.secondary">
-                {entry.completedBy}
+                {entry.completedJob}
               </Typography>
             </Box>
           )}
@@ -541,9 +566,9 @@ export const WorkLogPage = () => {
               size="small"
               startIcon={<PhotoIcon />}
               onClick={() => handleViewPhotos(entry)}
-              disabled={!Object.values(entry.photos).some((photo) => photo)}
+              disabled={!Object.values(entry.photo).some((photo) => photo)}
             >
-              Фото ({Object.values(entry.photos).filter((photo) => photo).length})
+              Фото ({Object.values(entry.photo).filter((photo) => photo).length})
             </Button>
             <Button
               size="small"
@@ -588,7 +613,7 @@ export const WorkLogPage = () => {
         <Grid size={{ xs: 12, sm: 2, md: 2 }}>
           <Box display="flex" alignItems="center" gap={1}>
             <Chip
-              label={`#${entry.applicationNumber}`}
+              label={`#${entry.id}`}
               color="primary"
               size="small"
               sx={{ fontWeight: 'bold' }}
@@ -598,11 +623,11 @@ export const WorkLogPage = () => {
         </Grid>
 
         <Grid size={{ xs: 12, sm: 3, md: 3 }} sx={{ ml: { xs: 0, sm: 4 } }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          {/* <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {entry.typeWork}
-          </Typography>
+          </Typography> */}
           <Typography variant="body2" color="text.secondary">
-            Поезд {entry.trainNumber}, Вагон {entry.carriageNumber}
+            Поезд {entry.trainNumbers[0]}, Вагоны {entry.carriages.map((item)=>item.number).join(", ")}
           </Typography>
         </Grid>
 
@@ -613,21 +638,21 @@ export const WorkLogPage = () => {
           </Typography>
           <Typography variant="body2" color="text.secondary">
             <CalendarTodayIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-            {formatDate(entry.applicationDate)}
+            {formatDate(entry.createdAt)}
           </Typography>
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          {entry.equipment && (
+          {entry.equipmentDetails && (
             <Typography variant="body2" color="text.secondary" noWrap>
               <BuildIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-              {entry.equipment}
+              {entry.equipmentDetails.map((item)=>item.name).join(", ")}
             </Typography>
           )}
-          {entry.completedBy && (
+          {entry.completedJob && (
             <Typography variant="body2" color="text.secondary" noWrap>
               <PersonIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-              {entry.completedBy}
+              {entry.completedJob}
             </Typography>
           )}
         </Grid>
@@ -644,7 +669,7 @@ export const WorkLogPage = () => {
             </Typography>
           </Box>
           <Typography variant="caption" color="text.secondary">
-            Фото: {Object.values(entry.photos).filter((photo) => photo).length}
+            Фото: {Object.values(entry.photo).filter((photo) => photo).length}
           </Typography>
         </Grid>
 
@@ -653,7 +678,7 @@ export const WorkLogPage = () => {
             <IconButton
               size="small"
               onClick={() => handleViewPhotos(entry)}
-              disabled={!Object.values(entry.photos).some((photo) => photo)}
+              disabled={!Object.values(entry.photo).some((photo) => photo)}
             >
               <PhotoIcon />
             </IconButton>
@@ -717,22 +742,24 @@ export const WorkLogPage = () => {
             overflow: 'hidden',
           }}
         >
-          <Box sx={{
-            p:{
-              xs:1,
-              sm:4
-            }
-          }}>
+          <Box
+            sx={{
+              p: {
+                xs: 1,
+                sm: 4,
+              },
+            }}
+          >
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
-              <Box display="flex" alignItems="center" >
+              <Box display="flex" alignItems="center">
                 <Button
                   startIcon={<ArrowBackIcon />}
                   onClick={() => navigate('/')}
                   variant="contained"
                   sx={{
                     mr: {
-                      xs:1,
-                      sm:3
+                      xs: 1,
+                      sm: 3,
                     },
                     fontSize: {
                       xs: '0.7rem', // на телефонах
@@ -763,8 +790,8 @@ export const WorkLogPage = () => {
                       sm: 64,
                     },
                     mr: {
-                      xs:1,
-                      sm:3
+                      xs: 1,
+                      sm: 3,
                     },
                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                     backdropFilter: 'blur(10px)',
@@ -964,11 +991,11 @@ export const WorkLogPage = () => {
 
         {/* Диалог просмотра фотографий */}
         <Dialog open={photoDialogOpen} onClose={handleClosePhotoDialog} maxWidth="md" fullWidth>
-          <DialogTitle>Фотографии заявки #{selectedEntry?.applicationNumber}</DialogTitle>
+          <DialogTitle>Фотографии заявки #{selectedEntry?.id}</DialogTitle>
           <DialogContent>
             {selectedEntry && (
               <Grid container spacing={2}>
-                {getPhotoEntries(selectedEntry.photos).map((photo, index) => (
+                {getPhotoEntries(selectedEntry.photo).map((photo, index) => (
                   <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`photo-${photo.key}-${index}`}>
                     <Card>
                       <CardContent>

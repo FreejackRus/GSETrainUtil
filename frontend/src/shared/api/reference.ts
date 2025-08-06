@@ -21,7 +21,23 @@ interface CarriageTypeResponse {
 }
 
 interface EquipmentResponse {
-  type: string;
+  id: number;
+  name: string;
+  deviceId: number;
+  serialNumber: string;
+  macAddress: string;
+  lastService: string;
+  carriageId: number;
+  carriage: {
+    id: number;
+    number: string;
+    type: string;
+    trainId: number;
+    train: {
+      id: number;
+      number: string;
+    };
+  };
 }
 
 interface LocationResponse {
@@ -46,7 +62,9 @@ export const referenceApi = {
 
   getEquipmentTypes: async (): Promise<string[]> => {
     const response = await apiClient.get('/equipment');
-    return response.data.map((item: EquipmentResponse) => item.type);
+    console.log(response);
+
+    return response.data.map((item: EquipmentResponse) => item.name);
   },
 
   getLocations: async (): Promise<string[]> => {
@@ -55,13 +73,14 @@ export const referenceApi = {
   },
 
   getAllReferences: async (): Promise<ReferenceData> => {
-    const [workTypes, trainNumbers, carriageTypes, equipmentTypes, locations] = await Promise.allSettled([
-      referenceApi.getWorkTypes(),
-      referenceApi.getTrainNumbers(),
-      referenceApi.getCarriageTypes(),
-      referenceApi.getEquipmentTypes(),
-      referenceApi.getLocations(),
-    ]);
+    const [workTypes, trainNumbers, carriageTypes, equipmentTypes, locations] =
+      await Promise.allSettled([
+        referenceApi.getWorkTypes(),
+        referenceApi.getTrainNumbers(),
+        referenceApi.getCarriageTypes(),
+        referenceApi.getEquipmentTypes(),
+        referenceApi.getLocations(),
+      ]);
 
     return {
       typeWork: workTypes.status === 'fulfilled' ? workTypes.value : [],

@@ -1,51 +1,106 @@
-export interface Application {
-  id: string;
-  applicationNumber: number;
-  applicationDate: string;
-  status: 'draft' | 'completed' | 'cancelled';
-  // Связанные объекты с бэкенда
-  typeWork?: {
-    id: number;
-    name: string;
-  };
-  train?: {
-    id: number;
-    number: string;
-  };
-  carriages?: Array<{
-    id: number;
-    number: string;
-    type: string;
-    trainId: number;
-    carriagePhoto?: string | null;
-  }>;
-  completedJob?: {
-    id: number;
-    name: string;
-  };
-  currentLocation?: {
-    id: number;
-    name: string;
-  };
-  user?: {
-    id: number;
-    login: string;
-    role: string;
-    name: string;
-  };
-  // Устаревшие поля для обратной совместимости
-  workType?: string;
-  trainNumber?: string;
-  carriageType?: string;
-  carriageNumber?: string;
-  workCompleted?: string;
-  location?: string;
-  equipment: EquipmentItem[];
-  generalPhoto?: string | null;
-  finalPhoto?: string | null;
-}
+// export interface Application {
+//   id: string;
+//   applicationNumber: number;
+//   applicationDate: string;
+//   status: 'draft' | 'completed' | 'cancelled';
+//   // Связанные объекты с бэкенда
+//   typeWork?: {
+//     id: number;
+//     name: string;
+//   };
+//   train?: {
+//     id: number;
+//     number: string;
+//   };
+//   carriages?: Array<{
+//     id: number;
+//     number: string;
+//     type: string;
+//     trainId: number;
+//     carriagePhoto?: string | null;
+//   }>;
+//   completedJob?: {
+//     id: number;
+//     name: string;
+//   };
+//   currentLocation?: {
+//     id: number;
+//     name: string;
+//   };
+//   user?: {
+//     id: number;
+//     login: string;
+//     role: string;
+//     name: string;
+//   };
+//   // Устаревшие поля для обратной совместимости
+//   workType?: string;
+//   trainNumber?: string;
+//   carriageType?: string;
+//   carriageNumber?: string;
+//   workCompleted?: string;
+//   location?: string;
+//   equipment: EquipmentItem[];
+//   generalPhoto?: string | null;
+//   finalPhoto?: string | null;
+// }
+
+import type { WorkLogEntry } from "../../worklog/model/types";
 
 // Интерфейс для одного элемента оборудования
+export interface Application {
+  id: number;
+  photo: string;
+  status:  string;
+
+  trainNumbers: string[];
+  carriages: Array<{
+    number: string;
+    type: string;
+    train: string;
+    photo: string;
+  }>;
+
+  equipmentDetails: Array<{
+    id: number;
+    name: string;
+    deviceType: string;
+    typeWork: string;
+    serialNumber: string;
+    macAddress: string;
+    quantity: number;
+    photos: Array<{
+      type: string;
+      path: string;
+    }>;
+  }>;
+
+  countEquipment: number;
+  equipmentTypes: string[];
+  serialNumbers: string[];
+  macAddresses: string[];
+
+  equipmentPhoto: string;
+  equipmentPhotos: string[];
+  serialPhoto: string | null;
+  serialPhotos: string[];
+  macPhoto: string;
+  macPhotos: string[];
+
+  completedJob: string;
+  currentLocation: string;
+
+  user: {
+    id: number;
+    name: string;
+    role: string;
+  };
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+
 export interface EquipmentItem {
   id?: number;
   type: string;
@@ -166,45 +221,45 @@ export interface CarriageResponse {
   data: Carriage[];
 }
 
-// Типы для журнала работ
-export interface WorkLogEntry {
-  countEquipments?: number[];
-  equipmentTypes?: string[];
-  serialNumbers?: string[];
-  id: number;
-  equipmentDetails?: {
-    macAddress?: string;
-    quantity?: number;
-    serialNumber?: string;
-    type?: string;
-    photos?: {
-      description?: string;
-      path?: string;
-      type?: string;
-    }[];
-  }[];
-  applicationNumber: number;
-  applicationDate: string;
-  typeWork: string;
-  trainNumber: string;
-  carriageType: string;
-  carriageNumber: string;
-  equipment: string;
-  serialNumber?: string;
-  macAddress?: string;
-  countEquipment: number;
-  completedBy: string;
-  currentLocation: string;
-  user: string;
-  photos: {
-    carriagePhoto?: string;
-    equipmentPhoto?: string;
-    serialPhoto?: string;
-    macPhoto?: string;
-    generalPhoto?: string;
-    finalPhoto?: string;
-  };
-}
+// // Типы для журнала работ
+// export interface WorkLogEntry {
+//   countEquipments?: number[];
+//   equipmentTypes?: string[];
+//   serialNumbers?: string[];
+//   id: number;
+//   equipmentDetails?: {
+//     macAddress?: string;
+//     quantity?: number;
+//     serialNumber?: string;
+//     type?: string;
+//     photos?: {
+//       description?: string;
+//       path?: string;
+//       type?: string;
+//     }[];
+//   }[];
+//   applicationNumber: number;
+//   applicationDate: string;
+//   typeWork: string;
+//   trainNumber: string;
+//   carriageType: string;
+//   carriageNumber: string;
+//   equipment: string;
+//   serialNumber?: string;
+//   macAddress?: string;
+//   countEquipment: number;
+//   completedBy: string;
+//   currentLocation: string;
+//   user: string;
+//   photos: {
+//     carriagePhoto?: string;
+//     equipmentPhoto?: string;
+//     serialPhoto?: string;
+//     macPhoto?: string;
+//     generalPhoto?: string;
+//     finalPhoto?: string;
+//   };
+// }
 
 export interface WorkLogResponse {
   success: boolean;
