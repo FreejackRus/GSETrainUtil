@@ -392,7 +392,7 @@ export const CarriagesPage = () => {
                       Тип: {carriage.carriageType} • Оборудования: {carriage.equipment.length}
                     </Typography>
                   </Box>
-                  <Box display="flex" gap={1}>
+                  <Box display="flex" flexWrap={"wrap"} gap={1}>
                     <Chip 
                       label={`${carriage.equipment.length} ед.`} 
                       color="primary" 
