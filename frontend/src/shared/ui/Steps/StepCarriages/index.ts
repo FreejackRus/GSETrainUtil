@@ -1,1 +1,1 @@
-export { StepCarriages } from './StepCarriages';
+export { StepCarriages } from './stepcarriages';

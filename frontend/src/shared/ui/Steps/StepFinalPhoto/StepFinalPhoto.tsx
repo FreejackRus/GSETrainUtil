@@ -22,13 +22,13 @@ export const StepFinalPhoto: React.FC<StepFinalPhotoProps> = ({
     <Box>
       <Card className="step-final-photo-header-card" sx={{ mb: 3, borderRadius: 3 }}>
         <CardContent>
-          <Box display="flex" alignItems="center" gap={2}>
+          <Box display="flex" alignItems="center" justifyContent={"center"} gap={2} flexWrap={"wrap"}>
             <Box className="step-final-photo-avatar-container">
               <Avatar className="step-final-photo-avatar">
                 <CameraAlt className="step-final-photo-avatar-icon" />
               </Avatar>
             </Box>
-            <Box className="step-final-photo-text-container">
+            <Box className="step-final-photo-text-container" >
               <Typography variant="h6" className="step-final-photo-title">
                 📸 Финальная фотография
               </Typography>

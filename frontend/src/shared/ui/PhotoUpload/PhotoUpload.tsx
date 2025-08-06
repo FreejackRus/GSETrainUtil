@@ -1,21 +1,7 @@
-import { 
-  Box, 
-  Button, 
-  Avatar, 
-  Typography, 
-  Card, 
-  CardContent, 
-  Paper,
-  Chip
-} from "@mui/material";
-import { 
-  PhotoCamera, 
-  CheckCircle, 
-  CloudUpload,
-  CameraAlt
-} from "@mui/icons-material";
-import type { UploadPhotoParams } from "../../api/uploadApi";
-import "./PhotoUpload.css";
+import { Box, Button, Avatar, Typography, Card, CardContent, Paper, Chip } from '@mui/material';
+import { PhotoCamera, CheckCircle, CloudUpload, CameraAlt } from '@mui/icons-material';
+import type { UploadPhotoParams } from '../../api/uploadApi';
+import './PhotoUpload.css';
 
 // New interface for file selection
 interface PhotoUploadNewProps {
@@ -54,8 +40,15 @@ const isLegacyInterface = (props: PhotoUploadProps): props is PhotoUploadLegacyP
 };
 
 export const PhotoUpload = (props: PhotoUploadProps) => {
-  const { label, description, required = false, accept = "image/*", compact = false, size = 'medium' } = props;
-  
+  const {
+    label,
+    description,
+    required = false,
+    accept = 'image/*',
+    compact = false,
+    size = 'medium',
+  } = props;
+
   const handleButtonClick = () => {
     const input = document.getElementById(`photo-input-${label.replace(/\s+/g, '-')}`);
     input?.click();
@@ -67,7 +60,7 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
       return;
     }
     const file = e.target.files[0] || null;
-    
+
     if (isNewInterface(props)) {
       // New interface: just pass the file
       props.onPhotoChange(file);
@@ -86,37 +79,49 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
   const currentPhoto = isNewInterface(props) ? props.photo : null;
 
   return (
-    <Paper elevation={2} className={`photo-upload-container ${compact ? 'compact' : ''}`}>
+    <Paper
+      elevation={2}
+      className={`photo-upload-container ${compact ? 'compact' : ''}`}
+      sx={{ p: { xs: 2, sm: 3 } }}
+    >
       <Box className="photo-upload-content">
         <Avatar className={`photo-upload-avatar ${size}`}>
           <PhotoCamera />
         </Avatar>
-        
-        <Typography variant={compact ? "body2" : "subtitle1"} className="photo-upload-title">
+
+        <Typography
+          variant={compact ? 'body2' : 'subtitle1'}
+          className="photo-upload-title"
+          // fontSize={{xs:"0.68rem",sm:"0.88rem"}}
+        >
           {label}
           {required && <span className="photo-upload-required"> *</span>}
         </Typography>
-        
+
         {description && !compact && (
           <Typography variant="body2" color="text.secondary" className="photo-upload-description">
             {description}
           </Typography>
         )}
-        
-        <input 
+
+        <input
           id={`photo-input-${label.replace(/\s+/g, '-')}`}
-          type="file" 
+          type="file"
           accept={accept}
           className="photo-upload-input-hidden"
           onChange={handleFileChange}
         />
-        
-        <Button 
-          variant="contained" 
+
+        <Button
+          variant="contained"
           onClick={handleButtonClick}
           startIcon={<CloudUpload />}
           className="photo-upload-button"
           size={size === 'large' ? 'large' : size === 'small' ? 'small' : 'medium'}
+          sx={{
+            width: { xs: 90, sm: 'auto' },
+            fontSize: { xs: '0.55rem', sm: '0.88rem' },
+          }}
         >
           {currentPhoto ? 'Изменить фото' : 'Загрузить фото'}
         </Button>
@@ -126,13 +131,16 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
       {currentPhoto && currentPhoto instanceof File && (
         <Card className={`photo-upload-preview ${compact ? 'compact' : ''}`}>
           <CardContent className="photo-upload-preview-content">
-            <Box className="photo-upload-success">
+            <Box className="photo-upload-success" display={'flex'} flexWrap={'wrap'}>
               <CheckCircle className="photo-upload-success-icon" />
-              <Typography variant={compact ? "caption" : "subtitle2"} className="photo-upload-success-text">
+              <Typography
+                variant={compact ? 'caption' : 'subtitle2'}
+                className="photo-upload-success-text"
+              >
                 Фото выбрано
               </Typography>
             </Box>
-            
+
             <Box className="photo-upload-image-container">
               <Avatar
                 variant="rounded"
@@ -141,15 +149,15 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
                 className={`photo-upload-image ${size}`}
               />
             </Box>
-            
+
             <Box className="photo-upload-chips">
-              <Chip 
+              <Chip
                 icon={<CameraAlt />}
                 label={currentPhoto.name}
                 size="small"
                 className="photo-upload-chip-name"
               />
-              <Chip 
+              <Chip
                 label={`${Math.round(currentPhoto.size / 1024)} KB`}
                 size="small"
                 className="photo-upload-chip-size"

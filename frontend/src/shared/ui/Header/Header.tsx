@@ -111,7 +111,7 @@ const handleLogoutAdmin = () => {
 
   return (
     <>
-      <AppBar position="static" elevation={3} className="header">
+      <AppBar position="static" elevation={3}  className="header">
         <Toolbar className="header__toolbar">
           {/* Левая часть - Логотип и название */}
           <Box className="header__left">

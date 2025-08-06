@@ -38,10 +38,10 @@ interface StepCarriagesProps {
   onValidationChange?: (isValid: boolean) => void;
 }
 
-export const StepCarriages: React.FC<StepCarriagesProps> = ({ 
-  carriages, 
+export const StepCarriages: React.FC<StepCarriagesProps> = ({
+  carriages,
   onCarriagesChange,
-  onValidationChange 
+  onValidationChange,
 }) => {
   const [carriageTypes, setCarriageTypes] = useState<string[]>([]);
   const [equipmentTypes, setEquipmentTypes] = useState<string[]>([]);
@@ -68,25 +68,30 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
   const validateForm = () => {
     if (carriages.length === 0) return false;
 
-    return carriages.every(carriage => {
+    return carriages.every((carriage) => {
       // Проверяем заполненность полей вагона и фото вагона
-      const carriageValid = carriage.carriageNumber.trim() !== '' && 
-                           carriage.carriageType.trim() !== '' &&
-                           carriage.carriagePhoto !== null;
-      
+      const carriageValid =
+        carriage.carriageNumber.trim() !== '' &&
+        carriage.carriageType.trim() !== '' &&
+        carriage.carriagePhoto !== null;
+
       // Проверяем заполненность оборудования
-      const equipmentValid = !carriage.equipment || carriage.equipment.length === 0 || 
-        carriage.equipment.every((equipment: EquipmentFormItem) =>
-          equipment.equipmentType.trim() !== '' &&
-          equipment.serialNumber.trim() !== '' &&
-          equipment.quantity > 0 &&
-          equipment.photos.equipment !== null &&
-          equipment.photos.serial !== null &&
-          // MAC-адрес и фото MAC обязательны только для определенных типов оборудования
-          (isNetworkEquipment(equipment.equipmentType) ? 
-            equipment.macAddress.trim() !== '' && 
-            isValidMacAddress(equipment.macAddress) &&
-            equipment.photos.mac !== null : true)
+      const equipmentValid =
+        !carriage.equipment ||
+        carriage.equipment.length === 0 ||
+        carriage.equipment.every(
+          (equipment: EquipmentFormItem) =>
+            equipment.equipmentType.trim() !== '' &&
+            equipment.serialNumber.trim() !== '' &&
+            equipment.quantity > 0 &&
+            equipment.photos.equipment !== null &&
+            equipment.photos.serial !== null &&
+            // MAC-адрес и фото MAC обязательны только для определенных типов оборудования
+            (isNetworkEquipment(equipment.equipmentType)
+              ? equipment.macAddress.trim() !== '' &&
+                isValidMacAddress(equipment.macAddress) &&
+                equipment.photos.mac !== null
+              : true),
         );
 
       return carriageValid && equipmentValid;
@@ -96,20 +101,20 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
   // Проверяем, является ли оборудование сетевым (требует MAC-адрес)
   const isNetworkEquipment = (equipmentType: string): boolean => {
     const networkTypes = ['точка доступа', 'маршрутизатор', 'коммутатор'];
-    return networkTypes.some(type => equipmentType.toLowerCase().includes(type));
+    return networkTypes.some((type) => equipmentType.toLowerCase().includes(type));
   };
 
   // Форматирование MAC-адреса
   const formatMacAddress = (value: string): string => {
     // Удаляем все символы кроме букв и цифр
     const cleaned = value.replace(/[^a-fA-F0-9]/g, '');
-    
+
     // Ограничиваем до 12 символов
     const limited = cleaned.slice(0, 12);
-    
+
     // Добавляем двоеточия каждые 2 символа
     const formatted = limited.replace(/(.{2})/g, '$1:').slice(0, -1);
-    
+
     return formatted.toUpperCase();
   };
 
@@ -132,7 +137,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
       carriageNumber: '',
       carriageType: '',
       carriagePhoto: null,
-      equipment: []
+      equipment: [],
     };
     onCarriagesChange([...carriages, newCarriage]);
   };
@@ -160,7 +165,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
         equipment: null,
         serial: null,
         mac: null,
-      }
+      },
     };
 
     const newCarriages = [...carriages];
@@ -173,15 +178,18 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
 
   const handleRemoveEquipment = (carriageIndex: number, equipmentIndex: number) => {
     const newCarriages = [...carriages];
-    newCarriages[carriageIndex].equipment = newCarriages[carriageIndex].equipment?.filter((_item: EquipmentFormItem, i: number) => i !== equipmentIndex) || [];
+    newCarriages[carriageIndex].equipment =
+      newCarriages[carriageIndex].equipment?.filter(
+        (_item: EquipmentFormItem, i: number) => i !== equipmentIndex,
+      ) || [];
     onCarriagesChange(newCarriages);
   };
 
   const handleEquipmentChange = (
-    carriageIndex: number, 
-    equipmentIndex: number, 
-    field: keyof EquipmentFormItem, 
-    value: any
+    carriageIndex: number,
+    equipmentIndex: number,
+    field: keyof EquipmentFormItem,
+    value: any,
   ) => {
     const newCarriages = [...carriages];
     if (newCarriages[carriageIndex].equipment) {
@@ -191,7 +199,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
       }
       newCarriages[carriageIndex].equipment![equipmentIndex] = {
         ...newCarriages[carriageIndex].equipment![equipmentIndex],
-        [field]: value
+        [field]: value,
       };
       onCarriagesChange(newCarriages);
     }
@@ -201,7 +209,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
     carriageIndex: number,
     equipmentIndex: number,
     photoType: 'equipment' | 'serial' | 'mac',
-    file: File | null
+    file: File | null,
   ) => {
     const newCarriages = [...carriages];
     if (newCarriages[carriageIndex].equipment) {
@@ -212,21 +220,26 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
 
   // Проверка заполненности вагона
   const isCarriageComplete = (carriage: CarriageFormItem): boolean => {
-    const carriageFieldsComplete = carriage.carriageNumber.trim() !== '' && 
-                                  carriage.carriageType.trim() !== '' &&
-                                  carriage.carriagePhoto !== null;
-    
-    const equipmentComplete = !carriage.equipment || carriage.equipment.length === 0 || 
-      carriage.equipment.every((equipment: EquipmentFormItem) =>
-        equipment.equipmentType.trim() !== '' &&
-        equipment.serialNumber.trim() !== '' &&
-        equipment.quantity > 0 &&
-        equipment.photos.equipment !== null &&
-        equipment.photos.serial !== null &&
-        (isNetworkEquipment(equipment.equipmentType) ? 
-          equipment.macAddress.trim() !== '' && 
-          isValidMacAddress(equipment.macAddress) &&
-          equipment.photos.mac !== null : true)
+    const carriageFieldsComplete =
+      carriage.carriageNumber.trim() !== '' &&
+      carriage.carriageType.trim() !== '' &&
+      carriage.carriagePhoto !== null;
+
+    const equipmentComplete =
+      !carriage.equipment ||
+      carriage.equipment.length === 0 ||
+      carriage.equipment.every(
+        (equipment: EquipmentFormItem) =>
+          equipment.equipmentType.trim() !== '' &&
+          equipment.serialNumber.trim() !== '' &&
+          equipment.quantity > 0 &&
+          equipment.photos.equipment !== null &&
+          equipment.photos.serial !== null &&
+          (isNetworkEquipment(equipment.equipmentType)
+            ? equipment.macAddress.trim() !== '' &&
+              isValidMacAddress(equipment.macAddress) &&
+              equipment.photos.mac !== null
+            : true),
       );
     return carriageFieldsComplete && equipmentComplete;
   };
@@ -234,11 +247,11 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
   // Получение ошибок для оборудования
   const getEquipmentErrors = (equipment: EquipmentFormItem): string[] => {
     const errors: string[] = [];
-    
+
     if (!equipment.equipmentType.trim()) errors.push('Не указан тип оборудования');
     if (!equipment.serialNumber.trim()) errors.push('Не указан серийный номер');
     if (equipment.quantity <= 0) errors.push('Количество должно быть больше 0');
-    
+
     if (isNetworkEquipment(equipment.equipmentType)) {
       if (!equipment.macAddress.trim()) {
         errors.push('MAC-адрес обязателен для сетевого оборудования');
@@ -246,7 +259,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
         errors.push('Неверный формат MAC-адреса');
       }
     }
-    
+
     return errors;
   };
 
@@ -267,16 +280,14 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
           <CardContent>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Box display="flex" alignItems="center" gap={1}>
-                <Typography variant="h6">
-                  Вагон {carriageIndex + 1}
-                </Typography>
+                <Typography variant="h6">Вагон {carriageIndex + 1}</Typography>
                 {isCarriageComplete(carriage) ? (
                   <CheckCircleIcon color="success" />
                 ) : (
                   <ErrorIcon color="error" />
                 )}
               </Box>
-              <IconButton 
+              <IconButton
                 onClick={() => handleRemoveCarriage(carriageIndex)}
                 color="error"
                 size="small"
@@ -286,18 +297,20 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
             </Box>
 
             <Grid container spacing={2} mb={2}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   label="Номер вагона"
                   value={carriage.carriageNumber}
-                  onChange={(e) => handleCarriageChange(carriageIndex, 'carriageNumber', e.target.value)}
+                  onChange={(e) =>
+                    handleCarriageChange(carriageIndex, 'carriageNumber', e.target.value)
+                  }
                   error={!carriage.carriageNumber.trim()}
                   helperText={!carriage.carriageNumber.trim() ? 'Обязательное поле' : ''}
                   required
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <AutocompleteField
                   label="Тип вагона"
                   value={carriage.carriageType}
@@ -319,7 +332,9 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                 <PhotoUpload
                   label="Фото вагона"
                   photo={carriage.carriagePhoto || null}
-                  onPhotoChange={(file) => handleCarriageChange(carriageIndex, 'carriagePhoto', file)}
+                  onPhotoChange={(file) =>
+                    handleCarriageChange(carriageIndex, 'carriagePhoto', file)
+                  }
                   required
                 />
               </Box>
@@ -328,10 +343,14 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
             {/* Секция оборудования */}
             {carriage.carriageNumber && carriage.carriageType && (
               <Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="subtitle1">
-                    Оборудование
-                  </Typography>
+                <Box
+                  display="flex"
+                  flexWrap={'wrap'}
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={2}
+                >
+                  <Typography variant="subtitle1">Оборудование</Typography>
                   <Button
                     startIcon={<AddIcon />}
                     onClick={() => handleAddEquipment(carriageIndex)}
@@ -349,8 +368,14 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                   return (
                     <Accordion key={equipmentIndex} sx={{ mb: 1 }}>
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Box display="flex" alignItems="center" gap={1} width="100%">
-                          <Typography>
+                        <Box
+                          display="flex"
+                          flexWrap={'wrap'}
+                          alignItems="center"
+                          gap={1}
+                          width="100%"
+                        >
+                          <Typography fontSize={{ xs: '0.68rem', sm: '1rem' }}>
                             Оборудование {equipmentIndex + 1}
                           </Typography>
                           {hasErrors ? (
@@ -359,18 +384,17 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                             <CheckCircleIcon color="success" fontSize="small" />
                           )}
                           {equipment.equipmentType && (
-                            <Chip 
-                              label={equipment.equipmentType} 
-                              size="small" 
-                              variant="outlined" 
-                            />
+                            <Chip label={equipment.equipmentType} size="small" variant="outlined" />
                           )}
                         </Box>
                       </AccordionSummary>
-                      <AccordionDetails>
+                      <AccordionDetails sx={{ p: { xs: 0, sm: 2 } }}>
                         {hasErrors && (
-                          <Alert severity="error" sx={{ mb: 2 }}>
-                            <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                          <Alert
+                            severity="error"
+                            sx={{ mb: 2, fontSize: { xs: '0.56rem', sm: '0.8rem' } }}
+                          >
+                            <ul style={{ margin: 0, paddingLeft: '10px' }}>
                               {equipmentErrors.map((error, index) => (
                                 <li key={index}>{error}</li>
                               ))}
@@ -379,63 +403,99 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                         )}
 
                         <Grid container spacing={2} mb={2}>
-                          <Grid item xs={12} md={6}>
+                          <Grid size={{ xs: 12, md: 6 }}>
                             <AutocompleteField
                               label="Тип оборудования"
                               value={equipment.equipmentType}
-                              onChange={(value) => handleEquipmentChange(carriageIndex, equipmentIndex, 'equipmentType', value)}
+                              onChange={(value) =>
+                                handleEquipmentChange(
+                                  carriageIndex,
+                                  equipmentIndex,
+                                  'equipmentType',
+                                  value,
+                                )
+                              }
                               options={equipmentTypes}
                               error={!equipment.equipmentType.trim()}
-                              helperText={!equipment.equipmentType.trim() ? 'Обязательное поле' : ''}
+                              helperText={
+                                !equipment.equipmentType.trim() ? 'Обязательное поле' : ''
+                              }
                               required
                             />
                           </Grid>
-                          <Grid item xs={12} md={6}>
+                          <Grid size={{ xs: 12, md: 6 }}>
                             <TextField
                               fullWidth
                               label="Серийный номер"
                               value={equipment.serialNumber}
-                              onChange={(e) => handleEquipmentChange(carriageIndex, equipmentIndex, 'serialNumber', e.target.value)}
+                              onChange={(e) =>
+                                handleEquipmentChange(
+                                  carriageIndex,
+                                  equipmentIndex,
+                                  'serialNumber',
+                                  e.target.value,
+                                )
+                              }
                               error={!equipment.serialNumber.trim()}
                               helperText={!equipment.serialNumber.trim() ? 'Обязательное поле' : ''}
                               required
                             />
                           </Grid>
-                          <Grid item xs={12} md={6}>
+                          <Grid size={{ xs: 12, md: 6 }}>
                             <TextField
                               fullWidth
                               type="number"
                               label="Количество"
                               value={equipment.quantity}
-                              onChange={(e) => handleEquipmentChange(carriageIndex, equipmentIndex, 'quantity', parseInt(e.target.value) || 1)}
+                              onChange={(e) =>
+                                handleEquipmentChange(
+                                  carriageIndex,
+                                  equipmentIndex,
+                                  'quantity',
+                                  parseInt(e.target.value) || 1,
+                                )
+                              }
                               inputProps={{ min: 1 }}
                               error={equipment.quantity <= 0}
-                              helperText={equipment.quantity <= 0 ? 'Количество должно быть больше 0' : ''}
+                              helperText={
+                                equipment.quantity <= 0 ? 'Количество должно быть больше 0' : ''
+                              }
                               required
                             />
                           </Grid>
                           {isNetworkEquipment(equipment.equipmentType) && (
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <TextField
                                 fullWidth
                                 label="MAC-адрес"
                                 value={equipment.macAddress}
-                                onChange={(e) => handleEquipmentChange(carriageIndex, equipmentIndex, 'macAddress', e.target.value)}
+                                onChange={(e) =>
+                                  handleEquipmentChange(
+                                    carriageIndex,
+                                    equipmentIndex,
+                                    'macAddress',
+                                    e.target.value,
+                                  )
+                                }
                                 placeholder="XX:XX:XX:XX:XX:XX"
-                                error={equipment.macAddress.trim() !== '' && !isValidMacAddress(equipment.macAddress)}
+                                error={
+                                  equipment.macAddress.trim() !== '' &&
+                                  !isValidMacAddress(equipment.macAddress)
+                                }
                                 helperText={
-                                  equipment.macAddress.trim() === '' 
+                                  equipment.macAddress.trim() === ''
                                     ? 'Обязательное поле для сетевого оборудования'
-                                    : !isValidMacAddress(equipment.macAddress) 
-                                      ? 'Неверный формат MAC-адреса (XX:XX:XX:XX:XX:XX)'
-                                      : 'Формат: XX:XX:XX:XX:XX:XX'
+                                    : !isValidMacAddress(equipment.macAddress)
+                                    ? 'Неверный формат MAC-адреса (XX:XX:XX:XX:XX:XX)'
+                                    : 'Формат: XX:XX:XX:XX:XX:XX'
                                 }
                                 InputProps={{
                                   endAdornment: (
                                     <InputAdornment position="end">
-                                      {equipment.macAddress && isValidMacAddress(equipment.macAddress) && (
-                                        <CheckCircleIcon color="success" fontSize="small" />
-                                      )}
+                                      {equipment.macAddress &&
+                                        isValidMacAddress(equipment.macAddress) && (
+                                          <CheckCircleIcon color="success" fontSize="small" />
+                                        )}
                                     </InputAdornment>
                                   ),
                                 }}
@@ -452,28 +512,49 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                               📷 Фотографии оборудования
                             </Typography>
                             <Grid container spacing={2}>
-                              <Grid item xs={6} md={4}>
+                              <Grid size={{ xs: 12, md: 4 }}>
                                 <PhotoUpload
                                   label="Фото оборудования"
                                   photo={equipment.photos.equipment}
-                                  onPhotoChange={(file) => handleEquipmentPhotoChange(carriageIndex, equipmentIndex, 'equipment', file)}
+                                  onPhotoChange={(file) =>
+                                    handleEquipmentPhotoChange(
+                                      carriageIndex,
+                                      equipmentIndex,
+                                      'equipment',
+                                      file,
+                                    )
+                                  }
                                   required
                                 />
                               </Grid>
-                              <Grid item xs={6} md={4}>
+                              <Grid size={{ xs: 12, md: 4 }}>
                                 <PhotoUpload
                                   label="Фото серийного номера"
                                   photo={equipment.photos.serial}
-                                  onPhotoChange={(file) => handleEquipmentPhotoChange(carriageIndex, equipmentIndex, 'serial', file)}
+                                  onPhotoChange={(file) =>
+                                    handleEquipmentPhotoChange(
+                                      carriageIndex,
+                                      equipmentIndex,
+                                      'serial',
+                                      file,
+                                    )
+                                  }
                                   required
                                 />
                               </Grid>
                               {isNetworkEquipment(equipment.equipmentType) && (
-                                <Grid item xs={6} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }}>
                                   <PhotoUpload
                                     label="Фото MAC-адреса"
                                     photo={equipment.photos.mac}
-                                    onPhotoChange={(file) => handleEquipmentPhotoChange(carriageIndex, equipmentIndex, 'mac', file)}
+                                    onPhotoChange={(file) =>
+                                      handleEquipmentPhotoChange(
+                                        carriageIndex,
+                                        equipmentIndex,
+                                        'mac',
+                                        file,
+                                      )
+                                    }
                                     required
                                   />
                                 </Grid>
