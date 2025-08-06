@@ -6,333 +6,150 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Начинаю заполнение базы данных...");
 
-  // Хешируем пароли
-  const adminPasswordHash = await bcrypt.hash("admin", 10);
-  const engineerPasswordHash = await bcrypt.hash("engineer", 10);
+  // 1. Создаём пользователей
+  const [adminPwd, engPwd] = await Promise.all([
+    bcrypt.hash("admin", 10),
+    bcrypt.hash("engineer", 10),
+  ]);
 
-  // 1. Создаем пользователей
-  console.log("👤 Создаю пользователей...");
   const admin = await prisma.user.upsert({
-    where: { login: "admin" },
-    update: {},
-    create: {
-      login: "admin",
-      password: adminPasswordHash,
-      role: "admin",
-      name: "Администратор",
-    },
+    where:   { login: "admin" },
+    update:  {},
+    create:  { login: "admin", password: adminPwd, role: "admin", name: "Администратор" },
   });
 
   const engineer = await prisma.user.upsert({
-    where: { login: "engineer" },
-    update: {},
-    create: {
-      login: "engineer",
-      password: engineerPasswordHash,
-      role: "engineer",
-      name: "Инженер",
-    },
+    where:   { login: "engineer" },
+    update:  {},
+    create:  { login: "engineer", password: engPwd, role: "engineer", name: "Инженер" },
   });
 
-  // 2. Создаем справочники
-  console.log("📋 Создаю справочники...");
+  // 2. Справочники: TypeWork, CompletedJob, CurrentLocation
+  const [tw1, tw2, tw3] = await Promise.all([
+    prisma.typeWork.upsert({ where: { name: "Монтаж"       }, update: {}, create: { name: "Монтаж" } }),
+    prisma.typeWork.upsert({ where: { name: "Демонтаж"     }, update: {}, create: { name: "Демонтаж" } }),
+    prisma.typeWork.upsert({ where: { name: "Обслуживание" }, update: {}, create: { name: "Обслуживание" } }),
+  ]);
 
-  // Типы работ
-  const typeWork1 = await prisma.typeWork.upsert({
-    where: { name: "Монтаж" },
-    update: {},
-    create: { name: "Монтаж" },
-  });
+  const [cj1, cj2, cj3] = await Promise.all([
+    prisma.completedJob.upsert({ where: { name: "Перемена"            }, update: {}, create: { name: "Перемена" } }),
+    prisma.completedJob.upsert({ where: { name: "Подрядчик"          }, update: {}, create: { name: "Подрядчик" } }),
+    prisma.completedJob.upsert({ where: { name: "Внутренние ресурсы"  }, update: {}, create: { name: "Внутренние ресурсы" } }),
+  ]);
 
-  const typeWork2 = await prisma.typeWork.upsert({
-    where: { name: "Демонтаж" },
-    update: {},
-    create: { name: "Демонтаж" },
-  });
+  const [loc1, loc2, loc3] = await Promise.all([
+    prisma.currentLocation.upsert({ where: { name: "Депо №1"        }, update: {}, create: { name: "Депо №1" } }),
+    prisma.currentLocation.upsert({ where: { name: "Депо №2"        }, update: {}, create: { name: "Депо №2" } }),
+    prisma.currentLocation.upsert({ where: { name: "Ремонтная база" }, update: {}, create: { name: "Ремонтная база" } }),
+  ]);
 
-  const typeWork3 = await prisma.typeWork.upsert({
-    where: { name: "Обслуживание" },
-    update: {},
-    create: { name: "Обслуживание" },
-  });
+  // 3. Поезда
+  const [train1, train2, train3] = await Promise.all([
+    prisma.train.upsert({ where: { number: "001" }, update: {}, create: { number: "001" } }),
+    prisma.train.upsert({ where: { number: "002" }, update: {}, create: { number: "002" } }),
+    prisma.train.upsert({ where: { number: "003" }, update: {}, create: { number: "003" } }),
+  ]);
 
-  // Выполненные работы
-  const completedJob1 = await prisma.completedJob.upsert({
-    where: { name: "Перемена" },
-    update: {},
-    create: { name: "Перемена" },
-  });
+  // 4. Вагоны
+  const [car1, car2, car3, car4, car5] = await Promise.all([
+    prisma.carriage.upsert({ where: { number_trainId: { number: "В-001", trainId: train1.id } },
+      update: {}, create: { number: "В-001", type: "Пассажирский", trainId: train1.id } }),
+    prisma.carriage.upsert({ where: { number_trainId: { number: "В-002", trainId: train1.id } },
+      update: {}, create: { number: "В-002", type: "Грузовой",     trainId: train1.id } }),
+    prisma.carriage.upsert({ where: { number_trainId: { number: "В-003", trainId: train2.id } },
+      update: {}, create: { number: "В-003", type: "Багажный",    trainId: train2.id } }),
+    prisma.carriage.upsert({ where: { number_trainId: { number: "В-004", trainId: train2.id } },
+      update: {}, create: { number: "В-004", type: "Почтовый",    trainId: train2.id } }),
+    prisma.carriage.upsert({ where: { number_trainId: { number: "В-005", trainId: train3.id } },
+      update: {}, create: { number: "В-005", type: "Служебный",   trainId: train3.id } }),
+  ]);
 
-  const completedJob2 = await prisma.completedJob.upsert({
-    where: { name: "Подрядчик" },
-    update: {},
-    create: { name: "Подрядчик" },
-  });
+  // 5. Оборудование
+  const [eq1, eq2, eq3, eq4, eq5] = await Promise.all([
+    prisma.equipment.create({ data: { type: "GSE Terminal", serialNumber: "GSE-TRM-001", macAddress: "00:11:22:33:44:55", status: "Активно", lastService: new Date(), carriageId: car1.id } }),
+    prisma.equipment.create({ data: { type: "GSE Router",   serialNumber: "GSE-RTR-002", macAddress: "00:11:22:33:44:66", status: "Неактивно", lastService: new Date(), carriageId: car2.id } }),
+    prisma.equipment.create({ data: { type: "GSE Switch",   serialNumber: "GSE-SWT-003", macAddress: "00:11:22:33:44:77", status: "Активно", lastService: new Date(), carriageId: car3.id } }),
+    prisma.equipment.create({ data: { type: "GSE AP",       serialNumber: "GSE-AP-004",  macAddress: "00:11:22:33:44:88", status: "Активно", lastService: new Date(), carriageId: car4.id } }),
+    prisma.equipment.create({ data: { type: "GSE Controller",serialNumber:"GSE-CTL-005", macAddress: "00:11:22:33:44:99", status: "Неактивно", lastService: new Date(), carriageId: car5.id } }),
+  ]);
 
-  const completedJob3 = await prisma.completedJob.upsert({
-    where: { name: "Внутренние ресурсы" },
-    update: {},
-    create: { name: "Внутренние ресурсы" },
-  });
+  // 6. Тестовые заявки
+  console.log("📝 Создаю заявки...");
 
-  // Местоположения
-  const location1 = await prisma.currentLocation.upsert({
-    where: { name: "Депо №1" },
-    update: {},
-    create: { name: "Депо №1" },
-  });
-
-  const location2 = await prisma.currentLocation.upsert({
-    where: { name: "Депо №2" },
-    update: {},
-    create: { name: "Депо №2" },
-  });
-
-  const location3 = await prisma.currentLocation.upsert({
-    where: { name: "Ремонтная база" },
-    update: {},
-    create: { name: "Ремонтная база" },
-  });
-
-  // 3. Создаем поезда
-  console.log("🚂 Создаю поезда...");
-  const train1 = await prisma.train.upsert({
-    where: { number: "001" },
-    update: {},
-    create: { number: "001" },
-  });
-
-  const train2 = await prisma.train.upsert({
-    where: { number: "002" },
-    update: {},
-    create: { number: "002" },
-  });
-
-  const train3 = await prisma.train.upsert({
-    where: { number: "003" },
-    update: {},
-    create: { number: "003" },
-  });
-
-  // 4. Создаем вагоны
-  console.log("🚃 Создаю вагоны...");
-  const carriage1 = await prisma.carriage.create({
+  await prisma.request.create({
     data: {
-      number: "В-001",
-      type: "Пассажирский",
-      trainId: train1.id,
-    },
-  });
-
-  const carriage2 = await prisma.carriage.create({
-    data: {
-      number: "В-002",
-      type: "Грузовой",
-      trainId: train1.id,
-    },
-  });
-
-  const carriage3 = await prisma.carriage.create({
-    data: {
-      number: "В-003",
-      type: "Багажный",
-      trainId: train2.id,
-    },
-  });
-
-  const carriage4 = await prisma.carriage.create({
-    data: {
-      number: "В-004",
-      type: "Почтовый",
-      trainId: train2.id,
-    },
-  });
-
-  const carriage5 = await prisma.carriage.create({
-    data: {
-      number: "В-005",
-      type: "Служебный",
-      trainId: train3.id,
-    },
-  });
-
-  // 5. Создаем оборудование
-  console.log("⚙️ Создаю оборудование...");
-  const equipment1 = await prisma.equipment.create({
-    data: {
-      type: "GSE Terminal",
-      serialNumber: "GSE-TRM-001",
-      macAddress: "00:11:22:33:44:55",
-      status: "Активно",
-      lastService: new Date(),
-      carriageId: carriage1.id,
-    },
-  });
-
-  const equipment2 = await prisma.equipment.create({
-    data: {
-      type: "GSE Router",
-      serialNumber: "GSE-RTR-002",
-      macAddress: "00:11:22:33:44:66",
-      status: "Неактивно",
-      lastService: new Date(),
-      carriageId: carriage2.id,
-    },
-  });
-
-  const equipment3 = await prisma.equipment.create({
-    data: {
-      type: "GSE Switch",
-      serialNumber: "GSE-SWT-003",
-      macAddress: "00:11:22:33:44:77",
-      status: "Активно",
-      lastService: new Date(),
-      carriageId: carriage3.id,
-    },
-  });
-
-  const equipment4 = await prisma.equipment.create({
-    data: {
-      type: "GSE Access Point",
-      serialNumber: "GSE-AP-004",
-      macAddress: "00:11:22:33:44:88",
-      status: "Активно",
-      lastService: new Date(),
-      carriageId: carriage4.id,
-    },
-  });
-
-  const equipment5 = await prisma.equipment.create({
-    data: {
-      type: "GSE Controller",
-      serialNumber: "GSE-CTL-005",
-      macAddress: "00:11:22:33:44:99",
-      status: "Неактивно",
-      lastService: new Date(),
-      carriageId: carriage5.id,
-    },
-  });
-
-  // 6. Создаем фотографии оборудования
-  console.log("📷 Создаю фотографии оборудования...");
-  await prisma.equipmentPhoto.createMany({
-    data: [
-      {
-        equipmentId: equipment1.id,
-        photoType: "equipment",
-        photoPath: "/uploads/equipment/equipment1.jpg",
-        description: "Основное фото GSE Terminal",
+      status:            "draft",
+      currentLocationId: loc1.id,
+      completedJobId:    cj1.id,
+      userId:            engineer.id,
+      // Привязываем поезда
+      requestTrains: {
+        create: [{ trainId: train1.id }],
       },
-      {
-        equipmentId: equipment1.id,
-        photoType: "serial",
-        photoPath: "/uploads/equipment/equipment1_serial.jpg",
-        description: "Серийный номер GSE Terminal",
-      },
-      {
-        equipmentId: equipment2.id,
-        photoType: "equipment",
-        photoPath: "/uploads/equipment/equipment2.jpg",
-        description: "Основное фото GSE Router",
-      },
-      {
-        equipmentId: equipment3.id,
-        photoType: "equipment",
-        photoPath: "/uploads/equipment/equipment3.jpg",
-        description: "Основное фото GSE Switch",
-      },
-      {
-        equipmentId: equipment4.id,
-        photoType: "equipment",
-        photoPath: "/uploads/equipment/equipment4.jpg",
-        description: "Основное фото GSE Access Point",
-      },
-      {
-        equipmentId: equipment5.id,
-        photoType: "equipment",
-        photoPath: "/uploads/equipment/equipment5.jpg",
-        description: "Основное фото GSE Controller",
-      },
-    ],
-  });
-
-  // 7. Создаем тестовые заявки
-  console.log("📝 Создаю тестовые заявки...");
-  const request1 = await prisma.request.create({
-    data: {
-      applicationNumber: 1001,
-      typeWorkId: typeWork1.id,
-      trainId: train1.id,
+      // Вагоны + фото номера
       requestCarriages: {
-        create: {
-          carriageId: carriage1.id,
-          carriagePhoto: "/uploads/carriages/carriage1.jpg",
-        },
+        create: [{ carriageId: car1.id, carriagePhoto: "/uploads/carriages/1.jpg" }],
       },
+      // Оборудование + тип работ + количество + фото
       requestEquipment: {
-        create: {
-          equipmentId: equipment1.id,
-          quantity: 1,
-        },
+        create: [{
+          equipmentId: eq1.id,
+          typeWorkId:  tw1.id,
+          quantity:    1,
+          photos: {
+            create: [
+              { photoType: "equipment", photoPath: "/uploads/req_eq/1_eq.jpg" },
+              { photoType: "serial",    photoPath: "/uploads/req_eq/1_serial.jpg" },
+            ],
+          },
+        }],
       },
-      completedJobId: completedJob1.id,
-      currentLocationId: location1.id,
-      userId: engineer.id,
     },
   });
 
-  const request2 = await prisma.request.create({
+  await prisma.request.create({
     data: {
-      applicationNumber: 1002,
-      typeWorkId: typeWork2.id,
-      trainId: train2.id,
-      requestCarriages: {
-        create: {
-          carriageId: carriage3.id,
-          carriagePhoto: "/uploads/carriages/carriage3.jpg",
-        },
+      status:            "completed",
+      currentLocationId: loc2.id,
+      completedJobId:    cj2.id,
+      userId:            admin.id,
+      requestTrains:     { create: [{ trainId: train2.id }] },
+      requestCarriages:  { create: [{ carriageId: car3.id, carriagePhoto: "/uploads/carriages/3.jpg" }] },
+      requestEquipment:  {
+        create: [{
+          equipmentId: eq3.id,
+          typeWorkId:  tw2.id,
+          quantity:    2,
+          photos: {
+            create: [
+              { photoType: "equipment", photoPath: "/uploads/req_eq/3_eq.jpg" },
+              { photoType: "mac",        photoPath: "/uploads/req_eq/3_mac.jpg" },
+            ],
+          },
+        }],
       },
-      requestEquipment: {
-        create: {
-          equipmentId: equipment1.id,
-          quantity: 2,
-        },
-      },
-      completedJobId: completedJob2.id,
-      currentLocationId: location2.id,
-      userId: admin.id,
     },
   });
 
-  // 8. Создаем устройства для статистики
-  console.log("📊 Создаю данные для статистики...");
+  // 7. Устройства для статистики
   await prisma.device.createMany({
     data: [
       { name: "GSE Terminal", status: "Активно", count: 15 },
-      { name: "GSE Router", status: "Активно", count: 8 },
-      { name: "GSE Switch", status: "Активно", count: 12 },
-      { name: "GSE Access Point", status: "Активно", count: 20 },
-      { name: "GSE Controller", status: "Неактивно", count: 5 },
-      { name: "GSE Sensor", status: "Активно", count: 25 },
+      { name: "GSE Router",   status: "Активно", count:  8 },
+      { name: "GSE Switch",   status: "Активно", count: 12 },
+      { name: "GSE AP",       status: "Активно", count: 20 },
+      { name: "GSE Controller", status:"Неактивно",count: 5 },
     ],
   });
 
-  console.log("✅ База данных успешно заполнена!");
-  console.log("👥 Пользователи:");
-  console.log("  - Администратор: admin/admin");
-  console.log("  - Инженер: engineer/engineer");
-  console.log("🚂 Поезда: 001, 002, 003");
-  console.log("🚃 Вагоны: В-001, В-002, В-003, В-004, В-005");
-  console.log("⚙️ Оборудование: 5 единиц");
-  console.log("📝 Заявки: 2 тестовые заявки");
-  console.log("📷 Фотографии: 6 фотографий оборудования");
+  console.log("✅ База заполнена");
 }
 
 main()
-  .catch((e) => {
-    console.error("❌ Ошибка при заполнении базы данных:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+    .catch(e => {
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });

@@ -309,7 +309,7 @@ export const CreateApplicationForm = ({
         carriages: (form.carriages || []).map(carriage => ({
           carriageType: carriage.carriageType,
           carriageNumber: carriage.carriageNumber,
-          carriagePhoto: carriage.carriagePhoto ? carriage.carriagePhoto.name : null,
+          carriagePhoto: carriage.carriagePhoto ?? null,
         })),
         equipment: allEquipment,
         completedJob: form.workCompleted,

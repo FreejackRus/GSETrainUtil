@@ -15,8 +15,8 @@ export const applicationApi = {
       if (data.applicationDate) fd.append('applicationDate', data.applicationDate);
       if (data.typeWork) fd.append('typeWork', data.typeWork);
       if (data.trainNumber) fd.append('trainNumber', data.trainNumber);
-      if (data.carriageType) fd.append('carriageType', data.carriageType);
-      if (data.carriageNumber) fd.append('carriageNumber', data.carriageNumber);
+      // if (data.carriageType) fd.append('carriageType', data.carriageType);
+      // if (data.carriageNumber) fd.append('carriageNumber', data.carriageNumber);
       if (data.completedJob) fd.append('completedJob', data.completedJob);
       if (data.currentLocation) fd.append('currentLocation', data.currentLocation);
       fd.append('userId',   String(data.userId));

@@ -88,7 +88,6 @@ export interface ApplicationFormData {
   workType: string;
   trainNumber: string;
   carriages: CarriageFormItem[]; // Массив вагонов
-  equipment: EquipmentFormItem[]; // Массив оборудования
   workCompleted: string;
   location: string;
   generalPhoto?: File | null;
@@ -105,18 +104,18 @@ export interface CreateApplicationRequest {
   carriages: Array<{
     carriageNumber: string;
     carriageType: string;
-    carriagePhoto?: string | null;
-  }>;
-  equipment?: Array<{ // Теперь оборудование может быть привязано к вагонам
-    equipmentType: string;
-    serialNumber: string;
-    macAddress: string;
-    quantity: number;
-    photos: {
-      equipmentPhoto?: File | null;
-      serialPhoto?: File | null;
-      macPhoto?: File | null;
-    };
+    carriagePhoto?: File | null;
+    equipment?: Array<{ // Теперь оборудование может быть привязано к вагонам
+      equipmentType: string;
+      serialNumber: string;
+      macAddress: string;
+      quantity: number;
+      photos: {
+        equipmentPhoto?: File | null;
+        serialPhoto?: File | null;
+        macPhoto?: File | null;
+      };
+    }>;
   }>;
   completedJob?: string;
   currentLocation?: string;
