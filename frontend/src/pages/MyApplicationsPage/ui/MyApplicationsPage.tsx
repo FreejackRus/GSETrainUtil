@@ -197,10 +197,11 @@ export const MyApplicationsPage: React.FC = () => {
               </Box>
               <Box className="header-actions">
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   startIcon={<RefreshIcon />}
                   onClick={loadApplications}
                   disabled={loading}
+                  sx={{color:"white"}}
                 >
                   Обновить
                 </Button>
@@ -220,7 +221,7 @@ export const MyApplicationsPage: React.FC = () => {
 
           {/* Современные карточки статистики */}
           <Grid container spacing={3} className="modern-stats">
-            <Grid item xs={6} md={3}>
+            <Grid size={{xs:12,sm:6,md:4}} >
               <Card className="stat-card modern-stat-card">
                 <CardContent>
                   <Box className="stat-content">
@@ -239,7 +240,7 @@ export const MyApplicationsPage: React.FC = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={6} md={3}>
+            <Grid  size={{xs:12,sm:6,md:4}}>
               <Card className="stat-card modern-stat-card">
                 <CardContent>
                   <Box className="stat-content">
@@ -258,7 +259,7 @@ export const MyApplicationsPage: React.FC = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={6} md={3}>
+            <Grid size={{xs:12,sm:12,md:4}}>
               <Card className="stat-card modern-stat-card">
                 <CardContent>
                   <Box className="stat-content">
@@ -289,7 +290,7 @@ export const MyApplicationsPage: React.FC = () => {
             </Box>
             <Divider sx={{ mb: 3 }} />
             <Grid container spacing={3}>
-              <Grid item xs={12} md={8}>
+              <Grid  size={{xs:12,md:8}}>
                 <TextField
                   fullWidth
                   placeholder="Поиск по номеру заявки, поезду, вагону или типу работ..."
@@ -311,7 +312,7 @@ export const MyApplicationsPage: React.FC = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid  size={{xs:12,md:4}}>
                 <FormControl fullWidth>
                   <InputLabel>Статус заявки</InputLabel>
                   <Select
@@ -357,7 +358,7 @@ export const MyApplicationsPage: React.FC = () => {
           ) : (
             <>
               {/* Современная таблица */}
-              <Paper className="modern-table" elevation={0}>
+              <Paper className="modern-table" elevation={0} sx={{m:{xs:0.1,sm:0}}}>
                 <TableContainer>
                   <Table>
                     <TableHead>

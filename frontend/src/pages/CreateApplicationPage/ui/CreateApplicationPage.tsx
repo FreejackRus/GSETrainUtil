@@ -19,13 +19,13 @@ import {
   IconButton,
   Chip,
   Fade,
-  Alert
+  Alert,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Description as DescriptionIcon
+  Description as DescriptionIcon,
 } from '@mui/icons-material';
 import { CreateApplicationForm } from '../../../features/application-management';
 import { applicationApi } from '../../../entities/application/api/applicationApi';
@@ -55,17 +55,19 @@ export const CreateApplicationPage: React.FC = () => {
 
   const loadDrafts = async () => {
     if (!user?.id) return;
-    
+
     try {
       setLoading(true);
       const response = await applicationApi.getDrafts(user.id, user.role);
-      setDrafts(response.map(app => ({
-        id: app.id,
-        trainNumber: app.trainNumber || '',
-        routeNumber: '', // В Application нет поля route, используем пустую строку
-        createdAt: app.applicationDate,
-        updatedAt: app.applicationDate
-      })));
+      setDrafts(
+        response.map((app) => ({
+          id: app.id,
+          trainNumber: app.trainNumber || '',
+          routeNumber: '', // В Application нет поля route, используем пустую строку
+          createdAt: app.applicationDate,
+          updatedAt: app.applicationDate,
+        })),
+      );
     } catch (error) {
       console.error('Ошибка загрузки черновиков:', error);
       setError('Не удалось загрузить черновики');
@@ -107,7 +109,7 @@ export const CreateApplicationPage: React.FC = () => {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -144,7 +146,7 @@ export const CreateApplicationPage: React.FC = () => {
           {/* Основные действия */}
           <Grid container spacing={3}>
             {/* Создать новую заявку */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Card className="action-card">
                 <CardContent className="action-card-content">
                   <Box className="action-icon">
@@ -170,7 +172,7 @@ export const CreateApplicationPage: React.FC = () => {
             </Grid>
 
             {/* Продолжить черновик */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Card className="action-card">
                 <CardContent className="action-card-content">
                   <Box className="action-icon">
@@ -236,7 +238,7 @@ export const CreateApplicationPage: React.FC = () => {
         fullWidth
       >
         <DialogTitle>Выберите черновик</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ p: { xs: 0, sm: 3 } }}>
           {loading ? (
             <Typography>Загрузка...</Typography>
           ) : drafts.length === 0 ? (
@@ -259,29 +261,21 @@ export const CreateApplicationPage: React.FC = () => {
                       </Box>
                     }
                   />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      onClick={() => handleContinueDraft(draft.id)}
-                      color="primary"
-                    >
-                      <EditIcon />
+                  <Grid display={'flex'}>
+                    <IconButton onClick={() => handleContinueDraft(draft.id)} color="primary">
+                      <EditIcon sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 } }} />
                     </IconButton>
-                    <IconButton
-                      onClick={() => handleDeleteDraft(draft.id)}
-                      color="error"
-                    >
-                      <DeleteIcon />
+                    <IconButton onClick={() => handleDeleteDraft(draft.id)} color="error">
+                      <DeleteIcon sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 } }} />
                     </IconButton>
-                  </ListItemSecondaryAction>
+                  </Grid>
                 </ListItem>
               ))}
             </List>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowDraftsDialog(false)}>
-            Отмена
-          </Button>
+          <Button onClick={() => setShowDraftsDialog(false)}>Отмена</Button>
         </DialogActions>
       </Dialog>
     </Container>

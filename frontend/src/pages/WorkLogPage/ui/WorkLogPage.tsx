@@ -323,7 +323,7 @@ export const WorkLogPage = () => {
             typeWork: entry.typeWork,
             applicationNumber: entry.applicationNumber,
             carriageNumber: entry.carriageNumber,
-            equipmentDetails:entry.equipmentDetails?.map(({ photos,...rest})=>rest),
+            equipmentDetails: entry.equipmentDetails?.map(({ photos, ...rest }) => rest),
             // equipmentTypes: entry.equipmentTypes,
             // countEquipments: entry.countEquipments,
             // serialNumbers: entry.serialNumbers,
@@ -443,7 +443,7 @@ export const WorkLogPage = () => {
   };
 
   const renderWorkLogCard = (entry: WorkLogEntry) => (
-    <Grid item xs={12} sm={6} md={4} lg={3} key={entry.id}>
+    <Grid size={{ xs: 12, sm: 12, md: 6, lg: 4 }} key={entry.id}>
       <Card
         elevation={4}
         sx={{
@@ -459,7 +459,7 @@ export const WorkLogPage = () => {
       >
         <CardContent sx={{ flexGrow: 1 }}>
           <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-            <Box >
+            <Box>
               <Chip
                 label={`#${entry.applicationNumber}`}
                 color="primary"
@@ -467,7 +467,7 @@ export const WorkLogPage = () => {
                 sx={{ fontWeight: 'bold' }}
               />
               <Chip
-              sx={{ml:2}}
+                sx={{ ml: 2 }}
                 label={entry.typeWork}
                 color={getWorkTypeColor(entry.typeWork)}
                 size="small"
@@ -536,7 +536,7 @@ export const WorkLogPage = () => {
         </CardContent>
 
         <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-          <Box display="flex" gap={1}>
+          <Box display="flex" width={'100%'} gap={1}>
             <Button
               size="small"
               startIcon={<PhotoIcon />}
@@ -552,7 +552,9 @@ export const WorkLogPage = () => {
             >
               Подробнее
             </Button>
+
             <Select
+              sx={{ ml: 'auto' }}
               value="Скачать"
               onChange={(e) => handleDownloadPdf(entry, e.target.value as string)}
             >
@@ -583,7 +585,7 @@ export const WorkLogPage = () => {
       }}
     >
       <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} sm={2}>
+        <Grid size={{ xs: 12, sm: 2, md: 2 }}>
           <Box display="flex" alignItems="center" gap={1}>
             <Chip
               label={`#${entry.applicationNumber}`}
@@ -595,7 +597,7 @@ export const WorkLogPage = () => {
           </Box>
         </Grid>
 
-        <Grid item xs={12} sm={3}>
+        <Grid size={{ xs: 12, sm: 3, md: 3 }} sx={{ ml: { xs: 0, sm: 4 } }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {entry.typeWork}
           </Typography>
@@ -604,7 +606,7 @@ export const WorkLogPage = () => {
           </Typography>
         </Grid>
 
-        <Grid item xs={12} sm={2}>
+        <Grid size={{ xs: 12, sm: 2 }}>
           <Typography variant="body2" color="text.secondary">
             <LocationOnIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
             {entry.currentLocation || 'Не указано'}
@@ -615,7 +617,7 @@ export const WorkLogPage = () => {
           </Typography>
         </Grid>
 
-        <Grid item xs={12} sm={2}>
+        <Grid size={{ xs: 12, sm: 2 }}>
           {entry.equipment && (
             <Typography variant="body2" color="text.secondary" noWrap>
               <BuildIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
@@ -630,7 +632,7 @@ export const WorkLogPage = () => {
           )}
         </Grid>
 
-        <Grid item xs={12} sm={2}>
+        <Grid size={{ xs: 12, sm: 2 }}>
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <LinearProgress
               variant="determinate"
@@ -646,8 +648,8 @@ export const WorkLogPage = () => {
           </Typography>
         </Grid>
 
-        <Grid item xs={12} sm={1}>
-          <Box display="flex"  gap={0.5}>
+        <Grid size={{ xs: 12, sm: 1 }}>
+          <Box display="flex" gap={0.5} width={'100%'}>
             <IconButton
               size="small"
               onClick={() => handleViewPhotos(entry)}
@@ -703,7 +705,7 @@ export const WorkLogPage = () => {
 
   return (
     <Container maxWidth="xl" className="work-log-page">
-      <Box>
+      <Box sx={{ p: { xs: 1.75, sm: 0 } }}>
         {/* Современный заголовок */}
         <Paper
           elevation={0}
@@ -715,15 +717,29 @@ export const WorkLogPage = () => {
             overflow: 'hidden',
           }}
         >
-          <Box p={4}>
+          <Box sx={{
+            p:{
+              xs:1,
+              sm:4
+            }
+          }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
-              <Box display="flex" alignItems="center">
+              <Box display="flex" alignItems="center" >
                 <Button
                   startIcon={<ArrowBackIcon />}
                   onClick={() => navigate('/')}
                   variant="contained"
                   sx={{
-                    mr: 3,
+                    mr: {
+                      xs:1,
+                      sm:3
+                    },
+                    fontSize: {
+                      xs: '0.7rem', // на телефонах
+                      sm: '0.7rem', // на маленьких экранах
+                      md: '1rem', // на планшетах
+                      // lg: '3rem', // на больших
+                    },
                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                     backdropFilter: 'blur(10px)',
                     border: '1px solid rgba(255, 255, 255, 0.3)',
@@ -736,9 +752,20 @@ export const WorkLogPage = () => {
                 </Button>
                 <Avatar
                   sx={{
-                    width: 64,
-                    height: 64,
-                    mr: 3,
+                    // width: 64,
+                    // height: 64,
+                    width: {
+                      xs: 45,
+                      sm: 64,
+                    },
+                    height: {
+                      xs: 45,
+                      sm: 64,
+                    },
+                    mr: {
+                      xs:1,
+                      sm:3
+                    },
                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                     backdropFilter: 'blur(10px)',
                   }}
@@ -746,10 +773,34 @@ export const WorkLogPage = () => {
                   <AssignmentIcon sx={{ fontSize: 32 }} />
                 </Avatar>
                 <Box>
-                  <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
+                  <Typography
+                    variant="h3"
+                    component="h1"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      fontSize: {
+                        xs: '0.9rem', // на телефонах
+                        sm: '1.5rem', // на маленьких экранах
+                        md: '2rem', // на планшетах
+                        // lg: '3rem', // на больших
+                      },
+                    }}
+                  >
                     Журнал работ
                   </Typography>
-                  <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      opacity: 0.9,
+                      fontSize: {
+                        xs: '0.55rem', // на телефонах
+                        sm: '0.9rem', // на маленьких экранах
+                        md: '1.15rem', // на планшетах
+                        // lg: '3rem', // на больших
+                      },
+                    }}
+                  >
                     Управление техническими заявками и мониторинг выполнения работ
                   </Typography>
                 </Box>
@@ -772,7 +823,7 @@ export const WorkLogPage = () => {
 
             {/* Статистические карточки */}
             <Grid container spacing={3}>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 3, sm: 3 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>
                     {stats.total}
@@ -782,7 +833,7 @@ export const WorkLogPage = () => {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 3, sm: 3 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#4caf50' }}>
                     {stats.completed}
@@ -792,7 +843,7 @@ export const WorkLogPage = () => {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 3, sm: 3 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#ff9800' }}>
                     {stats.inProgress}
@@ -802,7 +853,7 @@ export const WorkLogPage = () => {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 3, sm: 3 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#2196f3' }}>
                     {stats.started}
@@ -819,7 +870,7 @@ export const WorkLogPage = () => {
         {/* Панель управления */}
         <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
           <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 fullWidth
                 label="Поиск по номеру вагона, MAC-адресу или серийному номеру"
@@ -837,7 +888,7 @@ export const WorkLogPage = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid size={{ xs: 12, md: 2 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>Статус</InputLabel>
                 <Select
@@ -852,7 +903,7 @@ export const WorkLogPage = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>Тип работ</InputLabel>
                 <Select
@@ -869,7 +920,7 @@ export const WorkLogPage = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <ToggleButtonGroup
                   value={viewMode}
@@ -918,7 +969,7 @@ export const WorkLogPage = () => {
             {selectedEntry && (
               <Grid container spacing={2}>
                 {getPhotoEntries(selectedEntry.photos).map((photo, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={`photo-${photo.key}-${index}`}>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`photo-${photo.key}-${index}`}>
                     <Card>
                       <CardContent>
                         <Typography variant="subtitle2" gutterBottom>

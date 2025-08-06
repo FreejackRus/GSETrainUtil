@@ -220,7 +220,7 @@ export const WorkLogDetailPage: React.FC = () => {
   return (
     <Container maxWidth="lg" className="work-log-detail-page">
       {/* Заголовок */}
-      <Paper className="detail-header" elevation={0}>
+      <Paper className="detail-header"  elevation={0} >
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Box display="flex" alignItems="center" gap={2}>
             <IconButton onClick={() => navigate('/work-log')} className="back-button">
@@ -230,10 +230,22 @@ export const WorkLogDetailPage: React.FC = () => {
               <AssignmentIcon />
             </Avatar>
             <Box>
-              <Typography variant="h4" className="detail-title">
+              <Typography
+                variant="h4"
+                className="detail-title"
+                sx={{
+                  fontSize: {
+                     xs: '0.8rem',sm:"1.5rem"
+                  },
+                }}
+              >
                 Заявка №{workLog.applicationNumber}
               </Typography>
-              <Typography variant="subtitle1" className="detail-subtitle">
+              <Typography variant="subtitle1" className="detail-subtitle" sx={{
+                  fontSize: {
+                    xs: '0.8rem',sm:"1rem"
+                  },
+                }}>
                 {workLog.typeWork} • {workLog.trainNumber} • Вагон {workLog.carriageNumber}
               </Typography>
             </Box>
@@ -303,7 +315,7 @@ export const WorkLogDetailPage: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* Основная информация */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper className="detail-section" elevation={2}>
             <Typography variant="h6" className="section-title" gutterBottom>
               <BuildIcon sx={{ mr: 1 }} />
@@ -313,7 +325,7 @@ export const WorkLogDetailPage: React.FC = () => {
 
             {/* Информационные карточки */}
             <Grid container spacing={3} sx={{ mb: 3 }}>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card
                   sx={{
                     background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
@@ -340,7 +352,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 </Card>
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card
                   sx={{
                     background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
@@ -372,14 +384,10 @@ export const WorkLogDetailPage: React.FC = () => {
                           }}
                         >
                           {workTypes.map((item, index) => (
-                            <MenuItem key={`worktype-${index}`} value={item}>{item}</MenuItem>
+                            <MenuItem key={`worktype-${index}`} value={item}>
+                              {item}
+                            </MenuItem>
                           ))}
-                          {/*                           
-                          <MenuItem value="Установка оборудования">Установка оборудования</MenuItem>
-                          <MenuItem value="Замена оборудования">Замена оборудования</MenuItem>
-                          <MenuItem value="Техническое обслуживание">Техническое обслуживание</MenuItem>
-                          <MenuItem value="Ремонт">Ремонт</MenuItem>
-                          <MenuItem value="Диагностика">Диагностика</MenuItem> */}
                         </Select>
                       </FormControl>
                     ) : (
@@ -391,7 +399,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 </Card>
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 12, md: 4 }}>
                 <Card
                   sx={{
                     background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
@@ -451,7 +459,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 </Box>
 
                 <Grid container spacing={3}>
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}>
                     <Box>
                       <Typography variant="subtitle2" color="#bf360c" fontWeight={600} gutterBottom>
                         Номер поезда
@@ -480,7 +488,7 @@ export const WorkLogDetailPage: React.FC = () => {
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}>
                     <Box>
                       <Typography variant="subtitle2" color="#bf360c" fontWeight={600} gutterBottom>
                         Тип вагона
@@ -501,7 +509,9 @@ export const WorkLogDetailPage: React.FC = () => {
                             }}
                           >
                             {carriageTypes.map((item, index) => (
-                              <MenuItem key={`carriagetype-${index}`} value={item}>{item}</MenuItem>
+                              <MenuItem key={`carriagetype-${index}`} value={item}>
+                                {item}
+                              </MenuItem>
                             ))}
                             {/* <MenuItem value="Плацкартный">Плацкартный</MenuItem>
                             <MenuItem value="Купейный">Купейный</MenuItem>
@@ -517,7 +527,7 @@ export const WorkLogDetailPage: React.FC = () => {
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}>
                     <Box>
                       <Typography variant="subtitle2" color="#bf360c" fontWeight={600} gutterBottom>
                         Номер вагона
@@ -551,7 +561,7 @@ export const WorkLogDetailPage: React.FC = () => {
 
             {/* Информация об оборудовании */}
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Box className="info-item">
                   <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                     Установленное оборудование
@@ -562,7 +572,7 @@ export const WorkLogDetailPage: React.FC = () => {
                         <Card key={equipment.id} sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
                           <CardContent sx={{ p: 2 }}>
                             <Grid container spacing={2}>
-                              <Grid item xs={12} sm={6}>
+                              <Grid size={{ xs: 12, sm: 6 }}>
                                 <Typography variant="subtitle2" color="textSecondary">
                                   Тип оборудования
                                 </Typography>
@@ -570,7 +580,7 @@ export const WorkLogDetailPage: React.FC = () => {
                                   {equipment.equipmentType}
                                 </Typography>
                               </Grid>
-                              <Grid item xs={12} sm={6}>
+                              <Grid size={{ xs: 12, sm: 6 }}>
                                 <Typography variant="subtitle2" color="textSecondary">
                                   Количество
                                 </Typography>
@@ -578,7 +588,7 @@ export const WorkLogDetailPage: React.FC = () => {
                                   {equipment.countEquipment} ед.
                                 </Typography>
                               </Grid>
-                              <Grid item xs={12} sm={6}>
+                              <Grid size={{ xs: 12, sm: 6 }}>
                                 <Typography variant="subtitle2" color="textSecondary">
                                   Серийный номер
                                 </Typography>
@@ -586,7 +596,7 @@ export const WorkLogDetailPage: React.FC = () => {
                                   {equipment.serialNumber || 'Не указан'}
                                 </Typography>
                               </Grid>
-                              <Grid item xs={12} sm={6}>
+                              <Grid size={{ xs: 12, sm: 6 }}>
                                 <Typography variant="subtitle2" color="textSecondary">
                                   MAC-адрес
                                 </Typography>
@@ -610,7 +620,7 @@ export const WorkLogDetailPage: React.FC = () => {
                       <Card sx={{ border: '1px solid #e0e0e0' }}>
                         <CardContent sx={{ p: 2 }}>
                           <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                               <Typography variant="subtitle2" color="textSecondary">
                                 Тип оборудования
                               </Typography>
@@ -629,13 +639,13 @@ export const WorkLogDetailPage: React.FC = () => {
                                 <Typography variant="body1">{workLog.equipmentType}</Typography>
                               )}
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                               <Typography variant="subtitle2" color="textSecondary">
                                 Количество
                               </Typography>
                               <Typography variant="body1">{workLog.countEquipment} ед.</Typography>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                               <Typography variant="subtitle2" color="textSecondary">
                                 Серийный номер
                               </Typography>
@@ -654,7 +664,7 @@ export const WorkLogDetailPage: React.FC = () => {
                                 <Typography variant="body1">{workLog.serialNumber}</Typography>
                               )}
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                               <Typography variant="subtitle2" color="textSecondary">
                                 MAC-адрес
                               </Typography>
@@ -681,7 +691,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 </Box>
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Box className="info-item">
                   <Typography variant="subtitle2" color="textSecondary">
                     Выполненная работа
@@ -726,10 +736,16 @@ export const WorkLogDetailPage: React.FC = () => {
 
                   <Grid container spacing={2}>
                     {photos.map(({ key, url }) => (
-                      <Grid item xs={6} sm={4} md={3} key={key}>
+                      <Grid size={{ xs: 6, sm: 4, md: 3 }} key={key}>
                         <Card
                           className="photo-card"
-                          onClick={() => handlePhotoClick(typeof url === 'string' ? getFullPhotoUrl(url) : getFullPhotoUrl(url[0]))}
+                          onClick={() =>
+                            handlePhotoClick(
+                              typeof url === 'string'
+                                ? getFullPhotoUrl(url)
+                                : getFullPhotoUrl(url[0]),
+                            )
+                          }
                           sx={{ cursor: 'pointer' }}
                         >
                           <CardMedia
@@ -755,7 +771,7 @@ export const WorkLogDetailPage: React.FC = () => {
         </Grid>
 
         {/* Боковая панель */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           {/* Информация о пользователе */}
           <Paper className="detail-section" elevation={2}>
             <Typography variant="h6" className="section-title" gutterBottom>

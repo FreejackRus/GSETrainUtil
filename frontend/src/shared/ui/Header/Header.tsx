@@ -111,7 +111,7 @@ const handleLogoutAdmin = () => {
 
   return (
     <>
-      <AppBar position="static" elevation={3} className="header">
+      <AppBar position="static" elevation={3}  className="header">
         <Toolbar className="header__toolbar">
           {/* Левая часть - Логотип и название */}
           <Box className="header__left">
@@ -199,6 +199,7 @@ const handleLogoutAdmin = () => {
                   <PersonIcon />
                 </Avatar>
                 <Chip 
+                sx={{color:"white",bgcolor:"green"}}
                   label={getRoleDisplayName(role)}
                   size="small"
                   className={`header__role-chip header__role-chip--${role}`}
@@ -210,8 +211,9 @@ const handleLogoutAdmin = () => {
                 onClick={handleLogoutAdmin}
                 sx={{ 
                   color: 'white',
+                  
                   '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                    bgcolor:"red"
                   }
                 }}
               >
@@ -324,6 +326,7 @@ const handleLogoutAdmin = () => {
           <Button
             fullWidth
             startIcon={<LogoutIcon />}
+            sx={{color:"#fafafa"}}
             onClick={handleLogout}
             className="header__logout-button"
           >

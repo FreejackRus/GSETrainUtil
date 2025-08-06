@@ -87,9 +87,9 @@ export const LoginForm = ({ onLogin }: { onLogin: (token: string, role: string) 
     <Box className="login-form-container">
       <Container maxWidth="sm">
         <Fade in timeout={1000}>
-          <Paper elevation={24} className="login-form-paper">
+          <Paper elevation={24} className="login-form-paper" sx={{m:"0 auto"}}>
             {/* Логотип и заголовок */}
-            <Box className="login-form-header">
+            <Box className="login-form-header" >
               <Box className="login-form-logo">
                 <img src="/logo_peremena.png" alt="PEREMENA" width={160} height={48} />
               </Box>

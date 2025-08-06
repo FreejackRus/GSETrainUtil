@@ -27,7 +27,7 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Autocomplete
+  Autocomplete,
 } from '@mui/material';
 import {
   Archive as ArchiveIcon,
@@ -36,7 +36,7 @@ import {
   Storage as StorageIcon,
   DateRange as DateRangeIcon,
   List as ListIcon,
-  ArrowBack as ArrowBackIcon
+  ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import { archiveApi, StorageInfo, CleanupResult } from '../../../entities/archive';
 import { applicationApi } from '../../../entities/application';
@@ -55,17 +55,17 @@ export const ArchiveManagement: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
+
   // Состояние для архивирования заявки
   const [applicationId, setApplicationId] = useState<string>('');
   const [selectedApplication, setSelectedApplication] = useState<ApplicationOption | null>(null);
   const [applications, setApplications] = useState<ApplicationOption[]>([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
-  
+
   // Состояние для архивирования за период
   const [dateFrom, setDateFrom] = useState<string>('');
   const [dateTo, setDateTo] = useState<string>('');
-  
+
   // Состояние для очистки
   const [cleanupDays, setCleanupDays] = useState<number>(365);
   const [cleanupDialogOpen, setCleanupDialogOpen] = useState(false);
@@ -91,12 +91,12 @@ export const ArchiveManagement: React.FC = () => {
     try {
       setLoadingApplications(true);
       const response = await applicationApi.getAll();
-      const applicationOptions: ApplicationOption[] = response.map(app => ({
+      const applicationOptions: ApplicationOption[] = response.map((app) => ({
         id: app.id,
         label: `Заявка №${app.applicationNumber} (ID: ${app.id}) - ${app.status}`,
         applicationNumber: app.applicationNumber,
         status: app.status,
-        createdAt: app.createdAt
+        createdAt: app.createdAt,
       }));
       setApplications(applicationOptions);
     } catch (err) {
@@ -108,16 +108,20 @@ export const ArchiveManagement: React.FC = () => {
 
   const handleDownloadApplicationArchive = async () => {
     const targetId = selectedApplication?.id || (applicationId ? parseInt(applicationId) : null);
-    
+
     if (!targetId) {
       setError('Выберите заявку из списка или введите ID заявки');
       return;
     }
 
     // Проверяем, существует ли заявка в списке
-    const applicationExists = applications.some(app => app.id === targetId);
+    const applicationExists = applications.some((app) => app.id === targetId);
     if (!applicationExists && applications.length > 0) {
-      setError(`Заявка с ID ${targetId} не найдена. Доступные заявки: ${applications.map(app => `ID ${app.id} (№${app.applicationNumber})`).join(', ')}`);
+      setError(
+        `Заявка с ID ${targetId} не найдена. Доступные заявки: ${applications
+          .map((app) => `ID ${app.id} (№${app.applicationNumber})`)
+          .join(', ')}`,
+      );
       return;
     }
 
@@ -129,9 +133,14 @@ export const ArchiveManagement: React.FC = () => {
       setApplicationId('');
       setSelectedApplication(null);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка при скачивании архива заявки';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Ошибка при скачивании архива заявки';
       if (errorMessage.includes('не найдена') && applications.length > 0) {
-        setError(`${errorMessage}. Доступные заявки: ${applications.map(app => `ID ${app.id} (№${app.applicationNumber})`).join(', ')}`);
+        setError(
+          `${errorMessage}. Доступные заявки: ${applications
+            .map((app) => `ID ${app.id} (№${app.applicationNumber})`)
+            .join(', ')}`,
+        );
       } else {
         setError(errorMessage);
       }
@@ -171,7 +180,7 @@ export const ArchiveManagement: React.FC = () => {
       setError(null);
       const result: CleanupResult = await archiveApi.cleanupOldPhotos(cleanupDays);
       setSuccess(
-        `Очистка завершена. Удалено ${result.deletedFiles} файлов, освобождено ${result.freedSpaceFormatted}`
+        `Очистка завершена. Удалено ${result.deletedFiles} файлов, освобождено ${result.freedSpaceFormatted}`,
       );
       setCleanupDialogOpen(false);
       // Обновляем информацию о хранилище
@@ -190,304 +199,332 @@ export const ArchiveManagement: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Button
-        variant="outlined"
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate('/')}
-        sx={{ mb: 2 }}
-      >
-        Вернуться в главное меню
-      </Button>
-      
-      <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <ArchiveIcon />
-        Управление архивами фотографий
-      </Typography>
+      <Box maxWidth="xl" sx={{ m: '0 auto' }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/')}
+          sx={{ mb: 2 }}
+        >
+          Вернуться в главное меню
+        </Button>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={clearMessages}>
-          {error}
-        </Alert>
-      )}
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <ArchiveIcon />
+          Управление архивами фотографий
+        </Typography>
 
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={clearMessages}>
-          {success}
-        </Alert>
-      )}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={clearMessages}>
+            {error}
+          </Alert>
+        )}
 
-      <Grid container spacing={3}>
-        {/* Информация о хранилище */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <StorageIcon />
-                Информация о хранилище
-              </Typography>
-              
-              {loading && !storageInfo ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                  <CircularProgress />
-                </Box>
-              ) : storageInfo ? (
-                <Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Общий размер:</Typography>
-                    <Chip label={storageInfo.sizeFormatted} color="primary" size="small" />
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }} onClose={clearMessages}>
+            {success}
+          </Alert>
+        )}
+
+        <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
+          {/* Информация о хранилище */}
+          <Grid size={{ xs: 12, md: 6 }} offset={{ md: 0 }}>
+            <Card>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <StorageIcon />
+                  Информация о хранилище
+                </Typography>
+
+                {loading && !storageInfo ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                    <CircularProgress />
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Количество файлов:</Typography>
-                    <Chip label={storageInfo.totalFiles} color="secondary" size="small" />
+                ) : storageInfo ? (
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2">Общий размер:</Typography>
+                      <Chip label={storageInfo.sizeFormatted} color="primary" size="small" />
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2">Количество файлов:</Typography>
+                      <Chip label={storageInfo.totalFiles} color="secondary" size="small" />
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                      <Typography variant="body2">Количество папок:</Typography>
+                      <Chip label={storageInfo.folders} color="default" size="small" />
+                    </Box>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={loadStorageInfo}
+                      disabled={loading}
+                    >
+                      Обновить
+                    </Button>
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="body2">Количество папок:</Typography>
-                    <Chip label={storageInfo.folders} color="default" size="small" />
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Не удалось загрузить информацию о хранилище
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Архивирование заявки */}
+          <Grid size={{ xs: 12, md: 6 }} offset={{ md: 0 }}>
+            <Card>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <DownloadIcon />
+                  Архивирование заявки
+                </Typography>
+
+                <Autocomplete
+                  options={applications}
+                  getOptionLabel={(option) => option.label}
+                  value={selectedApplication}
+                  onChange={(event, newValue) => {
+                    setSelectedApplication(newValue);
+                    setApplicationId(newValue ? newValue.id.toString() : '');
+                  }}
+                  loading={loadingApplications}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Выберите заявку"
+                      placeholder="Начните вводить номер заявки или ID"
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {loadingApplications ? (
+                              <CircularProgress color="inherit" size={20} />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      }}
+                    />
+                  )}
+                  sx={{ mb: 2 }}
+                />
+
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Или введите ID заявки вручную:
+                </Typography>
+
+                <TextField
+                  fullWidth
+                  label="ID заявки"
+                  type="number"
+                  value={applicationId}
+                  onChange={(e) => {
+                    setApplicationId(e.target.value);
+                    setSelectedApplication(null);
+                  }}
+                  sx={{ mb: 2 }}
+                  placeholder="Введите ID заявки"
+                  size="small"
+                />
+
+                <Button
+                  variant="contained"
+                  onClick={handleDownloadApplicationArchive}
+                  disabled={loading || (!applicationId && !selectedApplication)}
+                  startIcon={loading ? <CircularProgress size={20} /> : <DownloadIcon />}
+                  fullWidth
+                >
+                  Скачать архив заявки
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Список доступных заявок */}
+          <Grid size={{ xs: 12, md: 12 }} offset={{ md: 0 }}>
+            <Card>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <ListIcon />
+                  Доступные заявки
+                </Typography>
+
+                {loadingApplications ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                    <CircularProgress />
                   </Box>
+                ) : applications.length > 0 ? (
+                  <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+                    <Table stickyHeader size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>ID</TableCell>
+                          <TableCell>Номер заявки</TableCell>
+                          <TableCell>Статус</TableCell>
+                          <TableCell>Дата создания</TableCell>
+                          <TableCell align="center">Действие</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {applications.map((app) => (
+                          <TableRow key={app.id} hover>
+                            <TableCell>{app.id}</TableCell>
+                            <TableCell>{app.applicationNumber}</TableCell>
+                            <TableCell>
+                              <Chip
+                                label={app.status}
+                                size="small"
+                                color={app.status === 'completed' ? 'success' : 'default'}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              {new Date(app.createdAt).toLocaleDateString('ru-RU')}
+                            </TableCell>
+                            <TableCell align="center">
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => {
+                                  setSelectedApplication(app);
+                                  setApplicationId(app.id.toString());
+                                }}
+                                startIcon={<DownloadIcon />}
+                              >
+                                Выбрать
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Заявки не найдены
+                  </Typography>
+                )}
+
+                <Box sx={{ mt: 2 }}>
                   <Button
                     variant="outlined"
                     size="small"
-                    onClick={loadStorageInfo}
-                    disabled={loading}
+                    onClick={loadApplications}
+                    disabled={loadingApplications}
                   >
-                    Обновить
+                    Обновить список
                   </Button>
                 </Box>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Не удалось загрузить информацию о хранилище
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
 
-        {/* Архивирование заявки */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <DownloadIcon />
-                Архивирование заявки
-              </Typography>
-              
-              <Autocomplete
-                options={applications}
-                getOptionLabel={(option) => option.label}
-                value={selectedApplication}
-                onChange={(event, newValue) => {
-                  setSelectedApplication(newValue);
-                  setApplicationId(newValue ? newValue.id.toString() : '');
-                }}
-                loading={loadingApplications}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Выберите заявку"
-                    placeholder="Начните вводить номер заявки или ID"
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <>
-                          {loadingApplications ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </>
-                      ),
-                    }}
-                  />
-                )}
-                sx={{ mb: 2 }}
-              />
-              
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Или введите ID заявки вручную:
-              </Typography>
-              
-              <TextField
-                fullWidth
-                label="ID заявки"
-                type="number"
-                value={applicationId}
-                onChange={(e) => {
-                  setApplicationId(e.target.value);
-                  setSelectedApplication(null);
-                }}
-                sx={{ mb: 2 }}
-                placeholder="Введите ID заявки"
-                size="small"
-              />
-              
-              <Button
-                variant="contained"
-                onClick={handleDownloadApplicationArchive}
-                disabled={loading || (!applicationId && !selectedApplication)}
-                startIcon={loading ? <CircularProgress size={20} /> : <DownloadIcon />}
-                fullWidth
-              >
-                Скачать архив заявки
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Список доступных заявок */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <ListIcon />
-                Доступные заявки
-              </Typography>
-              
-              {loadingApplications ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                  <CircularProgress />
-                </Box>
-              ) : applications.length > 0 ? (
-                <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
-                  <Table stickyHeader size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Номер заявки</TableCell>
-                        <TableCell>Статус</TableCell>
-                        <TableCell>Дата создания</TableCell>
-                        <TableCell align="center">Действие</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {applications.map((app) => (
-                        <TableRow key={app.id} hover>
-                          <TableCell>{app.id}</TableCell>
-                          <TableCell>{app.applicationNumber}</TableCell>
-                          <TableCell>
-                            <Chip 
-                              label={app.status} 
-                              size="small"
-                              color={app.status === 'completed' ? 'success' : 'default'}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {new Date(app.createdAt).toLocaleDateString('ru-RU')}
-                          </TableCell>
-                          <TableCell align="center">
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              onClick={() => {
-                                setSelectedApplication(app);
-                                setApplicationId(app.id.toString());
-                              }}
-                              startIcon={<DownloadIcon />}
-                            >
-                              Выбрать
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Заявки не найдены
+          {/* Архивирование за период */}
+          <Grid size={{ xs: 12, md: 12 }}>
+            <Card>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <DateRangeIcon />
+                  Архивирование за период
                 </Typography>
-              )}
-              
-              <Box sx={{ mt: 2 }}>
+
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      fullWidth
+                      label="Дата начала"
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField
+                      fullWidth
+                      label="Дата окончания"
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Button
+                  variant="contained"
+                  onClick={handleDownloadDateRangeArchive}
+                  disabled={loading || !dateFrom || !dateTo}
+                  startIcon={loading ? <CircularProgress size={20} /> : <DownloadIcon />}
+                  fullWidth
+                >
+                  Скачать архив за период
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Очистка старых фотографий */}
+          <Grid size={{ xs: 12, md: 12 }}>
+            <Card>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <DeleteIcon />
+                  Очистка старых фотографий
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Удаление фотографий старше указанного количества дней для освобождения места на
+                  диске.
+                </Typography>
+
                 <Button
                   variant="outlined"
-                  size="small"
-                  onClick={loadApplications}
-                  disabled={loadingApplications}
+                  color="warning"
+                  onClick={() => setCleanupDialogOpen(true)}
+                  startIcon={<DeleteIcon />}
                 >
-                  Обновить список
+                  Настроить очистку
                 </Button>
-              </Box>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-
-        {/* Архивирование за период */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <DateRangeIcon />
-                Архивирование за период
-              </Typography>
-              
-              <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Дата начала"
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Дата окончания"
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-              </Grid>
-              
-              <Button
-                variant="contained"
-                onClick={handleDownloadDateRangeArchive}
-                disabled={loading || !dateFrom || !dateTo}
-                startIcon={loading ? <CircularProgress size={20} /> : <DownloadIcon />}
-                fullWidth
-              >
-                Скачать архив за период
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Очистка старых фотографий */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <DeleteIcon />
-                Очистка старых фотографий
-              </Typography>
-              
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Удаление фотографий старше указанного количества дней для освобождения места на диске.
-              </Typography>
-              
-              <Button
-                variant="outlined"
-                color="warning"
-                onClick={() => setCleanupDialogOpen(true)}
-                startIcon={<DeleteIcon />}
-              >
-                Настроить очистку
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      </Box>
 
       {/* Диалог очистки */}
       <Dialog open={cleanupDialogOpen} onClose={() => setCleanupDialogOpen(false)}>
         <DialogTitle>Очистка старых фотографий</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            Будут удалены все фотографии старше указанного количества дней.
-            Это действие необратимо!
+            Будут удалены все фотографии старше указанного количества дней. Это действие необратимо!
           </Typography>
-          
+
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>Удалить фотографии старше</InputLabel>
             <Select
@@ -504,9 +541,7 @@ export const ArchiveManagement: React.FC = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCleanupDialogOpen(false)}>
-            Отмена
-          </Button>
+          <Button onClick={() => setCleanupDialogOpen(false)}>Отмена</Button>
           <Button
             onClick={handleCleanupPhotos}
             color="warning"

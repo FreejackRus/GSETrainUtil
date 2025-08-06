@@ -115,7 +115,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
       <DialogContent sx={{ p: 3, bgcolor: 'white' }}>
         <Grid container spacing={3}>
           {/* Основная информация */}
-          <Grid item xs={12}>
+          <Grid size={{xs:12}}>
             <Card elevation={2} sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -125,7 +125,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                 <Divider sx={{ mb: 2 }} />
                 
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{xs:12,sm:6}}>
                     <Box display="flex" alignItems="center" gap={1} mb={1}>
                       <Typography variant="body2" color="text.secondary">
                         Статус:
@@ -137,17 +137,17 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{xs:12,sm:6}}>
                     <Typography variant="body2" color="text.secondary">
                       Дата создания: <strong>{formatDate(application.applicationDate)}</strong>
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{xs:12,sm:6}}>
                     <Typography variant="body2" color="text.secondary">
                       Тип работ: <strong>{application.typeWork?.name || application.workType || '-'}</strong>
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{xs:12,sm:6}}>
                     <Typography variant="body2" color="text.secondary">
                       Исполнитель: <strong>{application.user?.name || application.user || '-'}</strong>
                     </Typography>
@@ -158,7 +158,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
           </Grid>
 
           {/* Информация о поезде и вагоне */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{xs:12,md:6}}>
             <Card elevation={2} sx={{ borderRadius: 2, height: '100%' }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -199,7 +199,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
           </Grid>
 
           {/* Выполненные работы */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{xs:12,md:6}} >
             <Card elevation={2} sx={{ borderRadius: 2, height: '100%' }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -217,7 +217,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
 
           {/* Оборудование */}
           {application.equipment && application.equipment.length > 0 && (
-            <Grid item xs={12}>
+            <Grid  size={{xs:12}}>
               <Card elevation={2} sx={{ borderRadius: 2 }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -228,7 +228,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                   
                   <Grid container spacing={2}>
                     {application.equipment.map((item, index) => (
-                      <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Grid  size={{xs:12,sm:6,md:4}}  key={index}>
                         <Card variant="outlined" sx={{ borderRadius: 2 }}>
                           <CardContent sx={{ p: 2 }}>
                             <Typography variant="subtitle2" gutterBottom>
@@ -254,7 +254,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
           )}
 
           {/* Фотографии */}
-          <Grid item xs={12}>
+          <Grid   size={{xs:12}} >
             <Card elevation={2} sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -265,7 +265,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                 
                 <Grid container spacing={2}>
                   {application.carriagePhoto && (
-                    <Grid item xs={12} sm={4}>
+                    <Grid  size={{xs:12,sm:4}} >
                       <Box>
                         <Typography variant="body2" gutterBottom>
                           Фото вагона
@@ -280,7 +280,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                   )}
                   
                   {application.generalPhoto && (
-                    <Grid item xs={12} sm={4}>
+                    <Grid  size={{xs:12,sm:4}}  >
                       <Box>
                         <Typography variant="body2" gutterBottom>
                           Общее фото
@@ -295,7 +295,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                   )}
                   
                   {application.finalPhoto && (
-                    <Grid item xs={12} sm={4}>
+                    <Grid size={{xs:12,sm:4}}  >
                       <Box>
                         <Typography variant="body2" gutterBottom>
                           Итоговое фото

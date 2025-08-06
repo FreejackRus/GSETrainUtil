@@ -259,7 +259,7 @@ export const CarriagesPage = () => {
 
         {/* Статистика */}
         <Grid container spacing={3} className="carriages-page__stats">
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}} >
             <Card elevation={4}>
               <CardContent>
                 <Typography variant="h6" color="primary">
@@ -271,7 +271,7 @@ export const CarriagesPage = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}} >
             <Card elevation={4}>
               <CardContent>
                 <Typography variant="h6" color="primary">
@@ -283,7 +283,7 @@ export const CarriagesPage = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}} >
             <Card elevation={4}>
               <CardContent>
                 <Typography variant="h6" color="success.main">
@@ -295,7 +295,7 @@ export const CarriagesPage = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}} >
             <Card elevation={4}>
               <CardContent>
                 <Typography variant="h6" color="error.main">
@@ -312,7 +312,7 @@ export const CarriagesPage = () => {
         {/* Панель управления */}
         <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
           <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={6}>
+            <Grid size={{xs:12,sm:6}} >
               <TextField
                 fullWidth
                 label="Поиск по номеру вагона, MAC-адресу или серийному номеру"
@@ -330,7 +330,7 @@ export const CarriagesPage = () => {
                 placeholder="Введите номер вагона, MAC-адрес или серийный номер..."
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid  size={{xs:12,md:4}} >
               <FormControl fullWidth size="small">
                 <InputLabel>Фильтр по статусу</InputLabel>
                 <Select
@@ -345,7 +345,7 @@ export const CarriagesPage = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid size={{xs:12,md:4}} >
               <Box display="flex" justifyContent="flex-end">
                 <Typography variant="body2" color="text.secondary">
                   {filteredCarriages.length} из {carriages.length}
@@ -392,7 +392,7 @@ export const CarriagesPage = () => {
                       Тип: {carriage.carriageType} • Оборудования: {carriage.equipment.length}
                     </Typography>
                   </Box>
-                  <Box display="flex" gap={1}>
+                  <Box display="flex" flexWrap={"wrap"} gap={1}>
                     <Chip 
                       label={`${carriage.equipment.length} ед.`} 
                       color="primary" 

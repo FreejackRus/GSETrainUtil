@@ -161,7 +161,9 @@
   .admin-panel {
     padding: 16px 0;
   }
-
+ .admin-panel__actions {
+    flex-direction: column;
+  }
   .admin-panel__header {
     padding: 24px;
     margin-bottom: 24px;
