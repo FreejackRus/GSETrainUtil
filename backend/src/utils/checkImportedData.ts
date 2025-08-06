@@ -5,105 +5,117 @@ const prisma = new PrismaClient();
 async function checkImportedData() {
   try {
     console.log('Проверка импортированных данных...\n');
-    
-    // Проверяем заявки
+
+    // 1. Проверяем заявки
     const requests = await prisma.request.findMany({
       include: {
-        typeWork: true,
-        train: true,
+        // Список поездов в заявке
+        requestTrains: {
+          include: { train: true },
+        },
+        // Список вагонов в заявке + их фото номера
         requestCarriages: {
           include: {
             carriage: {
-              include: {
-                train: true,
-              },
+              include: { train: true },
             },
           },
         },
+        // Оборудование в заявке + тип работ + фото в запросе + справочник устройств
         requestEquipment: {
           include: {
-            equipment: {
-              include: {
-                photos: true
-              }
-            }
-          }
+            typeWork:  true,
+            photos:    true,
+            equipment: { include: { device: true } },
+          },
         },
-        completedJob: true,
+        completedJob:    true,
         currentLocation: true,
-        user: true
-      }
+        user:            true,
+      },
     });
-    
+
     console.log(`Всего заявок: ${requests.length}`);
-    
+
     if (requests.length > 0) {
+      const first = requests[0];
       console.log('\nПример заявки:');
-      const firstRequest = requests[0];
-      console.log(`- Номер заявки: ${firstRequest.applicationNumber}`);
-      console.log(`- Дата: ${firstRequest.applicationDate}`);
-      console.log(`- Тип работ: ${firstRequest.typeWork?.name || 'не указан'}`);
-      console.log(`- Номер поезда: ${firstRequest.train?.number || 'не указан'}`);
-      if (firstRequest.requestCarriages.length > 0) {
-        console.log(`- Тип вагона: ${firstRequest.requestCarriages[0].carriage?.type || 'не указан'}`);
-        console.log(`- Номер вагона: ${firstRequest.requestCarriages[0].carriage?.number || 'не указан'}`);
+      console.log(`- ID заявки: ${first.id}`);
+      console.log(`- Статус: ${first.status}`);
+      console.log(`- Дата создания: ${first.createdAt.toISOString()}`);
+      console.log(`- Дата обновления: ${first.updatedAt.toISOString()}`);
+
+      // Поезда
+      const trainNums = first.requestTrains.map(rt => rt.train.number);
+      console.log(`- Поезда: ${trainNums.join(', ') || 'не указаны'}`);
+
+      // Вагоны
+      if (first.requestCarriages.length > 0) {
+        first.requestCarriages.forEach((rc, i) => {
+          console.log(`  Вагон ${i + 1}: номер=${rc.carriage.number}, тип=${rc.carriage.type}, поезд=${rc.carriage.train.number}, фото=${rc.carriagePhoto || 'нет'}`);
+        });
       } else {
-        console.log(`- Тип вагона: не указан`);
-        console.log(`- Номер вагона: не указан`);
+        console.log('- Вагоны: не указаны');
       }
-      console.log(`- Выполнил: ${firstRequest.completedJob?.name || 'не указан'}`);
-      console.log(`- Текущее место: ${firstRequest.currentLocation?.name || 'не указан'}`);
-      console.log(`- Пользователь: ${firstRequest.user?.name || 'не указан'}`);
-      console.log(`- Количество оборудования: ${firstRequest.requestEquipment.length}`);
-      
-      if (firstRequest.requestEquipment.length > 0) {
-        const firstEquipment = firstRequest.requestEquipment[0].equipment;
-        console.log('\nОборудование:');
-        console.log(`  Тип: ${firstEquipment.type}`);
-        console.log(`  S/N: ${firstEquipment.serialNumber || 'не указан'}`);
-        console.log(`  MAC: ${firstEquipment.macAddress || 'не указан'}`);
-        console.log(`  Статус: ${firstEquipment.status}`);
-        console.log(`  Фотографий: ${firstEquipment.photos.length}`);
+
+      // Оборудование в заявке
+      console.log(`- Всего позиций оборудования: ${first.requestEquipment.length}`);
+      if (first.requestEquipment.length > 0) {
+        const re = first.requestEquipment[0];
+        console.log('  Пример позиции:');
+        console.log(`    - Equipment ID: ${re.equipmentId}`);
+        console.log(`    - Название: ${re.equipment?.name || 'не указано'}`);
+        console.log(`    - Тип устройства: ${re.equipment?.device?.name || 'не указано'}`);
+        console.log(`    - Тип работ: ${re.typeWork?.name || 'не указан'}`);
+        console.log(`    - Количество: ${re.quantity}`);
+        console.log(`    - Фото в запросе: ${re.photos.map(p => p.photoType).join(', ') || 'нет'}`);
       }
+
+      console.log(`- Выполнил: ${first.completedJob?.name || 'не указан'}`);
+      console.log(`- Местоположение: ${first.currentLocation?.name || 'не указано'}`);
+      console.log(`- Пользователь: ${first.user?.name || 'не указан'} (role=${first.user?.role})`);
     }
-    
-    // Проверяем оборудование
+
+    // 2. Проверяем оборудование (вне заявок)
     const equipment = await prisma.equipment.findMany({
       include: {
-        carriage: true,
-        photos: true
-      }
+        carriage: { include: { train: true } },
+        device:   true,
+      },
     });
-    
+
     console.log(`\nВсего записей оборудования: ${equipment.length}`);
-    
     if (equipment.length > 0) {
+      const eq = equipment[0];
       console.log('\nПример оборудования:');
-      const firstEquipment = equipment[0];
-      console.log(`- Тип: ${firstEquipment.type}`);
-      console.log(`- Статус: ${firstEquipment.status}`);
-      console.log(`- S/N: ${firstEquipment.serialNumber || 'не указан'}`);
-      console.log(`- MAC: ${firstEquipment.macAddress || 'не указан'}`);
-      console.log(`- Вагон: ${firstEquipment.carriage?.number || 'не указан'}`);
-      console.log(`- Фотографий: ${firstEquipment.photos.length}`);
+      console.log(`- ID: ${eq.id}`);
+      console.log(`- Название: ${eq.name}`);
+      console.log(`- Тип устройства (device): ${eq.device?.name || 'не указано'}`);
+      console.log(`- S/N: ${eq.serialNumber || 'не указан'}`);
+      console.log(`- MAC: ${eq.macAddress || 'не указан'}`);
+      console.log(`- Последнее обслуживание: ${eq.lastService?.toISOString() || 'не указано'}`);
+      console.log(`- Вагоны привязан к: ${eq.carriage ? `${eq.carriage.number} (поезд ${eq.carriage.train.number})` : 'не привязан'}`);
     }
-    
-    // Проверяем справочники
-    const typeWork = await prisma.typeWork.findMany();
-    const trains = await prisma.train.findMany();
-    const carriages = await prisma.carriage.findMany();
-    const completedJobs = await prisma.completedJob.findMany();
-    const currentLocations = await prisma.currentLocation.findMany();
-    const users = await prisma.user.findMany();
-    
+
+    // 3. Проверяем справочники
+    const [typeWorkList, trains, carriages, completedJobs, currentLocations, users, devices] = await Promise.all([
+      prisma.typeWork.findMany(),
+      prisma.train.findMany(),
+      prisma.carriage.findMany(),
+      prisma.completedJob.findMany(),
+      prisma.currentLocation.findMany(),
+      prisma.user.findMany(),
+      prisma.device.findMany(),
+    ]);
+
     console.log('\nСправочники:');
-    console.log(`- Типы работ: ${typeWork.length}`);
+    console.log(`- Типы работ: ${typeWorkList.length}`);
     console.log(`- Поезда: ${trains.length}`);
     console.log(`- Вагоны: ${carriages.length}`);
-    console.log(`- Исполнители: ${completedJobs.length}`);
-    console.log(`- Текущие места: ${currentLocations.length}`);
+    console.log(`- Выполненные работы: ${completedJobs.length}`);
+    console.log(`- Местоположения: ${currentLocations.length}`);
     console.log(`- Пользователи: ${users.length}`);
-    
+    console.log(`- Типы устройств (Device): ${devices.length}`);
   } catch (error) {
     console.error('Ошибка при проверке данных:', error);
   } finally {
@@ -111,15 +123,15 @@ async function checkImportedData() {
   }
 }
 
-// Запуск проверки, если файл запущен напрямую
+// Если файл запущен напрямую
 if (require.main === module) {
   checkImportedData()
-    .then(() => {
-      console.log('\nПроверка завершена');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('Ошибка проверки:', error);
-      process.exit(1);
-    });
+      .then(() => {
+        console.log('\nПроверка завершена');
+        process.exit(0);
+      })
+      .catch((error) => {
+        console.error('Ошибка проверки:', error);
+        process.exit(1);
+      });
 }

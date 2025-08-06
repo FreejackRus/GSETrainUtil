@@ -12,7 +12,6 @@ export const getEquipment = async (req: Request, res: Response) => {
             train: true
           }
         },
-        photos: true
       }
     });
 

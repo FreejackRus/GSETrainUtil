@@ -5,7 +5,14 @@ const prisma = new PrismaClient();
 async function checkRequest() {
   try {
     const request23 = await prisma.request.findUnique({
-      where: { id: 23 }
+      where: { id: 23 },
+      include: {
+        requestTrains:    true,
+        requestCarriages: true,
+        requestEquipment: {
+          include: { photos: true, typeWork: true }
+        },
+      },
     });
     
     console.log('Заявка 23:', JSON.stringify(request23, null, 2));
@@ -13,9 +20,10 @@ async function checkRequest() {
     const allRequests = await prisma.request.findMany({
       select: {
         id: true,
-        applicationNumber: true,
         userId: true,
-        status: true
+        status: true,
+        createdAt: true,
+        updatedAt: true,
       }
     });
     

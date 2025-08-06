@@ -5,11 +5,8 @@ import { PrismaClient } from '@prisma/client';
 
 export interface ArchiveOptions {
   applicationId?: number;
-  applicationNumber?: string;
   dateFrom?: string;
   dateTo?: string;
-  trainNumber?: string;
-  carriageNumber?: string;
   outputPath?: string;
 }
 
@@ -17,125 +14,98 @@ export interface ArchiveOptions {
  * Архивирует фотографии по заданным критериям
  */
 export class PhotoArchiver {
-  private prisma: PrismaClient;
-  private uploadsPath: string;
-
-  constructor() {
-    this.prisma = new PrismaClient();
-    this.uploadsPath = path.join(process.cwd(), 'uploads');
-  }
+  private prisma = new PrismaClient();
+  private uploadsPath = path.join(process.cwd(), 'uploads');
 
   /**
    * Создает архив фотографий для конкретной заявки
    */
   async archiveApplicationPhotos(applicationId: number, outputPath?: string): Promise<string> {
     try {
-      // Получаем данные заявки
+      // 1) Получаем заявку с новыми связями
       const application = await this.prisma.request.findUnique({
         where: { id: applicationId },
         include: {
-          train: true,
+          requestTrains: {
+            include: { train: true }
+          },
           requestCarriages: {
             include: {
-              carriage: {
-                include: {
-                  train: true,
-                },
-              },
-            },
+              carriage: { include: { train: true } }
+            }
           },
-          typeWork: true,
+          completedJob:    true,
           currentLocation: true,
-          user: true
+          user:            true
         }
       });
-
       if (!application) {
         throw new Error(`Заявка с ID ${applicationId} не найдена`);
       }
 
-      const archiveName = `application_${application.applicationNumber}_${application.applicationDate.toISOString().split('T')[0]}.zip`;
-      const archivePath = outputPath || path.join(process.cwd(), 'archives', archiveName);
+      // 2) Готовим имя архива, используем createdAt
+      const dateStr = application.createdAt.toISOString().split('T')[0];
+      const archiveName = `application_${application.id}_${dateStr}.zip`;
+      const archivePath = outputPath
+          || path.join(process.cwd(), 'archives', archiveName);
+      fs.mkdirSync(path.dirname(archivePath), { recursive: true });
 
-      // Создаем папку для архивов если не существует
-      const archiveDir = path.dirname(archivePath);
-      if (!fs.existsSync(archiveDir)) {
-        fs.mkdirSync(archiveDir, { recursive: true });
-      }
-
-      // Создаем архив
-      const output = fs.createWriteStream(archivePath);
-      const archive = archiver('zip', {
-        zlib: { level: 9 } // максимальное сжатие
-      });
+      // 3) Создаем zip-поток
+      const output  = fs.createWriteStream(archivePath);
+      const archive = archiver('zip', { zlib: { level: 9 } });
 
       return new Promise((resolve, reject) => {
         output.on('close', () => {
           console.log(`Архив создан: ${archivePath} (${archive.pointer()} байт)`);
           resolve(archivePath);
         });
-
-        archive.on('error', (err) => {
-          reject(err);
-        });
-
+        archive.on('error', err => reject(err));
         archive.pipe(output);
 
-        // Добавляем информацию о заявке
-        const applicationInfo = {
-          applicationNumber: application.applicationNumber,
-          applicationDate: application.applicationDate,
-          status: application.status,
-          typeWork: application.typeWork?.name,
-          train: application.train?.number,
+        // 4) Метаданные заявки
+        const info = {
+          id:               application.id,
+          status:           application.status,
+          createdAt:        application.createdAt,
+          updatedAt:        application.updatedAt,
+          trainNumbers:     application.requestTrains.map(rt => rt.train.number),
           carriage: {
             number: application.requestCarriages[0]?.carriage?.number,
-            type: application.requestCarriages[0]?.carriage?.type
+            type:   application.requestCarriages[0]?.carriage?.type
           },
-          location: application.currentLocation?.name,
-          user: application.user?.name,
-          createdAt: application.createdAt,
-          updatedAt: application.updatedAt
+          completedJob:     application.completedJob?.name,
+          currentLocation:  application.currentLocation?.name,
+          user:             application.user?.name
         };
+        archive.append(JSON.stringify(info, null, 2), { name: 'application_info.json' });
 
-        archive.append(JSON.stringify(applicationInfo, null, 2), { name: 'application_info.json' });
-
-        // Ищем папку с фотографиями для этой заявки
-        const applicationFolder = path.join(this.uploadsPath, application.applicationNumber.toString());
-        
-        if (fs.existsSync(applicationFolder)) {
-          // Добавляем все фотографии из папки заявки
-          archive.directory(applicationFolder, `photos`);
+        // 5) Папка uploads/<applicationId>/
+        const appFolder = path.join(this.uploadsPath, String(application.id));
+        if (fs.existsSync(appFolder)) {
+          archive.directory(appFolder, 'photos');
         }
 
-        // Добавляем отдельные фотографии из БД если они есть
+        // 6) Фото номера вагона
         const carriagePhoto = application.requestCarriages[0]?.carriagePhoto;
         if (carriagePhoto) {
-          const carriagePhotoPath = path.join(process.cwd(), carriagePhoto);
-          if (fs.existsSync(carriagePhotoPath)) {
-            archive.file(carriagePhotoPath, { name: `photos/carriage_photo_${path.basename(carriagePhoto)}` });
+          const p = path.join(process.cwd(), carriagePhoto);
+          if (fs.existsSync(p)) {
+            archive.file(p, { name: `photos/carriage_photo_${path.basename(p)}` });
           }
         }
 
-        if (application.generalPhoto) {
-          const generalPhotoPath = path.join(process.cwd(), application.generalPhoto);
-          if (fs.existsSync(generalPhotoPath)) {
-            archive.file(generalPhotoPath, { name: `photos/general_photo_${path.basename(application.generalPhoto)}` });
-          }
-        }
-
-        if (application.finalPhoto) {
-          const finalPhotoPath = path.join(process.cwd(), application.finalPhoto);
-          if (fs.existsSync(finalPhotoPath)) {
-            archive.file(finalPhotoPath, { name: `photos/final_photo_${path.basename(application.finalPhoto)}` });
+        // 7) Единое фото заявления
+        if (application.photo) {
+          const p = path.join(process.cwd(), application.photo);
+          if (fs.existsSync(p)) {
+            archive.file(p, { name: `photos/application_photo_${path.basename(p)}` });
           }
         }
 
         archive.finalize();
       });
-
     } catch (error) {
-      console.error('Ошибка при создании архива:', error);
+      console.error('Ошибка при создании архива заявки:', error);
       throw error;
     } finally {
       await this.prisma.$disconnect();
@@ -147,127 +117,94 @@ export class PhotoArchiver {
    */
   async archivePhotosByDateRange(dateFrom: string, dateTo: string, outputPath?: string): Promise<string> {
     try {
-      const applications = await this.prisma.request.findMany({
+      // 1) Подбираем заявки по createdAt
+      const apps = await this.prisma.request.findMany({
         where: {
-          applicationDate: {
+          createdAt: {
             gte: new Date(dateFrom),
             lte: new Date(dateTo)
           }
         },
         include: {
-          train: true,
-          requestCarriages: {
-            include: {
-              carriage: {
-                include: {
-                  train: true,
-                },
-              },
-            },
-          },
-          typeWork: true,
-          currentLocation: true,
-          user: true
+          requestTrains:    { include: { train: true } },
+          requestCarriages: { include: { carriage: { include: { train: true } } } },
+          completedJob:     true,
+          currentLocation:  true,
+          user:             true
         },
-        orderBy: {
-          applicationDate: 'asc'
-        }
+        orderBy: { createdAt: 'asc' }
       });
-
-      if (applications.length === 0) {
+      if (apps.length === 0) {
         throw new Error(`Заявки за период ${dateFrom} - ${dateTo} не найдены`);
       }
 
+      // 2) Подготовка архива
       const archiveName = `applications_${dateFrom}_to_${dateTo}.zip`;
-      const archivePath = outputPath || path.join(process.cwd(), 'archives', archiveName);
+      const archivePath = outputPath
+          || path.join(process.cwd(), 'archives', archiveName);
+      fs.mkdirSync(path.dirname(archivePath), { recursive: true });
 
-      // Создаем папку для архивов если не существует
-      const archiveDir = path.dirname(archivePath);
-      if (!fs.existsSync(archiveDir)) {
-        fs.mkdirSync(archiveDir, { recursive: true });
-      }
-
-      const output = fs.createWriteStream(archivePath);
-      const archive = archiver('zip', {
-        zlib: { level: 9 }
-      });
+      const output  = fs.createWriteStream(archivePath);
+      const archive = archiver('zip', { zlib: { level: 9 } });
 
       return new Promise((resolve, reject) => {
         output.on('close', () => {
           console.log(`Архив создан: ${archivePath} (${archive.pointer()} байт)`);
           resolve(archivePath);
         });
-
-        archive.on('error', (err) => {
-          reject(err);
-        });
-
+        archive.on('error', err => reject(err));
         archive.pipe(output);
 
-        // Добавляем сводную информацию
-        const summaryInfo = {
-          period: { from: dateFrom, to: dateTo },
-          totalApplications: applications.length,
-          applications: applications.map(app => ({
-            applicationNumber: app.applicationNumber,
-            applicationDate: app.applicationDate,
-            status: app.status,
-            typeWork: app.typeWork?.name,
-            train: app.train?.number,
+        // 3) Сводная информация
+        const summary = {
+          period: {
+            from: dateFrom,
+            to:   dateTo
+          },
+          totalApplications: apps.length,
+          applications: apps.map(app => ({
+            id:              app.id,
+            status:          app.status,
+            createdAt:       app.createdAt,
+            updatedAt:       app.updatedAt,
+            trainNumbers:    app.requestTrains.map(rt => rt.train.number),
             carriage: {
               number: app.requestCarriages[0]?.carriage?.number,
-              type: app.requestCarriages[0]?.carriage?.type
+              type:   app.requestCarriages[0]?.carriage?.type
             },
-            location: app.currentLocation?.name,
-            user: app.user?.name
+            completedJob:    app.completedJob?.name,
+            currentLocation: app.currentLocation?.name,
+            user:            app.user?.name
           }))
         };
+        archive.append(JSON.stringify(summary, null, 2), { name: 'summary.json' });
 
-        archive.append(JSON.stringify(summaryInfo, null, 2), { name: 'summary.json' });
-
-        // Добавляем фотографии для каждой заявки
-        applications.forEach(application => {
-          const applicationFolder = path.join(this.uploadsPath, application.applicationNumber.toString());
-          
-          if (fs.existsSync(applicationFolder)) {
-            archive.directory(applicationFolder, `application_${application.applicationNumber}/photos`);
+        // 4) Для каждой заявки собираем фото
+        for (const app of apps) {
+          const prefix = `application_${app.id}/photos`;
+          const appFolder = path.join(this.uploadsPath, String(app.id));
+          if (fs.existsSync(appFolder)) {
+            archive.directory(appFolder, prefix);
           }
-
-          // Добавляем отдельные фотографии из БД
-          const carriagePhoto = application.requestCarriages[0]?.carriagePhoto;
-          if (carriagePhoto) {
-            const carriagePhotoPath = path.join(process.cwd(), carriagePhoto);
-            if (fs.existsSync(carriagePhotoPath)) {
-              archive.file(carriagePhotoPath, { 
-                name: `application_${application.applicationNumber}/carriage_photo_${path.basename(carriagePhoto)}` 
-              });
+          const cp = app.requestCarriages[0]?.carriagePhoto;
+          if (cp) {
+            const p = path.join(process.cwd(), cp);
+            if (fs.existsSync(p)) {
+              archive.file(p, { name: `${prefix}/carriage_photo_${path.basename(p)}` });
             }
           }
-
-          if (application.generalPhoto) {
-            const generalPhotoPath = path.join(process.cwd(), application.generalPhoto);
-            if (fs.existsSync(generalPhotoPath)) {
-              archive.file(generalPhotoPath, { 
-                name: `application_${application.applicationNumber}/general_photo_${path.basename(application.generalPhoto)}` 
-              });
+          if (app.photo) {
+            const p = path.join(process.cwd(), app.photo);
+            if (fs.existsSync(p)) {
+              archive.file(p, { name: `${prefix}/application_photo_${path.basename(p)}` });
             }
           }
-
-          if (application.finalPhoto) {
-            const finalPhotoPath = path.join(process.cwd(), application.finalPhoto);
-            if (fs.existsSync(finalPhotoPath)) {
-              archive.file(finalPhotoPath, { 
-                name: `application_${application.applicationNumber}/final_photo_${path.basename(application.finalPhoto)}` 
-              });
-            }
-          }
-        });
+        }
 
         archive.finalize();
       });
-
     } catch (error) {
-      console.error('Ошибка при создании архива:', error);
+      console.error('Ошибка при создании архива по периоду:', error);
       throw error;
     } finally {
       await this.prisma.$disconnect();
@@ -275,73 +212,55 @@ export class PhotoArchiver {
   }
 
   /**
-   * Очищает старые фотографии (старше указанного количества дней)
+   * Удаляет старые фото (старше daysOld дней)
    */
-  async cleanupOldPhotos(daysOld: number = 365): Promise<{ deletedFiles: number; freedSpace: number }> {
+  async cleanupOldPhotos(daysOld = 365): Promise<{ deletedFiles: number; freedSpace: number }> {
     try {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - daysOld);
-
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - daysOld);
       let deletedFiles = 0;
-      let freedSpace = 0;
+      let freedSpace   = 0;
 
-      const applications = await this.prisma.request.findMany({
-        where: {
-          applicationDate: {
-            lt: cutoffDate
-          }
-        }
+      const apps = await this.prisma.request.findMany({
+        where: { createdAt: { lt: cutoff } }
       });
-
-      for (const application of applications) {
-        const applicationFolder = path.join(this.uploadsPath, application.applicationNumber.toString());
-        
-        if (fs.existsSync(applicationFolder)) {
-          const stats = this.getFolderSize(applicationFolder);
-          freedSpace += stats.size;
-          deletedFiles += stats.files;
-          
-          // Удаляем папку с фотографиями
-          fs.rmSync(applicationFolder, { recursive: true, force: true });
-          console.log(`Удалена папка: ${applicationFolder}`);
+      for (const app of apps) {
+        const folder = path.join(this.uploadsPath, String(app.id));
+        if (fs.existsSync(folder)) {
+          const { size, files } = this.getFolderSize(folder);
+          freedSpace   += size;
+          deletedFiles += files;
+          fs.rmSync(folder, { recursive: true, force: true });
+          console.log(`Удалена папка: ${folder}`);
         }
       }
-
       return { deletedFiles, freedSpace };
-
     } catch (error) {
-      console.error('Ошибка при очистке старых фотографий:', error);
+      console.error('Ошибка при очистке фото:', error);
       throw error;
     } finally {
       await this.prisma.$disconnect();
     }
   }
 
-
-
   /**
-   * Получает размер папки и количество файлов
+   * Считает размер папки и число файлов
    */
   private getFolderSize(folderPath: string): { size: number; files: number } {
     let totalSize = 0;
     let totalFiles = 0;
-
-    const items = fs.readdirSync(folderPath);
-    
-    for (const item of items) {
-      const itemPath = path.join(folderPath, item);
-      const stats = fs.statSync(itemPath);
-      
-      if (stats.isDirectory()) {
-        const subStats = this.getFolderSize(itemPath);
-        totalSize += subStats.size;
-        totalFiles += subStats.files;
+    for (const name of fs.readdirSync(folderPath)) {
+      const full = path.join(folderPath, name);
+      const stat = fs.statSync(full);
+      if (stat.isDirectory()) {
+        const sub = this.getFolderSize(full);
+        totalSize  += sub.size;
+        totalFiles += sub.files;
       } else {
-        totalSize += stats.size;
-        totalFiles++;
+        totalSize  += stat.size;
+        totalFiles += 1;
       }
     }
-
     return { size: totalSize, files: totalFiles };
   }
 }

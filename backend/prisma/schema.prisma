@@ -21,15 +21,16 @@ model Request {
   currentLocationId Int?
   completedJobId    Int?
   userId            Int
+  photo             String?
 
   currentLocation CurrentLocation? @relation(fields: [currentLocationId], references: [id])
   completedJob    CompletedJob?    @relation(fields: [completedJobId], references: [id])
   user            User             @relation(fields: [userId], references: [id])
 
   // Связи к join-таблицам
-  requestTrains    RequestTrain[] // Поезда в заявке
-  requestCarriages RequestCarriage[] // Вагоны в заявке + фото номера вагона
-  requestEquipment RequestEquipment[] // Оборудование в заявке + тип работ + количество
+  requestTrains     RequestTrain[] // Поезда в заявке
+  requestCarriages  RequestCarriage[] // Вагоны в заявке + фото номера вагона
+  requestEquipments RequestEquipment[] // Оборудование в заявке + тип работ + количество
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -98,45 +99,46 @@ model RequestEquipmentPhoto {
 
 /// Доменные таблицы без фото
 model Train {
-  id           Int            @id @default(autoincrement())
-  number       String         @unique
-  carriages    Carriage[]
-  RequestTrain RequestTrain[]
+  id            Int            @id @default(autoincrement())
+  number        String         @unique
+  carriages     Carriage[]
+  requestTrains RequestTrain[]
 
   @@map("trains")
 }
 
 model Carriage {
-  id              Int               @id @default(autoincrement())
-  number          String
-  type            String
-  trainId         Int // Привязка к поезду
-  train           Train             @relation(fields: [trainId], references: [id])
-  RequestCarriage RequestCarriage[]
-  Equipment       Equipment[]
+  id               Int               @id @default(autoincrement())
+  number           String
+  type             String
+  trainId          Int // Привязка к поезду
+  train            Train             @relation(fields: [trainId], references: [id])
+  requestCarriages RequestCarriage[]
+  equipments       Equipment[]
 
   @@unique([number, trainId])
   @@map("carriages")
 }
 
 model Equipment {
-  id               Int                @id @default(autoincrement())
-  type             String
-  serialNumber     String?
-  macAddress       String?
-  status           String
-  lastService      DateTime?
-  carriageId       Int // Привязка к вагону
-  carriage         Carriage           @relation(fields: [carriageId], references: [id])
-  RequestEquipment RequestEquipment[]
+  id                Int                @id @default(autoincrement())
+  name              String
+  deviceId          Int
+  device            Device             @relation(fields: [deviceId], references: [id])
+  serialNumber      String?
+  macAddress        String?
+  lastService       DateTime?
+  carriageId        Int?
+  carriage          Carriage?          @relation(fields: [carriageId], references: [id])
+  requestEquipments RequestEquipment[]
 
   @@map("equipment")
 }
 
 model TypeWork {
-  id               Int                @id @default(autoincrement())
-  name             String             @unique
-  requestEquipment RequestEquipment[] // Привязка через RequestEquipment
+  id                Int                @id @default(autoincrement())
+  name              String             @unique
+  requestEquipments RequestEquipment[] // Привязка через RequestEquipment
 
   @@map("type_work")
 }
@@ -169,10 +171,10 @@ model User {
 }
 
 model Device {
-  id     Int    @id @default(autoincrement())
-  status String
-  name   String
-  count  Int
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  equipments Equipment[]
 
   @@map("devices")
 }

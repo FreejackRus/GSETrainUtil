@@ -1,6 +1,8 @@
 export interface EquipmentDetail {
   id: number;
-  equipmentType: string;
+  name: string;
+  deviceType: string;
+  typeWork: string;
   serialNumber: string;
   macAddress: string;
   countEquipment: number;

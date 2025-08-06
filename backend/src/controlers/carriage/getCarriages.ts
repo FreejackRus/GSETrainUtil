@@ -9,11 +9,7 @@ export const getCarriages = async (req: Request, res: Response) => {
     const carriagesData = await prisma.carriage.findMany({
       include: {
         train: true,
-        equipment: {
-          include: {
-            photos: true,
-          },
-        },
+        equipments: { include: { device: true } },
       },
     });
 
@@ -22,21 +18,19 @@ export const getCarriages = async (req: Request, res: Response) => {
       carriageNumber: carriage.number,
       carriageType: carriage.type,
       trainNumber: carriage.train?.number || 'Неизвестно',
-      equipment: carriage.equipment.map(equipment => ({
+      equipment: carriage.equipments.map(equipment => ({
         id: equipment.id,
-        type: equipment.type,
-        status: equipment.status,
+        type: equipment.device.name,
         snNumber: equipment.serialNumber,
         mac: equipment.macAddress,
         lastService: equipment.lastService,
-        photos: equipment.photos.map(photo => photo.photoPath),
       })),
     }));
 
     // Получаем уникальные типы оборудования
     const equipmentTypes = [...new Set(
       carriagesData.flatMap(carriage => 
-        carriage.equipment.map(eq => eq.type)
+        carriage.equipments.map(eq => eq.device.name)
       )
     )];
 

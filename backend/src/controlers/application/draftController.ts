@@ -3,455 +3,275 @@ import { Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
-// Получить все черновики
+// GET /drafts
 export const getDrafts = async (req: Request, res: Response) => {
   try {
-    // TODO: Получить userId и userRole из токена аутентификации
-    const userId = parseInt(req.query.userId as string) || 2; // Временно используем ID инженера (существующий пользователь)
-    const userRole = req.query.userRole as string || 'engineer'; // Временно используем роль инженера
-    
-    // Администраторы не должны видеть черновики
-    if (userRole === 'admin') {
-      return res.status(200).json({
-        success: true,
-        data: []
-      });
-    }
-    
-    // Инженеры видят только свои черновики
-    const whereCondition = userRole === 'engineer' 
-      ? { status: 'draft', userId: userId }
-      : { status: 'draft' };
+    // TODO: взять userId/userRole из JWT
+    const userId   = Number(req.query.userId)   || undefined;
+    const userRole = String(req.query.userRole) || "engineer";
 
-    const drafts = await prisma.request.findMany({
-      where: whereCondition,
+    if (userRole === "admin") {
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    const where: any = { status: "draft" };
+    if (userRole === "engineer" && userId) {
+      where.userId = userId;
+    }
+
+    const raws = await prisma.request.findMany({
+      where,
+      orderBy:    { createdAt: "desc" },
       include: {
-        requestEquipment: {
+        requestTrains:    { include: { train: true } },
+        requestCarriages: { include: { carriage: { include: { train: true } } } },
+        requestEquipments: {
           include: {
-            equipment: {
-              include: {
-                photos: true
-              }
-            }
+            photos:    true,
+            equipment: { include: { device: true } },
           }
         },
-        typeWork: true,
-        train: true,
-        requestCarriages: {
-          include: {
-            carriage: {
-              include: {
-                train: true,
-              },
-            },
-          },
-        },
-        completedJob: true,
+        completedJob:    true,
         currentLocation: true,
-        user: true
-      },
-      orderBy: { applicationDate: 'desc' }
+        user:            true,
+      }
     });
 
-    res.status(200).json({
-      success: true,
-      data: drafts
-    });
+    const data = raws.map(r => ({
+      id:             r.id,
+      photo:          r.photo || null,
+      status:         r.status,
+      trainNumbers:   r.requestTrains.map(rt => rt.train.number),
+      carriages:      r.requestCarriages.map(rc => ({
+        number:  rc.carriage.number,
+        type:    rc.carriage.type,
+        train:   rc.carriage.train.number,
+        photo:   rc.carriagePhoto || null,
+      })),
+      equipmentCount: r.requestEquipments.length,
+      createdAt:      r.createdAt.toISOString(),
+      updatedAt:      r.updatedAt.toISOString(),
+    }));
 
-  } catch (error) {
-    console.error('Ошибка при получении черновиков:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Внутренняя ошибка сервера при получении черновиков' 
-    });
+    res.status(200).json({ success: true, data });
+  } catch (e) {
+    console.error("Ошибка при получении черновиков:", e);
+    res.status(500).json({ success: false, message: "Внутренняя ошибка сервера" });
+  } finally {
+    await prisma.$disconnect();
   }
 };
 
-// Завершить черновик (перевести в статус completed)
+// POST /drafts/:id/complete
 export const completeDraft = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ success: false, message: "Некорректный ID" });
+  }
+
   try {
-    const { id } = req.params;
-    const requestData = req.body;
-
-    // Проверяем, что заявка существует и является черновиком
-    const existingRequest = await prisma.request.findUnique({
-      where: { id: parseInt(id) }
-    });
-
-    if (!existingRequest) {
-      return res.status(404).json({ 
-        success: false,
-        message: 'Заявка не найдена' 
-      });
+    const existing = await prisma.request.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Черновик не найден" });
+    }
+    if (existing.status !== "draft") {
+      return res.status(400).json({ success: false, message: "Можно завершить только черновики" });
     }
 
-    if (existingRequest.status !== 'draft') {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Можно завершить только черновики' 
-      });
+    const {
+      trainNumber,
+      carriages = [],
+      equipment = [],
+      completedJob,
+      currentLocation,
+      photo,
+      userId
+    } = req.body;
+
+    // Валидация
+    if (!trainNumber || carriages.length === 0 || equipment.length === 0 || !completedJob || !currentLocation) {
+      return res.status(400).json({ success: false, message: "Не все обязательные поля заполнены" });
     }
 
-    // Валидация обязательных полей для завершенной заявки
-    const { typeWork, trainNumber, carriages, equipment, completedJob, currentLocation } = requestData;
-    
-    console.log('=== ВАЛИДАЦИЯ ДАННЫХ ===');
-    console.log('typeWork:', typeWork);
-    console.log('trainNumber:', trainNumber);
-    console.log('carriages:', carriages);
-    console.log('equipment:', equipment);
-    console.log('completedJob:', completedJob);
-    console.log('currentLocation:', currentLocation);
-    
-    if (!typeWork || !trainNumber || !carriages || !Array.isArray(carriages) || carriages.length === 0 ||
-        !equipment || !Array.isArray(equipment) || equipment.length === 0 ||
-        !completedJob || !currentLocation) {
-      console.log('=== ОШИБКА ВАЛИДАЦИИ ===');
-      console.log('typeWork valid:', !!typeWork);
-      console.log('trainNumber valid:', !!trainNumber);
-      console.log('carriages valid:', !!(carriages && Array.isArray(carriages) && carriages.length > 0));
-      console.log('equipment valid:', !!(equipment && Array.isArray(equipment) && equipment.length > 0));
-      console.log('completedJob valid:', !!completedJob);
-      console.log('currentLocation valid:', !!currentLocation);
-      
-      return res.status(400).json({
-        success: false,
-        message: 'Все обязательные поля должны быть заполнены для завершения заявки'
-      });
-    }
-
-    console.log('=== ВАЛИДАЦИЯ ВАГОНОВ ===');
-    // Проверяем, что у каждого вагона есть обязательные поля
-    for (const carriage of carriages) {
-      console.log('Проверяем вагон:', carriage);
-      if (!carriage.carriageType || !carriage.carriageNumber) {
-        console.log('ОШИБКА: Вагон не прошел валидацию');
-        return res.status(400).json({
-          success: false,
-          message: 'Все вагоны должны иметь тип и номер'
-        });
-      }
-    }
-    console.log('Все вагоны прошли валидацию');
-
-    console.log('=== ВАЛИДАЦИЯ ОБОРУДОВАНИЯ ===');
-    // Проверяем, что у каждого оборудования есть обязательные поля
-    for (const item of equipment) {
-      console.log('Проверяем оборудование:', item);
-      if (!item.equipmentType || !item.serialNumber || item.quantity === undefined) {
-        console.log('ОШИБКА: Оборудование не прошло валидацию');
-        return res.status(400).json({
-          success: false,
-          message: 'Все оборудование должно иметь тип, серийный номер и количество'
-        });
-      }
-
-      // Проверяем MAC-адрес для сетевого оборудования
-      const networkEquipmentTypes = ['точка доступа', 'маршрутизатор', 'коммутатор'];
-      const isNetworkEquipment = networkEquipmentTypes.some(type => 
-        item.equipmentType.toLowerCase().includes(type.toLowerCase())
-      );
-      
-      console.log('Сетевое оборудование?', isNetworkEquipment, 'MAC:', item.macAddress);
-      
-      if (isNetworkEquipment && !item.macAddress) {
-        console.log('ОШИБКА: MAC-адрес отсутствует для сетевого оборудования');
-        return res.status(400).json({
-          success: false,
-          message: `MAC-адрес обязателен для оборудования типа "${item.equipmentType}"`
-        });
-      }
-    }
-    console.log('Все оборудование прошло валидацию');
-
-    console.log('=== ПОИСК СВЯЗАННЫХ ЗАПИСЕЙ ===');
-    // Находим или создаем связанные записи
-    const [typeWorkRecord, trainRecord, completedJobRecord, currentLocationRecord] = await Promise.all([
-      // TypeWork
-      (async () => {
-        console.log('Ищем тип работы:', typeWork);
-        const record = await prisma.typeWork.upsert({
-          where: { name: typeWork },
-          update: {},
-          create: { name: typeWork }
-        });
-        console.log('Тип работы найден/создан:', record.id);
-        return record;
-      })(),
-      // Train
-      (async () => {
-        console.log('Ищем поезд:', trainNumber);
-        const record = await prisma.train.upsert({
-          where: { number: trainNumber },
-          update: {},
-          create: { number: trainNumber }
-        });
-        console.log('Поезд найден/создан:', record.id);
-        return record;
-      })(),
-      // CompletedJob
-      (async () => {
-        console.log('Ищем выполненную работу:', completedJob);
-        const record = await prisma.completedJob.upsert({
-          where: { name: completedJob },
-          update: {},
-          create: { name: completedJob }
-        });
-        console.log('Выполненная работа найдена/создана:', record.id);
-        return record;
-      })(),
-      // CurrentLocation
-      (async () => {
-        console.log('Ищем текущее местоположение:', currentLocation);
-        const record = await prisma.currentLocation.upsert({
-          where: { name: currentLocation },
-          update: {},
-          create: { name: currentLocation }
-        });
-        console.log('Текущее местоположение найдено/создано:', record.id);
-        return record;
-      })()
+    // Upsert справочников
+    const [tr, cj, loc] = await Promise.all([
+      prisma.train.upsert({ where: { number: trainNumber }, update: {}, create: { number: trainNumber } }),
+      prisma.completedJob.upsert({ where: { name: completedJob }, update: {}, create: { name: completedJob } }),
+      prisma.currentLocation.upsert({ where: { name: currentLocation }, update: {}, create: { name: currentLocation } }),
     ]);
 
-    // Находим или создаем вагоны
+    // Upsert вагонов
     const carriageRecords = [];
-    for (const carriage of carriages) {
-      const carriageRecord = await prisma.carriage.upsert({
-        where: { 
-          number_trainId: { 
-            number: carriage.carriageNumber, 
-            trainId: trainRecord.id 
-          } 
-        },
-        update: { type: carriage.carriageType },
-        create: { 
-          number: carriage.carriageNumber, 
-          type: carriage.carriageType, 
-          trainId: trainRecord.id 
-        }
-      });
-      carriageRecords.push(carriageRecord);
-    }
-
-    // Подготавливаем данные для обновления заявки
-    const updateData = {
-      status: 'completed',
-      typeWorkId: typeWorkRecord.id,
-      trainId: trainRecord.id,
-      completedJobId: completedJobRecord.id,
-      currentLocationId: currentLocationRecord.id,
-      generalPhoto: requestData.generalPhoto,
-      finalPhoto: requestData.finalPhoto,
-      userId: requestData.userId,
-    };
-
-    // Обновляем заявку
-    const updatedRequest = await prisma.request.update({
-      where: { id: parseInt(id) },
-      data: updateData,
-      include: {
-        requestEquipment: {
-          include: {
-            equipment: {
-              include: {
-                photos: true
-              }
-            }
+    for (const c of carriages) {
+      const cr = await prisma.carriage.upsert({
+        where: {
+          number_trainId: {
+            number:  c.carriageNumber,
+            trainId: tr.id
           }
         },
-        typeWork: true,
-        train: true,
-        requestCarriages: {
-          include: {
-            carriage: {
-              include: {
-                train: true,
-              },
-            },
-          },
+        update: { type: c.carriageType },
+        create: {
+          number:  c.carriageNumber,
+          type:    c.carriageType,
+          trainId: tr.id
+        }
+      });
+      carriageRecords.push({ id: cr.id, photo: c.carriagePhoto });
+    }
+
+    // Обновляем заявку + связи с поездами и вагонами
+    await prisma.request.update({
+      where: { id },
+      data: {
+        status:            "completed",
+        photo:             photo ?? existing.photo,
+        completedJobId:    cj.id,
+        currentLocationId: loc.id,
+        userId:            userId ?? existing.userId,
+        requestTrains: {
+          deleteMany: {},
+          create:     [{ trainId: tr.id }]
         },
-        completedJob: true,
-        currentLocation: true,
-        user: true
+        requestCarriages: {
+          deleteMany: {},
+          create:     carriageRecords.map(cr => ({
+            carriageId:    cr.id,
+            carriagePhoto: cr.photo ?? null
+          }))
+        }
       }
     });
 
-    // Удаляем старые связи с вагонами
-    await prisma.requestCarriage.deleteMany({
-      where: { requestId: parseInt(id) }
-    });
+    // Обновляем оборудование
+    await prisma.requestEquipment.deleteMany({ where: { requestId: id } });
 
-    // Создаем связи с вагонами
-    for (let i = 0; i < carriageRecords.length; i++) {
-      const carriageRecord = carriageRecords[i];
-      const carriageData = carriages[i];
-      
-      await prisma.requestCarriage.create({
+    for (const e of equipment) {
+      // Upsert устройства (Device)
+      const dev = await prisma.device.upsert({
+        where: { name: e.deviceType },
+        update: {},
+        create: { name: e.deviceType }
+      });
+
+      let eqRec = await prisma.equipment.findFirst({
+        where: {
+          serialNumber: e.serialNumber ?? undefined
+        }
+      });
+
+      if (eqRec) {
+        // обновляем
+        eqRec = await prisma.equipment.update({
+          where: { id: eqRec.id },
+          data: {
+            macAddress:  e.macAddress   ?? undefined,
+            lastService: e.lastService  ? new Date(e.lastService) : undefined,
+            carriageId:  null
+          }
+        });
+      } else {
+        // создаём
+        eqRec = await prisma.equipment.create({
+          data: {
+            name:         e.name,
+            deviceId:     dev.id,
+            serialNumber: e.serialNumber ?? null,
+            macAddress:   e.macAddress   ?? null,
+            lastService:  e.lastService  ? new Date(e.lastService) : undefined,
+            // carriageId — пропустим, пусть по умолчанию будет null
+          }
+        });
+      }
+
+      // Upsert типа работ для этого оборудования
+      const tw = await prisma.typeWork.upsert({
+        where:  { name: e.typeWork },
+        update: {},
+        create: { name: e.typeWork }
+      });
+
+      // Создание связи request ↔ equipment
+      const reqEq = await prisma.requestEquipment.create({
         data: {
-          requestId: parseInt(id),
-          carriageId: carriageRecord.id,
-          carriagePhoto: carriageData.carriagePhoto || null,
-        },
-      });
-    }
-
-    // Обрабатываем оборудование
-    if (equipment && Array.isArray(equipment)) {
-      // Удаляем старые связи с оборудованием
-      await prisma.requestEquipment.deleteMany({
-        where: { requestId: parseInt(id) }
+          requestId:   id,
+          equipmentId: eqRec.id,
+          typeWorkId:  tw.id,
+          quantity:    e.quantity || 1
+        }
       });
 
-      // Создаем новое оборудование и связи
-      for (const equipmentItem of equipment) {
-        // Создаем оборудование
-        const equipmentRecord = await prisma.equipment.create({
-          data: {
-            type: equipmentItem.equipmentType,
-            serialNumber: equipmentItem.serialNumber || null,
-            macAddress: equipmentItem.macAddress || null,
-            status: 'active'
-          }
-        });
-
-        // Создаем связь заявка-оборудование
-        await prisma.requestEquipment.create({
-          data: {
-            requestId: parseInt(id),
-            equipmentId: equipmentRecord.id,
-            quantity: equipmentItem.quantity || 1
-          }
-        });
-
-        // Создаем фотографии оборудования
-        if (equipmentItem.photos) {
-          const photos = [];
-          
-          if (equipmentItem.photos.equipmentPhoto) {
-            photos.push({
-              equipmentId: equipmentRecord.id,
-              photoType: 'equipment',
-              photoPath: equipmentItem.photos.equipmentPhoto,
-              description: 'Фото оборудования'
-            });
-          }
-          
-          if (equipmentItem.photos.serialPhoto) {
-            photos.push({
-              equipmentId: equipmentRecord.id,
-              photoType: 'serial',
-              photoPath: equipmentItem.photos.serialPhoto,
-              description: 'Фото серийного номера'
-            });
-          }
-          
-          if (equipmentItem.photos.macPhoto) {
-            photos.push({
-              equipmentId: equipmentRecord.id,
-              photoType: 'mac',
-              photoPath: equipmentItem.photos.macPhoto,
-              description: 'Фото MAC адреса'
-            });
-          }
-
-          if (photos.length > 0) {
-            await prisma.equipmentPhoto.createMany({
-              data: photos
-            });
-          }
+      // Фотографии оборудования
+      if (Array.isArray(e.photos)) {
+        for (const p of e.photos) {
+          await prisma.requestEquipmentPhoto.create({
+            data: {
+              requestEquipmentId: reqEq.id,
+              photoType:          p.type,
+              photoPath:          p.path
+            }
+          });
         }
       }
     }
 
-    // Получаем обновленные данные заявки с оборудованием
-    const finalRequest = await prisma.request.findUnique({
-      where: { id: parseInt(id) },
+    // Возвращаем полную заявку
+    const result = await prisma.request.findUnique({
+      where: { id },
       include: {
-        requestEquipment: {
+        requestTrains:    { include: { train: true } },
+        requestCarriages: { include: { carriage: { include: { train: true } } } },
+        requestEquipments: {
           include: {
-            equipment: {
-              include: {
-                photos: true
-              }
-            }
+            typeWork:  true,
+            photos:    true,
+            equipment: { include: { device: true } },
           }
         },
-        typeWork: true,
-        train: true,
-        requestCarriages: {
-          include: {
-            carriage: {
-              include: {
-                train: true,
-              },
-            },
-          },
-        },
-        completedJob: true,
+        completedJob:    true,
         currentLocation: true,
-        user: true
+        user:            true,
       }
     });
 
-    res.status(200).json({
-      success: true,
-      message: 'Черновик успешно завершен',
-      data: finalRequest
-    });
-
-  } catch (error) {
-    console.error('Ошибка при завершении черновика:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Внутренняя ошибка сервера при завершении черновика' 
-    });
+    res.status(200).json({ success: true, data: result });
+  } catch (e) {
+    console.error("Ошибка при завершении черновика:", e);
+    res.status(500).json({ success: false, message: "Внутренняя ошибка сервера" });
+  } finally {
+    await prisma.$disconnect();
   }
 };
 
-// Удалить черновик
+// DELETE /drafts/:id
 export const deleteDraft = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ success: false, message: "Некорректный ID" });
+  }
+
   try {
-    const { id } = req.params;
-
-    // Проверяем, что заявка существует и является черновиком
-    const existingRequest = await prisma.request.findUnique({
-      where: { id: parseInt(id) }
-    });
-
-    if (!existingRequest) {
-      return res.status(404).json({ 
-        success: false,
-        message: 'Заявка не найдена' 
-      });
+    const existing = await prisma.request.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Черновик не найден" });
+    }
+    if (existing.status !== "draft") {
+      return res.status(400).json({ success: false, message: "Можно удалить только черновики" });
     }
 
-    if (existingRequest.status !== 'draft') {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Можно удалить только черновики' 
-      });
-    }
+    // Удаляем все связи
+    await prisma.requestEquipment.deleteMany({ where: { requestId: id } });
+    await prisma.requestCarriage.deleteMany({ where: { requestId: id } });
+    await prisma.requestTrain.deleteMany({    where: { requestId: id } });
 
-    // Удаляем связи с оборудованием
-    await prisma.requestEquipment.deleteMany({
-      where: { requestId: parseInt(id) }
-    });
+    // Удаляем сам черновик
+    await prisma.request.delete({ where: { id } });
 
-    // Удаляем заявку
-    await prisma.request.delete({
-      where: { id: parseInt(id) }
-    });
-
-    res.status(200).json({
-      success: true,
-      message: 'Черновик успешно удален'
-    });
-
-  } catch (error) {
-    console.error('Ошибка при удалении черновика:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Внутренняя ошибка сервера при удалении черновика' 
-    });
+    res.status(200).json({ success: true, message: "Черновик успешно удалён" });
+  } catch (e) {
+    console.error("Ошибка при удалении черновика:", e);
+    res.status(500).json({ success: false, message: "Внутренняя ошибка сервера" });
+  } finally {
+    await prisma.$disconnect();
   }
 };

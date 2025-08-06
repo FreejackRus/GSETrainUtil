@@ -1,38 +1,39 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
-export const getDevices = async (req: Request, res: Response) => {
-  const prisma = new PrismaClient();
-  
+const prisma = new PrismaClient();
+
+export const getDevices = async (_req: Request, res: Response) => {
   try {
-    const equipmentData = await prisma.equipment.findMany({
+    // Находим всё оборудование вместе с привязкой к справочнику Device и к вагонам/поездам
+    const equipments = await prisma.equipment.findMany({
       include: {
+        device: true,
         carriage: {
-          include: {
-            train: true
-          }
-        },
-        photos: true
-      },
+          include: { train: true }
+        }
+      }
     });
 
-    const devices = equipmentData.map((item) => ({
-      id: item.id,
-      name: item.type,
-      status: item.status,
-      snNumber: item.serialNumber,
-      mac: item.macAddress,
-      lastService: item.lastService,
-      photos: item.photos,
-      typeWagon: item.carriage?.type,
-      numberWagon: item.carriage?.number,
-      trainNumber: item.carriage?.train?.number,
+    // Форматируем под нужный клиенту вид
+    const devices = equipments.map(e => ({
+      id:             e.id,
+      name:           e.name,
+      deviceType:     e.device.name,            // из справочника Device
+      snNumber:       e.serialNumber ?? null,
+      mac:            e.macAddress  ?? null,
+      lastService:    e.lastService ? e.lastService.toISOString() : null,
+      // Если carriageId отсутствует → не привязано (неактивно)
+      isActive:       e.carriageId != null,
+      carriageType:   e.carriage?.type    ?? null,
+      carriageNumber: e.carriage?.number  ?? null,
+      trainNumber:    e.carriage?.train?.number ?? null,
     }));
 
-    res.json({ devices });
+    return res.status(200).json({ success: true, data: devices });
   } catch (error) {
-    console.error('Error fetching devices:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching devices:", error);
+    return res.status(500).json({ success: false, error: "Internal server error" });
   } finally {
     await prisma.$disconnect();
   }
