@@ -144,7 +144,7 @@ export const CreateApplicationPage: React.FC = () => {
           {/* Основные действия */}
           <Grid container spacing={3}>
             {/* Создать новую заявку */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{xs:12,md:6}} >
               <Card className="action-card">
                 <CardContent className="action-card-content">
                   <Box className="action-icon">
@@ -170,7 +170,7 @@ export const CreateApplicationPage: React.FC = () => {
             </Grid>
 
             {/* Продолжить черновик */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{xs:12,md:6}}>
               <Card className="action-card">
                 <CardContent className="action-card-content">
                   <Box className="action-icon">

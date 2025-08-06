@@ -585,7 +585,7 @@ export const WorkLogPage = () => {
       }}
     >
       <Grid container spacing={2} alignItems="center">
-        <Grid size={{ xs: 12, sm: 2 ,md:2}}>
+        <Grid size={{ xs: 12, sm: 2, md: 2 }}>
           <Box display="flex" alignItems="center" gap={1}>
             <Chip
               label={`#${entry.applicationNumber}`}
@@ -597,7 +597,7 @@ export const WorkLogPage = () => {
           </Box>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 3 ,md:3}} sx={{ ml: { xs: 0, sm: 4 } }}>
+        <Grid size={{ xs: 12, sm: 3, md: 3 }} sx={{ ml: { xs: 0, sm: 4 } }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {entry.typeWork}
           </Typography>
@@ -649,7 +649,7 @@ export const WorkLogPage = () => {
         </Grid>
 
         <Grid size={{ xs: 12, sm: 1 }}>
-          <Box display="flex" gap={0.5} width={"100%"}>
+          <Box display="flex" gap={0.5} width={'100%'}>
             <IconButton
               size="small"
               onClick={() => handleViewPhotos(entry)}
@@ -717,15 +717,23 @@ export const WorkLogPage = () => {
             overflow: 'hidden',
           }}
         >
-          <Box p={4}>
+          <Box sx={{
+            p:{
+              xs:1,
+              sm:4
+            }
+          }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
-              <Box display="flex" alignItems="center">
+              <Box display="flex" alignItems="center" >
                 <Button
                   startIcon={<ArrowBackIcon />}
                   onClick={() => navigate('/')}
                   variant="contained"
                   sx={{
-                    mr: 3,
+                    mr: {
+                      xs:1,
+                      sm:3
+                    },
                     fontSize: {
                       xs: '0.7rem', // на телефонах
                       sm: '0.7rem', // на маленьких экранах
@@ -744,9 +752,20 @@ export const WorkLogPage = () => {
                 </Button>
                 <Avatar
                   sx={{
-                    width: 64,
-                    height: 64,
-                    mr: 3,
+                    // width: 64,
+                    // height: 64,
+                    width: {
+                      xs: 45,
+                      sm: 64,
+                    },
+                    height: {
+                      xs: 45,
+                      sm: 64,
+                    },
+                    mr: {
+                      xs:1,
+                      sm:3
+                    },
                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                     backdropFilter: 'blur(10px)',
                   }}
@@ -761,7 +780,7 @@ export const WorkLogPage = () => {
                       fontWeight: 700,
                       mb: 1,
                       fontSize: {
-                        xs: '1.2rem', // на телефонах
+                        xs: '0.9rem', // на телефонах
                         sm: '1.5rem', // на маленьких экранах
                         md: '2rem', // на планшетах
                         // lg: '3rem', // на больших
@@ -775,7 +794,7 @@ export const WorkLogPage = () => {
                     sx={{
                       opacity: 0.9,
                       fontSize: {
-                        xs: '0.75rem', // на телефонах
+                        xs: '0.55rem', // на телефонах
                         sm: '0.9rem', // на маленьких экранах
                         md: '1.15rem', // на планшетах
                         // lg: '3rem', // на больших
