@@ -1644,15 +1644,9 @@ export const createApplication = async (req: Request, res: Response) => {
         });
         if (!eqRec) {
           // создаём Device по имени оборудования, если нужно
-          const dev = await prisma.device.upsert({
-            where:  { name: e.equipmentName },
-            update: {},
-            create: { name: e.equipmentName }
-          });
           eqRec = await prisma.equipment.create({
             data: {
               name:         e.equipmentName,
-              deviceId:     dev.id,
               serialNumber: e.serialNumber,
               macAddress:   e.macAddress ?? null
             }
@@ -1665,7 +1659,6 @@ export const createApplication = async (req: Request, res: Response) => {
             requestId:   request.id,
             equipmentId: eqRec.id,
             typeWorkId:  tw.id,
-            quantity:    e.quantity
           }
         });
 
@@ -1694,7 +1687,7 @@ export const createApplication = async (req: Request, res: Response) => {
           include:{
             typeWork: true,
             photos:   true,
-            equipment:{ include:{ device:true } }
+            equipment:true
           }
         },
         completedJob:    true,

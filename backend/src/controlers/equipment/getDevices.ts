@@ -8,7 +8,6 @@ export const getDevices = async (_req: Request, res: Response) => {
     // Находим всё оборудование вместе с привязкой к справочнику Device и к вагонам/поездам
     const equipments = await prisma.equipment.findMany({
       include: {
-        device: true,
         carriage: {
           include: { train: true }
         }
@@ -19,7 +18,6 @@ export const getDevices = async (_req: Request, res: Response) => {
     const devices = equipments.map(e => ({
       id:             e.id,
       name:           e.name,
-      deviceType:     e.device.name,            // из справочника Device
       snNumber:       e.serialNumber ?? null,
       mac:            e.macAddress  ?? null,
       lastService:    e.lastService ? e.lastService.toISOString() : null,

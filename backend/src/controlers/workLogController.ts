@@ -14,7 +14,7 @@ export const getWorkLog = async (_req: Request, res: Response) => {
           include: {
             typeWork:  true,
             photos:    true,
-            equipment: { include: { device: true } },
+            equipment: true,
           }
         },
         completedJob:    true,
@@ -23,6 +23,7 @@ export const getWorkLog = async (_req: Request, res: Response) => {
       },
       orderBy: { createdAt: "desc" },
     });
+    const equipments = await prisma.equipment.findMany();
 
     const formatted = entries.map(r => {
       // Вагоны
@@ -37,11 +38,9 @@ export const getWorkLog = async (_req: Request, res: Response) => {
       const equipmentDetails = r.requestEquipments.map(re => ({
         id:           re.id,
         name:         re.equipment?.name               || "—",
-        deviceType:   re.equipment?.device?.name       || "—",
         typeWork:     re.typeWork?.name                || "—",
         serialNumber: re.equipment?.serialNumber       || "—",
         macAddress:   re.equipment?.macAddress         || "—",
-        quantity:     re.quantity,
         photos:       re.photos.map(p => ({
           type: p.photoType,
           path: p.photoPath,
@@ -61,7 +60,7 @@ export const getWorkLog = async (_req: Request, res: Response) => {
         trainNumbers:   r.requestTrains.map(rt => rt.train.number),
         carriages,
         equipmentDetails,
-        countEquipment: equipmentDetails.reduce((sum, d) => sum + d.quantity, 0),
+        countEquipment: equipments.length,
         equipmentTypes: equipmentDetails.map(d => d.typeWork),
         serialNumbers:  equipmentDetails.map(d => d.serialNumber),
         macAddresses:   equipmentDetails.map(d => d.macAddress),
@@ -157,7 +156,7 @@ export const updateWorkLogById = async (req: Request, res: Response) => {
           include: {
             typeWork:  true,
             photos:    true,
-            equipment: { include: { device: true } }
+            equipment: true
           }
         },
         completedJob:    true,
@@ -187,7 +186,7 @@ export const getWorkLogById = async (req: Request, res: Response) => {
           include: {
             typeWork:  true,
             photos:    true,
-            equipment: { include: { device: true } }
+            equipment: true
           }
         },
         completedJob:    true,
@@ -195,6 +194,7 @@ export const getWorkLogById = async (req: Request, res: Response) => {
         user:            true
       }
     });
+    const equipments = await prisma.equipment.findMany();
 
     if (!r) {
       return res.status(404).json({ success: false, message: "Not found" });
@@ -210,11 +210,9 @@ export const getWorkLogById = async (req: Request, res: Response) => {
     const equipmentDetails = r.requestEquipments.map(re => ({
       id:           re.id,
       name:         re.equipment?.name             || "—",
-      deviceType:   re.equipment?.device?.name     || "—",
       typeWork:     re.typeWork?.name              || "—",
       serialNumber: re.equipment?.serialNumber     || "—",
       macAddress:   re.equipment?.macAddress       || "—",
-      quantity:     re.quantity,
       photos:       re.photos.map(p => ({
         type: p.photoType,
         path: p.photoPath,
@@ -232,7 +230,7 @@ export const getWorkLogById = async (req: Request, res: Response) => {
       trainNumbers:     r.requestTrains.map(rt => rt.train.number),
       carriages,
       equipmentDetails,
-      countEquipment:   equipmentDetails.reduce((sum, d) => sum + d.quantity, 0),
+      countEquipment:   equipments.length,
       equipmentTypes:   equipmentDetails.map(d => d.typeWork),
       serialNumbers:    equipmentDetails.map(d => d.serialNumber),
       macAddresses:     equipmentDetails.map(d => d.macAddress),

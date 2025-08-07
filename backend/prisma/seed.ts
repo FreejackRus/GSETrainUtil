@@ -70,40 +70,30 @@ async function main() {
     prisma.carriage.upsert({
       where: { number_trainId: { number: "В-002", trainId: train1.id } },
       update: {},
-      create: { number: "В-002", type: "Грузовой",     trainId: train1.id },
+      create: { number: "В-002", type: "Грузовой", trainId: train1.id },
     }),
     prisma.carriage.upsert({
       where: { number_trainId: { number: "В-003", trainId: train2.id } },
       update: {},
-      create: { number: "В-003", type: "Багажный",    trainId: train2.id },
+      create: { number: "В-003", type: "Багажный", trainId: train2.id },
     }),
     prisma.carriage.upsert({
       where: { number_trainId: { number: "В-004", trainId: train2.id } },
       update: {},
-      create: { number: "В-004", type: "Почтовый",    trainId: train2.id },
+      create: { number: "В-004", type: "Почтовый", trainId: train2.id },
     }),
     prisma.carriage.upsert({
       where: { number_trainId: { number: "В-005", trainId: train3.id } },
       update: {},
-      create: { number: "В-005", type: "Служебный",   trainId: train3.id },
+      create: { number: "В-005", type: "Служебный", trainId: train3.id },
     }),
   ]);
 
-  // 5. Устройства (Device)
-  const [dev1, dev2, dev3, dev4, dev5] = await Promise.all([
-    prisma.device.upsert({ where: { name: "GSE Terminal"     }, update: {}, create: { name: "GSE Terminal"     } }),
-    prisma.device.upsert({ where: { name: "GSE Router"       }, update: {}, create: { name: "GSE Router"       } }),
-    prisma.device.upsert({ where: { name: "GSE Switch"       }, update: {}, create: { name: "GSE Switch"       } }),
-    prisma.device.upsert({ where: { name: "GSE Access Point" }, update: {}, create: { name: "GSE Access Point" } }),
-    prisma.device.upsert({ where: { name: "GSE Controller"   }, update: {}, create: { name: "GSE Controller"   } }),
-  ]);
-
-  // 6. Оборудование
+  // 5. Оборудование
   const [eq1, eq2, eq3, eq4, eq5] = await Promise.all([
     prisma.equipment.create({
       data: {
         name:         "GSE Terminal #1",
-        deviceId:     dev1.id,
         serialNumber: "GSE-TRM-001",
         macAddress:   "00:11:22:33:44:55",
         lastService:  new Date(),
@@ -113,7 +103,6 @@ async function main() {
     prisma.equipment.create({
       data: {
         name:         "GSE Router #1",
-        deviceId:     dev2.id,
         serialNumber: "GSE-RTR-002",
         macAddress:   "00:11:22:33:44:66",
         lastService:  new Date(),
@@ -123,7 +112,6 @@ async function main() {
     prisma.equipment.create({
       data: {
         name:         "GSE Switch #1",
-        deviceId:     dev3.id,
         serialNumber: "GSE-SWT-003",
         macAddress:   "00:11:22:33:44:77",
         lastService:  new Date(),
@@ -133,7 +121,6 @@ async function main() {
     prisma.equipment.create({
       data: {
         name:         "GSE AP #1",
-        deviceId:     dev4.id,
         serialNumber: "GSE-AP-004",
         macAddress:   "00:11:22:33:44:88",
         lastService:  new Date(),
@@ -143,7 +130,6 @@ async function main() {
     prisma.equipment.create({
       data: {
         name:         "GSE Controller #1",
-        deviceId:     dev5.id,
         serialNumber: "GSE-CTL-005",
         macAddress:   "00:11:22:33:44:99",
         lastService:  new Date(),
@@ -152,7 +138,7 @@ async function main() {
     }),
   ]);
 
-  // 7. Тестовые заявки
+  // 6. Тестовые заявки
   console.log("📝 Создаю заявки...");
 
   await prisma.request.create({
@@ -169,7 +155,6 @@ async function main() {
           {
             equipmentId: eq1.id,
             typeWorkId:  tw1.id,
-            quantity:    1,
             photos: {
               create: [
                 { photoType: "equipment", photoPath: "/uploads/req_eq/1_eq.jpg" },
@@ -196,7 +181,6 @@ async function main() {
           {
             equipmentId: eq3.id,
             typeWorkId:  tw2.id,
-            quantity:    2,
             photos: {
               create: [
                 { photoType: "equipment", photoPath: "/uploads/req_eq/3_eq.jpg" },
