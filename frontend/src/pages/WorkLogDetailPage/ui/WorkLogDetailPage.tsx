@@ -77,7 +77,10 @@ export const WorkLogDetailPage: React.FC = () => {
   //   return `${API_BASE_URL.replace('/api/v1', '')}/${cleanUrl}`;
   // };
 
-  interface PhotoItem { label: string; url: string; }
+  interface PhotoItem {
+    label: string;
+    url: string;
+  }
 
   function collectPhotos(entry: WorkLogEntry): PhotoItem[] {
     const base = STORAGE.replace(/\/$/, ''); // убираем возможный завершающий слэш
@@ -89,24 +92,24 @@ export const WorkLogDetailPage: React.FC = () => {
     }
 
     // 2) Фото вагонов
-    entry.carriages.forEach(c => {
+    entry.carriages.forEach((c) => {
       if (c.photo) {
         items.push({ label: 'Фото вагона', url: `${base}/${c.photo}` });
       }
     });
 
     // 3) Фото оборудования
-    entry.equipmentPhotos.forEach(p => {
+    entry.equipmentPhotos.forEach((p) => {
       items.push({ label: 'Фото оборудования', url: `${base}/${p}` });
     });
 
     // 4) Фото серийного номера
-    entry.serialPhotos.forEach(p => {
+    entry.serialPhotos.forEach((p) => {
       items.push({ label: 'Фото серийного номера', url: `${base}/${p}` });
     });
 
     // 5) Фото MAC-адреса
-    entry.macPhotos.forEach(p => {
+    entry.macPhotos.forEach((p) => {
       items.push({ label: 'Фото MAC-адреса', url: `${base}/${p}` });
     });
 
@@ -256,7 +259,7 @@ export const WorkLogDetailPage: React.FC = () => {
   }
 
   const getFullPhotoUrl = (url: string): string =>
-      url.startsWith('http') ? url : `${STORAGE.replace(/\/api\/v1$/, '')}/${url}`;
+    url.startsWith('http') ? url : `${STORAGE.replace(/\/api\/v1$/, '')}/${url}`;
 
   const photos = collectPhotos(workLog);
 
@@ -499,7 +502,7 @@ export const WorkLogDetailPage: React.FC = () => {
                         Номера вагонов
                       </Typography>
                       <Typography variant="body1" fontWeight={600} color="#d84315">
-                        {workLog.carriages.map((item)=>item.number).join(", ")}
+                        {workLog.carriages.map((item) => item.number).join(', ')}
                       </Typography>
 
                       {/* {isEditing ? (

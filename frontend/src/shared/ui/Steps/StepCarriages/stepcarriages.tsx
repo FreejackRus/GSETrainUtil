@@ -401,11 +401,13 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                             </ul>
                           </Alert>
                         )}
+                        {console.log(equipmentTypes)}
 
+                        
                         <Grid container spacing={2} mb={2}>
                           <Grid size={{ xs: 12, md: 6 }}>
                             <AutocompleteField
-                              label="Тип оборудования"
+                              label="Наименование оборудования"
                               value={equipment.equipmentType}
                               onChange={(value) =>
                                 handleEquipmentChange(
@@ -415,7 +417,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                                   value,
                                 )
                               }
-                              options={equipmentTypes}
+                              options={Array(...new Set(equipmentTypes))}
                               error={!equipment.equipmentType.trim()}
                               helperText={
                                 !equipment.equipmentType.trim() ? 'Обязательное поле' : ''

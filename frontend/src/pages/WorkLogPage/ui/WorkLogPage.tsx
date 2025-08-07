@@ -174,11 +174,11 @@ export const WorkLogPage = () => {
     }
 
     // Применяем фильтр по типу работ
-  if (filterWorkType !== 'all') {
-  filtered = filtered.filter((entry) =>
-    entry.equipmentDetails?.some((detail) => detail.typeWork === filterWorkType)
-  );
-}
+    if (filterWorkType !== 'all') {
+      filtered = filtered.filter((entry) =>
+        entry.equipmentDetails?.some((detail) => detail.typeWork === filterWorkType),
+      );
+    }
 
     // Применяем сортировку
     if (sortConfig.key) {
@@ -407,8 +407,8 @@ export const WorkLogPage = () => {
         response = await apiClient.post(
           '/pdfAppWork',
           {
-            applicationNumber:  entry.id.toString(),
-                  carriageNumber: entry.carriages?.[0]?.number || '',
+            applicationNumber: entry.id.toString(),
+            carriageNumber: entry.carriages?.[0]?.number || '',
             carriageType: entry.carriages?.[0]?.type || '',
             currentLocation: entry.currentLocation,
             equipmentTypes: entry.equipmentTypes,
@@ -441,13 +441,13 @@ export const WorkLogPage = () => {
     setPhotoDialogOpen(false);
   };
 
-const getUniqueWorkTypes = () => {
-  const allTypes = workLogEntries
-    .flatMap(entry => entry.equipmentDetails.map(detail => detail.typeWork))
-    .filter(Boolean);
+  const getUniqueWorkTypes = () => {
+    const allTypes = workLogEntries
+      .flatMap((entry) => entry.equipmentDetails.map((detail) => detail.typeWork))
+      .filter(Boolean);
 
-  return Array.from(new Set(allTypes));
-};
+    return Array.from(new Set(allTypes));
+  };
 
   const getPhotoEntries = (photos: WorkLogEntry['photo']) => {
     const photoLabels = {
@@ -469,7 +469,7 @@ const getUniqueWorkTypes = () => {
 
   interface PhotoItem {
     label: string;
-    url:   string;
+    url: string;
   }
 
   // function collectPhotos(entry: WorkLogEntry): PhotoItem[] {
@@ -513,7 +513,7 @@ const getUniqueWorkTypes = () => {
     if (entry.photo) {
       items.push({
         label: 'Фото заявки',
-        url:   `${baseUrl}/${entry.photo}`,
+        url: `${baseUrl}/${entry.photo}`,
       });
     }
 
@@ -522,7 +522,7 @@ const getUniqueWorkTypes = () => {
       if (c.photo) {
         items.push({
           label: 'Фото вагона',
-          url:   `${baseUrl}/${c.photo}`,
+          url: `${baseUrl}/${c.photo}`,
         });
       }
     });
@@ -531,7 +531,7 @@ const getUniqueWorkTypes = () => {
     entry.equipmentPhotos.forEach((p) => {
       items.push({
         label: 'Фото оборудования',
-        url:   `${baseUrl}/${p}`,
+        url: `${baseUrl}/${p}`,
       });
     });
 
@@ -539,7 +539,7 @@ const getUniqueWorkTypes = () => {
     entry.serialPhotos.forEach((p) => {
       items.push({
         label: 'Фото серийного номера',
-        url:   `${baseUrl}/${p}`,
+        url: `${baseUrl}/${p}`,
       });
     });
 
@@ -547,7 +547,7 @@ const getUniqueWorkTypes = () => {
     entry.macPhotos.forEach((p) => {
       items.push({
         label: 'Фото MAC-адреса',
-        url:   `${baseUrl}/${p}`,
+        url: `${baseUrl}/${p}`,
       });
     });
 
@@ -599,7 +599,8 @@ const getUniqueWorkTypes = () => {
           <Box display="flex" alignItems="center" mb={1}>
             <TrainIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
             <Typography variant="body2" color="text.secondary">
-              Поезд {entry.trainNumbers[0]}, Вагоны {entry.carriages.map((item)=>item.number).join(", ")}
+              Поезд {entry.trainNumbers[0]}, Вагоны{' '}
+              {entry.carriages.map((item) => item.number).join(', ')}
             </Typography>
           </Box>
 
@@ -633,7 +634,8 @@ const getUniqueWorkTypes = () => {
 
           {entry.equipmentDetails && (
             <Typography variant="body2" color="text.secondary" mb={1}>
-              <strong>Оборудования:</strong> {entry.equipmentDetails.map((item)=>item.name).join(", ")}
+              <strong>Оборудования:</strong>{' '}
+              {entry.equipmentDetails.map((item) => item.name).join(', ')}
             </Typography>
           )}
 
@@ -700,12 +702,7 @@ const getUniqueWorkTypes = () => {
       <Grid container spacing={2} alignItems="center">
         <Grid size={{ xs: 12, sm: 2, md: 2 }}>
           <Box display="flex" alignItems="center" gap={1}>
-            <Chip
-              label={`#${entry.id}`}
-              color="primary"
-              size="small"
-              sx={{ fontWeight: 'bold' }}
-            />
+            <Chip label={`#${entry.id}`} color="primary" size="small" sx={{ fontWeight: 'bold' }} />
             <Chip label={getStatusText(entry)} color={getStatusColor(entry)} size="small" />
           </Box>
         </Grid>
@@ -715,7 +712,8 @@ const getUniqueWorkTypes = () => {
             {entry.typeWork}
           </Typography> */}
           <Typography variant="body2" color="text.secondary">
-            Поезд {entry.trainNumbers[0]}, Вагоны {entry.carriages.map((item)=>item.number).join(", ")}
+            Поезд {entry.trainNumbers[0]}, Вагоны{' '}
+            {entry.carriages.map((item) => item.number).join(', ')}
           </Typography>
         </Grid>
 
@@ -734,7 +732,7 @@ const getUniqueWorkTypes = () => {
           {entry.equipmentDetails && (
             <Typography variant="body2" color="text.secondary" noWrap>
               <BuildIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-              {entry.equipmentDetails.map((item)=>item.name).join(", ")}
+              {entry.equipmentDetails.map((item) => item.name).join(', ')}
             </Typography>
           )}
           {entry.completedJob && (
@@ -1082,7 +1080,6 @@ const getUniqueWorkTypes = () => {
         <Dialog open={photoDialogOpen} onClose={handleClosePhotoDialog} maxWidth="md" fullWidth>
           <DialogTitle>Фотографии заявки #{selectedEntry?.id}</DialogTitle>
           <DialogContent>
-
             {/*{selectedEntry && (*/}
             {/*  <Grid container spacing={2}>*/}
             {/*    {getPhotoEntries(selectedEntry.photo).map((photo, index) => (*/}
@@ -1110,26 +1107,26 @@ const getUniqueWorkTypes = () => {
             {/*  </Grid>*/}
             {/*)}*/}
             {selectedEntry && (
-               <Grid container spacing={2}>
-                    {collectPhotos(selectedEntry).map((ph, idx) => (
-                         <Grid size={{ xs: 12, sm: 6, md: 4 }} key={idx}>
-                             <Card>
-                               <CardContent>
-                                 <Typography variant="subtitle2" gutterBottom>
-                                   {ph.label}
-                                 </Typography>
-                                 <Box
-                                   component="img"
-                                   src={ph.url}
-                                   alt={ph.label}
-                                   sx={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 1 }}
-                                 />
-                               </CardContent>
-                             </Card>
-                           </Grid>
-                       ))}
-                   </Grid>
-               )}
+              <Grid container spacing={2}>
+                {collectPhotos(selectedEntry).map((ph, idx) => (
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={idx}>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="subtitle2" gutterBottom>
+                          {ph.label}
+                        </Typography>
+                        <Box
+                          component="img"
+                          src={ph.url}
+                          alt={ph.label}
+                          sx={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 1 }}
+                        />
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClosePhotoDialog}>Закрыть</Button>

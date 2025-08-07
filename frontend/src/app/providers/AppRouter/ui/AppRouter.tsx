@@ -4,6 +4,7 @@ import { Home, Login, AdminPanel, CarriagesPage, WorkLogPage, CreateApplicationP
 import { WorkLogDetailPage } from '../../../../pages/WorkLogDetailPage';
 import { Header } from '../../../../shared/ui';
 import { CreateApplicationButton } from '../../../../features/application-management';
+import { EquipmentLog } from '../../../../pages/EquipmentLog';
 
 interface AppRouterProps {
   role: string;
@@ -32,6 +33,7 @@ export const AppRouter = ({ role, onLogout }: AppRouterProps) => {
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/carriages" element={<CarriagesPage />} />
               <Route path="/work-log" element={<WorkLogPage />} />
+              <Route path="/equipment-log" element={<EquipmentLog />} />
               <Route path="/work-log/:id" element={<WorkLogDetailPage />} />
               <Route path="/archive" element={<ArchiveManagementPage />} />
             </Routes>
