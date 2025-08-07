@@ -1,10 +1,96 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 
-const prisma = new PrismaClient();
+type EquipmentPhoto = { type: string; path: string };
+
+interface EquipmentDetail {
+  id: number;
+  name: string;
+  deviceType: string;
+  typeWork: string;
+  serialNumber: string;
+  macAddress: string;
+  quantity: number;
+  photos: EquipmentPhoto[];
+}
+
+interface CarriageWithEquipment {
+  number: string;
+  type: string;
+  train: string;
+  photo: string | null;
+  equipment: EquipmentDetail[];
+}
+
+interface ApplicationSummary {
+  id: number;
+  photo: string | null;
+  status: string;
+  trainNumbers: string[];
+  carriages: CarriageWithEquipment[];
+  countEquipment: number;
+  completedJob: string;
+  currentLocation: string;
+  user: { id: number; name: string; role: string };
+  createdAt: string;
+  updatedAt: string;
+}
+
+function formatApplication(r: any): ApplicationSummary {
+  // сгруппируем оборудование по carriageId
+  const equipmentByCarriage: Record<number, EquipmentDetail[]> = {};
+  r.requestEquipments.forEach((re: any) => {
+    const cid = re.equipment?.carriageId ?? 0;
+    const detail: EquipmentDetail = {
+      id:           re.id,
+      name:         re.equipment?.name            || '—',
+      deviceType:   re.equipment?.device?.name    || '—',
+      typeWork:     re.typeWork?.name             || '—',
+      serialNumber: re.equipment?.serialNumber    || '—',
+      macAddress:   re.equipment?.macAddress      || '—',
+      quantity:     re.quantity,
+      photos:       re.photos.map((p: any) => ({
+                      type: p.photoType,
+                      path: p.photoPath
+                    })),
+    };
+    equipmentByCarriage[cid] = equipmentByCarriage[cid] || [];
+    equipmentByCarriage[cid].push(detail);
+  });
+
+  const carriages: CarriageWithEquipment[] = r.requestCarriages.map((rc: any) => ({
+    number:    rc.carriage.number,
+    type:      rc.carriage.type,
+    train:     rc.carriage.train.number,
+    photo:     rc.carriagePhoto || null,
+    equipment: equipmentByCarriage[rc.carriageId] || [],
+  }));
+
+  const countEquipment = r.requestEquipments.reduce((sum: number, re: any) => sum + re.quantity, 0);
+
+  return {
+    id:              r.id,
+    photo:           r.photo || null,
+    status:          r.status,
+    trainNumbers:    r.requestTrains.map((rt: any) => rt.train.number),
+    carriages,
+    countEquipment,
+    completedJob:    r.completedJob?.name    || '—',
+    currentLocation: r.currentLocation?.name || '—',
+    user: {
+      id:   r.userId,
+      name: r.user?.name  || '—',
+      role: r.user?.role  || '—',
+    },
+    createdAt: r.createdAt.toISOString(),
+    updatedAt: r.updatedAt.toISOString(),
+  };
+}
 
 // GET /drafts
 export const getDrafts = async (req: Request, res: Response) => {
+  const prisma = new PrismaClient();
+
   try {
     // TODO: взять userId/userRole из JWT
     const userId   = Number(req.query.userId)   || undefined;
@@ -21,38 +107,34 @@ export const getDrafts = async (req: Request, res: Response) => {
 
     const raws = await prisma.request.findMany({
       where,
-      orderBy:    { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       include: {
         requestTrains:    { include: { train: true } },
         requestCarriages: { include: { carriage: { include: { train: true } } } },
-        requestEquipments: {
-          include: {
-            photos:    true,
-            equipment: true,
-          }
-        },
+        requestEquipments:{ include: { typeWork: true, photos: true, equipment: true } },
         completedJob:    true,
         currentLocation: true,
         user:            true,
       }
     });
 
-    const data = raws.map(r => ({
-      id:             r.id,
-      photo:          r.photo || null,
-      status:         r.status,
-      trainNumbers:   r.requestTrains.map(rt => rt.train.number),
-      carriages:      r.requestCarriages.map(rc => ({
-        number:  rc.carriage.number,
-        type:    rc.carriage.type,
-        train:   rc.carriage.train.number,
-        photo:   rc.carriagePhoto || null,
-      })),
-      equipmentCount: r.requestEquipments.length,
-      createdAt:      r.createdAt.toISOString(),
-      updatedAt:      r.updatedAt.toISOString(),
-    }));
+    // const data = raws.map(r => ({
+    //   id:             r.id,
+    //   photo:          r.photo || null,
+    //   status:         r.status,
+    //   trainNumbers:   r.requestTrains.map(rt => rt.train.number),
+    //   carriages:      r.requestCarriages.map(rc => ({
+    //     number:  rc.carriage.number,
+    //     type:    rc.carriage.type,
+    //     train:   rc.carriage.train.number,
+    //     photo:   rc.carriagePhoto || null,
+    //   })),
+    //   equipmentCount: r.requestEquipments.length,
+    //   createdAt:      r.createdAt.toISOString(),
+    //   updatedAt:      r.updatedAt.toISOString(),
+    // }));
 
+    const data = raws.map(formatApplication);
     res.status(200).json({ success: true, data });
   } catch (e) {
     console.error("Ошибка при получении черновиков:", e);
@@ -68,6 +150,8 @@ export const completeDraft = async (req: Request, res: Response) => {
   if (isNaN(id)) {
     return res.status(400).json({ success: false, message: "Некорректный ID" });
   }
+
+  const prisma = new PrismaClient();
 
   try {
     const existing = await prisma.request.findUnique({ where: { id } });
@@ -242,6 +326,8 @@ export const deleteDraft = async (req: Request, res: Response) => {
   if (isNaN(id)) {
     return res.status(400).json({ success: false, message: "Некорректный ID" });
   }
+
+  const prisma = new PrismaClient();
 
   try {
     const existing = await prisma.request.findUnique({ where: { id } });

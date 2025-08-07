@@ -35,7 +35,7 @@ import './CreateApplicationPage.css';
 interface Draft {
   id: string;
   trainNumber: string;
-  routeNumber: string;
+  carriageNumbers: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -59,13 +59,14 @@ export const CreateApplicationPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await applicationApi.getDrafts(user.id, user.role);
+      console.log('response', response);
       setDrafts(
         response.map((app) => ({
-          id: app.id,
-          trainNumber: app.trainNumber || '',
-          routeNumber: '', // В Application нет поля route, используем пустую строку
-          createdAt: app.applicationDate,
-          updatedAt: app.applicationDate,
+          id: String(app.id),
+          trainNumber: app.trainNumbers[0] || '',
+          carriageNumbers: app.carriages.map((item) => item.number), // В Application нет поля route, используем пустую строку
+          createdAt: app.createdAt,
+          updatedAt: app.updatedAt,
         })),
       );
     } catch (error) {
@@ -82,6 +83,7 @@ export const CreateApplicationPage: React.FC = () => {
   };
 
   const handleContinueDraft = (draftId: string) => {
+    console.log('me!');
     setSelectedDraftId(draftId);
     setShowDraftsDialog(false);
     setShowForm(true);
@@ -112,6 +114,9 @@ export const CreateApplicationPage: React.FC = () => {
       minute: '2-digit',
     });
   };
+
+  console.log('drafts', drafts);
+  console.log('selectedDraftId', selectedDraftId);
 
   if (showForm) {
     return (
@@ -210,7 +215,9 @@ export const CreateApplicationPage: React.FC = () => {
                   <ListItem key={draft.id} className="draft-item">
                     <DescriptionIcon className="draft-icon" />
                     <ListItemText
-                      primary={`Поезд ${draft.trainNumber}, маршрут ${draft.routeNumber}`}
+                      primary={`Поезд ${draft.trainNumber}, вагоны ${draft.carriageNumbers.join(
+                        ', ',
+                      )}`}
                       secondary={`Изменен: ${formatDate(draft.updatedAt)}`}
                     />
                     <ListItemSecondaryAction>
@@ -249,7 +256,9 @@ export const CreateApplicationPage: React.FC = () => {
                 <ListItem key={draft.id} className="draft-dialog-item">
                   <DescriptionIcon className="draft-icon" />
                   <ListItemText
-                    primary={`Поезд ${draft.trainNumber}, маршрут ${draft.routeNumber}`}
+                    primary={`Поезд ${draft.trainNumber}, вагоны ${draft.carriageNumbers.join(
+                      ', ',
+                    )}`}
                     secondary={
                       <Box>
                         <Typography variant="body2">

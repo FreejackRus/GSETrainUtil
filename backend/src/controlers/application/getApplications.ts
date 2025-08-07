@@ -220,8 +220,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
 type EquipmentPhoto = { type: string; path: string };
 
 interface EquipmentDetail {
@@ -310,6 +308,8 @@ function formatApplication(r: any): ApplicationSummary {
 
 // GET /applications
 export const getApplications = async (_req: Request, res: Response) => {
+  const prisma = new PrismaClient();
+
   try {
     const userId = _req.query.userId ? Number(_req.query.userId) : undefined;
     const where: any = {};
@@ -340,6 +340,8 @@ export const getApplications = async (_req: Request, res: Response) => {
 
 // GET /applications/:id
 export const getApplicationById = async (req: Request, res: Response) => {
+  const prisma = new PrismaClient();
+
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) return res.status(400).json({ success: false, message: 'Invalid ID' });

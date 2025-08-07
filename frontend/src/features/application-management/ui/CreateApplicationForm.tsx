@@ -62,6 +62,7 @@ export const CreateApplicationForm = ({
   onClose: () => void;
   draftId?: number;
 }) => {
+  console.log('draftID', draftId);
   const { user } = useUser();
   const [activeStep, setActiveStep] = useState(0);
   const currentStep = APPLICATION_STEPS[activeStep];
@@ -131,12 +132,13 @@ export const CreateApplicationForm = ({
 
     try {
       const drafts = await applicationApi.getDrafts(user.id, user.role);
+      console.log('333', drafts);
       const draft = drafts.find((d) => d.id.toString() === id.toString());
 
       if (draft) {
         setForm({
-          workType: draft.carriages[0].equipment[0].typeWork || '',
-          trainNumber: draft.trainNumbers[0] || '',
+          workType: draft.carriages?.[0]?.equipment?.[0]?.typeWork || '',
+          trainNumber: draft.trainNumbers?.[0] || '',
           carriages: (draft.carriages || []).map((carriage) => ({
             carriageType: carriage.type || '',
             carriageNumber: carriage.number || '',
@@ -299,14 +301,6 @@ export const CreateApplicationForm = ({
 
   const handleNext = () =>
     setActiveStep((prev) => {
-      console.log('form', form);
-      const fd = new FormData();
-      // fd.append('photo', form.carriagePhoto ?? '');
-      console.log('form Data', fd.get('photo'));
-      console.log('form Data', fd.get('nichego'));
-
-      // handleSubmit().then(r => console.log('eeeeee', r));
-
       return prev + 1;
     });
   const handleBack = () => setActiveStep((prev) => prev - 1);

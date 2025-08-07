@@ -58,7 +58,7 @@ export const MyApplicationsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(8);
-  
+
   // Состояние для модального окна просмотра заявки
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
@@ -73,7 +73,7 @@ export const MyApplicationsPage: React.FC = () => {
 
   const loadApplications = async () => {
     if (!user?.id) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -90,6 +90,8 @@ export const MyApplicationsPage: React.FC = () => {
     }
   };
 
+  console.log('applications', applications);
+
   const filterApplications = () => {
     // Убеждаемся, что applications - это массив
     if (!Array.isArray(applications)) {
@@ -101,17 +103,18 @@ export const MyApplicationsPage: React.FC = () => {
 
     // Фильтр по поисковому запросу
     if (searchTerm) {
-      filtered = filtered.filter(app => 
-        app.applicationNumber?.toString().includes(searchTerm) ||
-        app.trainNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.carriageNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.workType?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (app) =>
+          app.applicationNumber?.toString().includes(searchTerm) ||
+          app.trainNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          app.carriageNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          app.workType?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
     // Фильтр по статусу
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(app => app.status === statusFilter);
+      filtered = filtered.filter((app) => app.status === statusFilter);
     }
 
     setFilteredApplications(filtered);
@@ -149,12 +152,12 @@ export const MyApplicationsPage: React.FC = () => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
-  const handleViewApplication = (applicationId: string) => {
-    const application = applications.find(app => app.id === applicationId);
+  const handleViewApplication = (applicationId: number) => {
+    const application = applications.find((app) => app.id === applicationId);
     if (application) {
       setSelectedApplication(application);
       setDetailsModalOpen(true);
@@ -175,9 +178,15 @@ export const MyApplicationsPage: React.FC = () => {
   // Статистика (с проверкой на массив)
   const stats = {
     total: Array.isArray(applications) ? applications.length : 0,
-    completed: Array.isArray(applications) ? applications.filter(app => app.status === 'completed').length : 0,
-    drafts: Array.isArray(applications) ? applications.filter(app => app.status === 'draft').length : 0,
-    cancelled: Array.isArray(applications) ? applications.filter(app => app.status === 'cancelled').length : 0
+    completed: Array.isArray(applications)
+      ? applications.filter((app) => app.status === 'completed').length
+      : 0,
+    drafts: Array.isArray(applications)
+      ? applications.filter((app) => app.status === 'draft').length
+      : 0,
+    cancelled: Array.isArray(applications)
+      ? applications.filter((app) => app.status === 'cancelled').length
+      : 0,
   };
 
   return (
@@ -201,7 +210,7 @@ export const MyApplicationsPage: React.FC = () => {
                   startIcon={<RefreshIcon />}
                   onClick={loadApplications}
                   disabled={loading}
-                  sx={{color:"white"}}
+                  sx={{ color: 'white' }}
                 >
                   Обновить
                 </Button>
@@ -210,18 +219,14 @@ export const MyApplicationsPage: React.FC = () => {
           </Box>
 
           {error && (
-            <Alert 
-              severity="error" 
-              sx={{ mb: 3, borderRadius: 2 }} 
-              onClose={() => setError(null)}
-            >
+            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }} onClose={() => setError(null)}>
               {error}
             </Alert>
           )}
 
           {/* Современные карточки статистики */}
           <Grid container spacing={3} className="modern-stats">
-            <Grid size={{xs:12,sm:6,md:4}} >
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <Card className="stat-card modern-stat-card">
                 <CardContent>
                   <Box className="stat-content">
@@ -240,7 +245,7 @@ export const MyApplicationsPage: React.FC = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid  size={{xs:12,sm:6,md:4}}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <Card className="stat-card modern-stat-card">
                 <CardContent>
                   <Box className="stat-content">
@@ -259,7 +264,7 @@ export const MyApplicationsPage: React.FC = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{xs:12,sm:12,md:4}}>
+            <Grid size={{ xs: 12, sm: 12, md: 4 }}>
               <Card className="stat-card modern-stat-card">
                 <CardContent>
                   <Box className="stat-content">
@@ -290,7 +295,7 @@ export const MyApplicationsPage: React.FC = () => {
             </Box>
             <Divider sx={{ mb: 3 }} />
             <Grid container spacing={3}>
-              <Grid  size={{xs:12,md:8}}>
+              <Grid size={{ xs: 12, md: 8 }}>
                 <TextField
                   fullWidth
                   placeholder="Поиск по номеру заявки, поезду, вагону или типу работ..."
@@ -304,24 +309,24 @@ export const MyApplicationsPage: React.FC = () => {
                     ),
                   }}
                   variant="outlined"
-                  sx={{ 
+                  sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
-                      backgroundColor: 'rgba(0, 0, 0, 0.02)'
-                    }
+                      backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                    },
                   }}
                 />
               </Grid>
-              <Grid  size={{xs:12,md:4}}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <FormControl fullWidth>
                   <InputLabel>Статус заявки</InputLabel>
                   <Select
                     value={statusFilter}
                     label="Статус заявки"
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    sx={{ 
+                    sx={{
                       borderRadius: 2,
-                      backgroundColor: 'rgba(0, 0, 0, 0.02)'
+                      backgroundColor: 'rgba(0, 0, 0, 0.02)',
                     }}
                   >
                     <MenuItem value="all">Все статусы</MenuItem>
@@ -346,19 +351,20 @@ export const MyApplicationsPage: React.FC = () => {
             <Paper className="empty-state" elevation={0}>
               <DescriptionIcon className="empty-icon" />
               <Typography variant="h5" className="empty-title">
-                {searchTerm || statusFilter !== 'all' ? 'Заявки не найдены' : 'У вас пока нет заявок'}
+                {searchTerm || statusFilter !== 'all'
+                  ? 'Заявки не найдены'
+                  : 'У вас пока нет заявок'}
               </Typography>
               <Typography variant="body1" className="empty-subtitle">
-                {searchTerm || statusFilter !== 'all' 
+                {searchTerm || statusFilter !== 'all'
                   ? 'Попробуйте изменить параметры поиска или фильтры'
-                  : 'Заявки будут отображаться здесь после их создания'
-                }
+                  : 'Заявки будут отображаться здесь после их создания'}
               </Typography>
             </Paper>
           ) : (
             <>
               {/* Современная таблица */}
-              <Paper className="modern-table" elevation={0} sx={{m:{xs:0.1,sm:0}}}>
+              <Paper className="modern-table" elevation={0} sx={{ m: { xs: 0.1, sm: 0 } }}>
                 <TableContainer>
                   <Table>
                     <TableHead>
@@ -397,22 +403,22 @@ export const MyApplicationsPage: React.FC = () => {
                         <TableRow key={application.id} className="table-row">
                           <TableCell>
                             <Typography variant="subtitle2" className="application-number">
-                              #{application.applicationNumber || application.id}
+                              #{application.id}
                             </Typography>
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {application.trainNumber || '-'}
+                              {application.trainNumbers[0] || '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {application.carriageNumber || '-'}
+                              {application.carriages.map((item) => item.number).join(', ') || '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {application.workType || '-'}
+                              {application.carriages[0]?.equipment[0]?.typeWork || '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>
@@ -425,7 +431,7 @@ export const MyApplicationsPage: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" color="text.secondary">
-                              {formatDate(application.applicationDate)}
+                              {formatDate(application.createdAt)}
                             </Typography>
                           </TableCell>
                           <TableCell align="center">
@@ -449,7 +455,8 @@ export const MyApplicationsPage: React.FC = () => {
                 {totalPages > 1 && (
                   <Box className="pagination-container">
                     <Typography variant="body2" color="text.secondary">
-                      Показано {startIndex + 1}-{Math.min(endIndex, filteredApplications.length)} из {filteredApplications.length}
+                      Показано {startIndex + 1}-{Math.min(endIndex, filteredApplications.length)} из{' '}
+                      {filteredApplications.length}
                     </Typography>
                     <Pagination
                       count={totalPages}

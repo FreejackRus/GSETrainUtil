@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 export const getDevices = async (_req: Request, res: Response) => {
+  const prisma = new PrismaClient();
   try {
     // Находим всё оборудование вместе с привязкой к справочнику Device и к вагонам/поездам
     const equipments = await prisma.equipment.findMany({
