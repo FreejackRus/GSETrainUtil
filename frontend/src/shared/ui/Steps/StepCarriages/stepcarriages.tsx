@@ -443,28 +443,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                               required
                             />
                           </Grid>
-                          <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField
-                              fullWidth
-                              type="number"
-                              label="Количество"
-                              value={equipment.quantity}
-                              onChange={(e) =>
-                                handleEquipmentChange(
-                                  carriageIndex,
-                                  equipmentIndex,
-                                  'quantity',
-                                  parseInt(e.target.value) || 1,
-                                )
-                              }
-                              inputProps={{ min: 1 }}
-                              error={equipment.quantity <= 0}
-                              helperText={
-                                equipment.quantity <= 0 ? 'Количество должно быть больше 0' : ''
-                              }
-                              required
-                            />
-                          </Grid>
+         
                           {isNetworkEquipment(equipment.equipmentType) && (
                             <Grid size={{ xs: 12, md: 6 }}>
                               <TextField
