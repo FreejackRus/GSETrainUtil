@@ -20,6 +20,8 @@ import {
 } from "@mui/icons-material";
 import "./LoginForm.css";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export const LoginForm = ({ onLogin }: { onLogin: (token: string, role: string) => void }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -58,7 +60,7 @@ export const LoginForm = ({ onLogin }: { onLogin: (token: string, role: string) 
     }
     
     try {
-      const response = await fetch("http://localhost:3000/api/v1/login", {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

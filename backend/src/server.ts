@@ -11,16 +11,30 @@ import multer from "multer";
 
 const app = express();
 const upload = multer();
-const port = 3000;
+const port = process.env.PORT;
+if (!port) {
+  throw new Error('❌ PORT is not defined in .env');
+}
 
 app.use(bodyParser.json());
 
 app.use(upload.any());
 app.use(express.static('public'));
 
+const clientUrl = process.env.CLIENT_URL;
+if (!clientUrl) {
+  throw new Error('❌ CLIENT_URL is not defined in .env');
+}
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (origin === clientUrl) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS: Origin ${origin} не разрешён`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Range'],

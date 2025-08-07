@@ -15,7 +15,7 @@ export const StepFinalPhoto: React.FC<StepFinalPhotoProps> = ({
   onFormDataChange,
 }) => {
   const handlePhotoChange = (file: File | null) => {
-    onFormDataChange({ finalPhoto: file });
+    onFormDataChange({ photo: file });
   };
 
   return (
@@ -44,7 +44,7 @@ export const StepFinalPhoto: React.FC<StepFinalPhotoProps> = ({
       </Card>
       
       <PhotoUpload
-        photo={formData.finalPhoto || null}
+        photo={formData.photo || null}
         onPhotoChange={handlePhotoChange}
         label="Финальная фотография работ"
         description="Загрузите фотографию завершенных работ для отчета"

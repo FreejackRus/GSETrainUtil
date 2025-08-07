@@ -467,6 +467,93 @@ const getUniqueWorkTypes = () => {
       }));
   };
 
+  interface PhotoItem {
+    label: string;
+    url:   string;
+  }
+
+  // function collectPhotos(entry: WorkLogEntry): PhotoItem[] {
+  //   const items: PhotoItem[] = [];
+  //
+  //   // 1) Общее фото заявки
+  //   if (entry.photo) {
+  //     items.push({ label: 'Фото заявки', url: `${process.env.VITE_API_STORAGE_PHOTOS_URL}/${entry.photo}` });
+  //   }
+  //
+  //   // 2) Фото вагонов
+  //   entry.carriages.forEach((c) => {
+  //     if (c.photo) {
+  //       items.push({ label: 'Фото вагона', url: `uploads/${c.photo}` });
+  //     }
+  //   });
+  //
+  //   // 3) Фото оборудования
+  //   entry.equipmentPhotos.forEach((url) => {
+  //     items.push({ label: 'Фото оборудования', url: `uploads/${url}` });
+  //   });
+  //
+  //   // 4) Фото серийников
+  //   entry.serialPhotos.forEach((url) => {
+  //     items.push({ label: 'Фото серийного номера', url: `uploads/${url}` });
+  //   });
+  //
+  //   // 5) Фото MAC-адресов
+  //   entry.macPhotos.forEach((url) => {
+  //     items.push({ label: 'Фото MAC-адреса', url: `uploads/${url}` });
+  //   });
+  //
+  //   return items;
+  // }
+
+  function collectPhotos(entry: WorkLogEntry): PhotoItem[] {
+    const items: PhotoItem[] = [];
+    const baseUrl = import.meta.env.VITE_API_STORAGE_PHOTOS_URL;
+
+    // 1) Общее фото заявки
+    if (entry.photo) {
+      items.push({
+        label: 'Фото заявки',
+        url:   `${baseUrl}/${entry.photo}`,
+      });
+    }
+
+    // 2) Фото вагонов
+    entry.carriages.forEach((c) => {
+      if (c.photo) {
+        items.push({
+          label: 'Фото вагона',
+          url:   `${baseUrl}/${c.photo}`,
+        });
+      }
+    });
+
+    // 3) Фото оборудования
+    entry.equipmentPhotos.forEach((p) => {
+      items.push({
+        label: 'Фото оборудования',
+        url:   `${baseUrl}/${p}`,
+      });
+    });
+
+    // 4) Фото серийного номера
+    entry.serialPhotos.forEach((p) => {
+      items.push({
+        label: 'Фото серийного номера',
+        url:   `${baseUrl}/${p}`,
+      });
+    });
+
+    // 5) Фото MAC-адреса
+    entry.macPhotos.forEach((p) => {
+      items.push({
+        label: 'Фото MAC-адреса',
+        url:   `${baseUrl}/${p}`,
+      });
+    });
+
+    return items;
+  }
+
   const renderWorkLogCard = (entry: WorkLogEntry) => (
     <Grid size={{ xs: 12, sm: 12, md: 6, lg: 4 }} key={entry.id}>
       <Card
@@ -566,9 +653,10 @@ const getUniqueWorkTypes = () => {
               size="small"
               startIcon={<PhotoIcon />}
               onClick={() => handleViewPhotos(entry)}
-              disabled={!Object.values(entry.photo).some((photo) => photo)}
+              // disabled={!Object.values(entry.photo).some((photo) => photo)}
             >
-              Фото ({Object.values(entry.photo).filter((photo) => photo).length})
+              {/*Фото ({Object.values(entry.photo).filter((photo) => photo).length})*/}
+              Фото
             </Button>
             <Button
               size="small"
@@ -669,7 +757,8 @@ const getUniqueWorkTypes = () => {
             </Typography>
           </Box>
           <Typography variant="caption" color="text.secondary">
-            Фото: {Object.values(entry.photo).filter((photo) => photo).length}
+            {/*Фото: {Object.values(entry.photo).filter((photo) => photo).length}*/}
+            Фото
           </Typography>
         </Grid>
 
@@ -678,7 +767,7 @@ const getUniqueWorkTypes = () => {
             <IconButton
               size="small"
               onClick={() => handleViewPhotos(entry)}
-              disabled={!Object.values(entry.photo).some((photo) => photo)}
+              // disabled={!Object.values(entry.photo).some((photo) => photo)}
             >
               <PhotoIcon />
             </IconButton>
@@ -993,32 +1082,54 @@ const getUniqueWorkTypes = () => {
         <Dialog open={photoDialogOpen} onClose={handleClosePhotoDialog} maxWidth="md" fullWidth>
           <DialogTitle>Фотографии заявки #{selectedEntry?.id}</DialogTitle>
           <DialogContent>
+
+            {/*{selectedEntry && (*/}
+            {/*  <Grid container spacing={2}>*/}
+            {/*    {getPhotoEntries(selectedEntry.photo).map((photo, index) => (*/}
+            {/*      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`photo-${photo.url}-${index}`}>*/}
+            {/*        <Card>*/}
+            {/*          <CardContent>*/}
+            {/*            <Typography variant="subtitle2" gutterBottom>*/}
+            {/*              {photo.label}*/}
+            {/*            </Typography>*/}
+            {/*            <Box*/}
+            {/*              component="img"*/}
+            {/*              src={photo.url}*/}
+            {/*              alt={photo.label}*/}
+            {/*              sx={{*/}
+            {/*                width: '100%',*/}
+            {/*                height: 200,*/}
+            {/*                objectFit: 'cover',*/}
+            {/*                borderRadius: 1,*/}
+            {/*              }}*/}
+            {/*            />*/}
+            {/*          </CardContent>*/}
+            {/*        </Card>*/}
+            {/*      </Grid>*/}
+            {/*    ))}*/}
+            {/*  </Grid>*/}
+            {/*)}*/}
             {selectedEntry && (
-              <Grid container spacing={2}>
-                {getPhotoEntries(selectedEntry.photo).map((photo, index) => (
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`photo-${photo.key}-${index}`}>
-                    <Card>
-                      <CardContent>
-                        <Typography variant="subtitle2" gutterBottom>
-                          {photo.label}
-                        </Typography>
-                        <Box
-                          component="img"
-                          src={photo.url}
-                          alt={photo.label}
-                          sx={{
-                            width: '100%',
-                            height: 200,
-                            objectFit: 'cover',
-                            borderRadius: 1,
-                          }}
-                        />
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            )}
+               <Grid container spacing={2}>
+                    {collectPhotos(selectedEntry).map((ph, idx) => (
+                         <Grid size={{ xs: 12, sm: 6, md: 4 }} key={idx}>
+                             <Card>
+                               <CardContent>
+                                 <Typography variant="subtitle2" gutterBottom>
+                                   {ph.label}
+                                 </Typography>
+                                 <Box
+                                   component="img"
+                                   src={ph.url}
+                                   alt={ph.label}
+                                   sx={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 1 }}
+                                 />
+                               </CardContent>
+                             </Card>
+                           </Grid>
+                       ))}
+                   </Grid>
+               )}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClosePhotoDialog}>Закрыть</Button>

@@ -50,8 +50,8 @@ export const getWorkLog = async (_req: Request, res: Response) => {
 
       // Сбор фотографий оборудования
       const allPhotos = equipmentDetails.flatMap(d => d.photos);
-      const get = (t: string) =>
-          allPhotos.filter(p => p.type === t).map(p => p.path);
+      const getByType = (type: 'equipmentPhoto' | 'serialPhoto' | 'macPhoto') =>
+          allPhotos.filter(p => p.type === type).map(p => p.path);
 
       return {
         id:             r.id,
@@ -65,12 +65,12 @@ export const getWorkLog = async (_req: Request, res: Response) => {
         equipmentTypes: equipmentDetails.map(d => d.typeWork),
         serialNumbers:  equipmentDetails.map(d => d.serialNumber),
         macAddresses:   equipmentDetails.map(d => d.macAddress),
-        equipmentPhoto:  get("equipment")[0] || null,
-        equipmentPhotos: get("equipment"),
-        serialPhoto:     get("serial")[0]    || null,
-        serialPhotos:    get("serial"),
-        macPhoto:        get("mac")[0]       || null,
-        macPhotos:       get("mac"),
+        equipmentPhoto:  getByType('equipmentPhoto')[0] || null,
+        equipmentPhotos: getByType('equipmentPhoto'),
+        serialPhoto:     getByType('serialPhoto')[0]    || null,
+        serialPhotos:    getByType('serialPhoto'),
+        macPhoto:        getByType('macPhoto')[0]       || null,
+        macPhotos:       getByType('macPhoto'),
         completedJob:    r.completedJob?.name    || "—",
         currentLocation: r.currentLocation?.name || "—",
         user: {
@@ -222,7 +222,8 @@ export const getWorkLogById = async (req: Request, res: Response) => {
     }));
 
     const allPhotos = equipmentDetails.flatMap(d => d.photos);
-    const get = (t: string) => allPhotos.filter(p => p.type === t).map(p => p.path);
+    const getByType = (type: 'equipmentPhoto' | 'serialPhoto' | 'macPhoto') =>
+        allPhotos.filter(p => p.type === type).map(p => p.path);
 
     const formatted = {
       id:               r.id,
@@ -235,12 +236,12 @@ export const getWorkLogById = async (req: Request, res: Response) => {
       equipmentTypes:   equipmentDetails.map(d => d.typeWork),
       serialNumbers:    equipmentDetails.map(d => d.serialNumber),
       macAddresses:     equipmentDetails.map(d => d.macAddress),
-      equipmentPhoto:   get("equipment")[0] || null,
-      equipmentPhotos:  get("equipment"),
-      serialPhoto:      get("serial")[0]    || null,
-      serialPhotos:     get("serial"),
-      macPhoto:         get("mac")[0]       || null,
-      macPhotos:        get("mac"),
+      equipmentPhoto:  getByType('equipmentPhoto')[0] || null,
+      equipmentPhotos: getByType('equipmentPhoto'),
+      serialPhoto:     getByType('serialPhoto')[0]    || null,
+      serialPhotos:    getByType('serialPhoto'),
+      macPhoto:        getByType('macPhoto')[0]       || null,
+      macPhotos:       getByType('macPhoto'),
       completedJob:     r.completedJob?.name    || "—",
       currentLocation:  r.currentLocation?.name || "—",
       user: {

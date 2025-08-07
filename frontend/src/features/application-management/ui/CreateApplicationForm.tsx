@@ -744,7 +744,7 @@ export const CreateApplicationForm = ({
               <Button
                 variant="contained"
                 onClick={activeStep === APPLICATION_STEPS.length - 1 ? handleSubmit : handleNext}
-                disabled={isNextDisabled() || loading}
+                // disabled={isNextDisabled() || loading}
                 endIcon={
                   loading ? (
                     <CircularProgress size={20} color="inherit" />

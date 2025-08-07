@@ -65,15 +65,53 @@ export const WorkLogDetailPage: React.FC = () => {
   const [workTypes, setWorkTypes] = useState<string[]>([]);
   const [carriageTypes, setCarriageTypes] = useState<string[]>([]);
 
+  const STORAGE = import.meta.env.VITE_API_STORAGE_PHOTOS_URL as string;
+
   // Функция для формирования полного URL фотографии
-  const getFullPhotoUrl = (url: string): string => {
-    if (url.startsWith('http')) {
-      return url;
+  // const getFullPhotoUrl = (url: string): string => {
+  //   if (url.startsWith('http')) {
+  //     return url;
+  //   }
+  //   // Убираем ведущий слеш, если он есть, так как API_BASE_URL уже содержит протокол и домен
+  //   const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+  //   return `${API_BASE_URL.replace('/api/v1', '')}/${cleanUrl}`;
+  // };
+
+  interface PhotoItem { label: string; url: string; }
+
+  function collectPhotos(entry: WorkLogEntry): PhotoItem[] {
+    const base = STORAGE.replace(/\/$/, ''); // убираем возможный завершающий слэш
+    const items: PhotoItem[] = [];
+
+    // 1) Общее фото заявки
+    if (entry.photo) {
+      items.push({ label: 'Фото заявки', url: `${base}/${entry.photo}` });
     }
-    // Убираем ведущий слеш, если он есть, так как API_BASE_URL уже содержит протокол и домен
-    const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
-    return `${API_BASE_URL.replace('/api/v1', '')}/${cleanUrl}`;
-  };
+
+    // 2) Фото вагонов
+    entry.carriages.forEach(c => {
+      if (c.photo) {
+        items.push({ label: 'Фото вагона', url: `${base}/${c.photo}` });
+      }
+    });
+
+    // 3) Фото оборудования
+    entry.equipmentPhotos.forEach(p => {
+      items.push({ label: 'Фото оборудования', url: `${base}/${p}` });
+    });
+
+    // 4) Фото серийного номера
+    entry.serialPhotos.forEach(p => {
+      items.push({ label: 'Фото серийного номера', url: `${base}/${p}` });
+    });
+
+    // 5) Фото MAC-адреса
+    entry.macPhotos.forEach(p => {
+      items.push({ label: 'Фото MAC-адреса', url: `${base}/${p}` });
+    });
+
+    return items;
+  }
 
   useEffect(() => {
     referenceApi
@@ -216,6 +254,11 @@ export const WorkLogDetailPage: React.FC = () => {
       </Container>
     );
   }
+
+  const getFullPhotoUrl = (url: string): string =>
+      url.startsWith('http') ? url : `${STORAGE.replace(/\/api\/v1$/, '')}/${url}`;
+
+  const photos = collectPhotos(workLog);
 
   return (
     <Container maxWidth="lg" className="work-log-detail-page">
@@ -689,9 +732,9 @@ export const WorkLogDetailPage: React.FC = () => {
 
           {/* Фотографии */}
           {(() => {
-            const photos = Object.entries(workLog.photo)
-              .filter(([, url]) => url)
-              .map(([key, url]) => ({ key, url: url! }));
+            // const photos = Object.entries(workLog.photo)
+            //   .filter(([, url]) => url)
+            //   .map(([key, url]) => ({ key, url: url! }));
 
             return (
               photos.length > 0 && (
@@ -703,8 +746,8 @@ export const WorkLogDetailPage: React.FC = () => {
                   <Divider sx={{ mb: 2 }} />
 
                   <Grid container spacing={2}>
-                    {photos.map(({ key, url }) => (
-                      <Grid size={{ xs: 6, sm: 4, md: 3 }} key={key}>
+                    {photos.map(({ label, url }, index) => (
+                      <Grid size={{ xs: 6, sm: 4, md: 3 }} key={index}>
                         <Card
                           className="photo-card"
                           onClick={() =>
@@ -720,12 +763,12 @@ export const WorkLogDetailPage: React.FC = () => {
                             component="img"
                             height="120"
                             image={getFullPhotoUrl(Array.isArray(url) ? url[0] : url)}
-                            alt={`Фото ${key}`}
+                            alt={label}
                             sx={{ objectFit: 'cover' }}
                           />
                           <CardContent sx={{ p: 1 }}>
                             <Typography variant="caption" color="textSecondary">
-                              Фото {key}
+                              {label}
                             </Typography>
                           </CardContent>
                         </Card>

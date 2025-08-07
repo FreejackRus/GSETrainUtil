@@ -55,6 +55,8 @@ interface NewUser {
   role: string;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export const AdminPanelPage = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
@@ -80,7 +82,7 @@ export const AdminPanelPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/v1/users', {
+      const response = await fetch(`${API_BASE_URL}/users`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -108,7 +110,7 @@ export const AdminPanelPage = () => {
   const handleAddUser = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/v1/users', {
+      const response = await fetch(`${API_BASE_URL}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +150,7 @@ export const AdminPanelPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/v1/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
