@@ -18,6 +18,7 @@
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.1",
@@ -30,6 +31,7 @@
   "scripts": {
     "dev": "ts-node src/server.ts",
     "seed": "ts-node prisma/seed.ts",
+    "import": "ts-node prisma/import-excel.ts",
     "import-excel": "ts-node src/utils/importExcelData.ts"
   },
   "devDependencies": {

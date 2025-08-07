@@ -18,7 +18,6 @@ interface Carriage {
 interface CarriageResponse {
   success: boolean;
   data: Carriage[];
-  equipmentTypes?: string[];
 }
 
 export const carriageApi = {

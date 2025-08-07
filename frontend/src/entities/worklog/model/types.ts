@@ -1,11 +1,9 @@
 export interface EquipmentDetail {
   id: number;
   name: string;
-  deviceType: string;
   typeWork: string;
   serialNumber: string;
   macAddress: string;
-  quantity: number;
   photos: { type: string; path: string }[];
 }
 

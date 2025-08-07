@@ -9,9 +9,7 @@ export const getCarriages = async (_req: Request, res: Response) => {
     const carriages = await prisma.carriage.findMany({
       include: {
         train:    true,
-        equipments: {
-          include: { device: true }
-        },
+        equipments: true
       },
     });
 
@@ -22,7 +20,6 @@ export const getCarriages = async (_req: Request, res: Response) => {
       equipment: c.equipments.map(item => ({
         id:           item.id,
         name:         item.name,
-        deviceType:   item.device?.name ?? '—',
         snNumber:     item.serialNumber ?? '—',
         mac:          item.macAddress ?? '—',
         lastService:  item.lastService,
@@ -48,9 +45,7 @@ export const getCarriageById = async (req: Request, res: Response) => {
       where: { number: carriageNumber },
       include: {
         train:    true,
-        equipments: {
-          include: { device: true }
-        },
+        equipments: true
       },
     });
 
@@ -68,7 +63,6 @@ export const getCarriageById = async (req: Request, res: Response) => {
       equipment: c.equipments.map(item => ({
         id:           item.id,
         name:         item.name,
-        deviceType:   item.device?.name ?? '—',
         snNumber:     item.serialNumber ?? '—',
         mac:          item.macAddress ?? '—',
         lastService:  item.lastService,

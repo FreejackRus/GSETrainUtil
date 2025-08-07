@@ -28,7 +28,7 @@ export const getDrafts = async (req: Request, res: Response) => {
         requestEquipments: {
           include: {
             photos:    true,
-            equipment: { include: { device: true } },
+            equipment: true,
           }
         },
         completedJob:    true,
@@ -148,11 +148,6 @@ export const completeDraft = async (req: Request, res: Response) => {
 
     for (const e of equipment) {
       // Upsert устройства (Device)
-      const dev = await prisma.device.upsert({
-        where: { name: e.deviceType },
-        update: {},
-        create: { name: e.deviceType }
-      });
 
       let eqRec = await prisma.equipment.findFirst({
         where: {
@@ -175,7 +170,6 @@ export const completeDraft = async (req: Request, res: Response) => {
         eqRec = await prisma.equipment.create({
           data: {
             name:         e.name,
-            deviceId:     dev.id,
             serialNumber: e.serialNumber ?? null,
             macAddress:   e.macAddress   ?? null,
             lastService:  e.lastService  ? new Date(e.lastService) : undefined,
@@ -197,7 +191,6 @@ export const completeDraft = async (req: Request, res: Response) => {
           requestId:   id,
           equipmentId: eqRec.id,
           typeWorkId:  tw.id,
-          quantity:    e.quantity || 1
         }
       });
 
@@ -225,7 +218,7 @@ export const completeDraft = async (req: Request, res: Response) => {
           include: {
             typeWork:  true,
             photos:    true,
-            equipment: { include: { device: true } },
+            equipment: true,
           }
         },
         completedJob:    true,

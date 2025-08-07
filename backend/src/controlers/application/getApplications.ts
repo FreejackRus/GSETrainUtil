@@ -321,7 +321,7 @@ export const getApplications = async (_req: Request, res: Response) => {
       include: {
         requestTrains:    { include: { train: true } },
         requestCarriages: { include: { carriage: { include: { train: true } } } },
-        requestEquipments:{ include: { typeWork: true, photos: true, equipment: { include: { device: true } } } },
+        requestEquipments:{ include: { typeWork: true, photos: true, equipment: true } },
         completedJob:    true,
         currentLocation: true,
         user:            true,
@@ -349,7 +349,7 @@ export const getApplicationById = async (req: Request, res: Response) => {
       include: {
         requestTrains:    { include: { train: true } },
         requestCarriages: { include: { carriage: { include: { train: true } } } },
-        requestEquipments:{ include: { typeWork: true, photos: true, equipment: { include: { device: true } } } },
+        requestEquipments:{ include: { typeWork: true, photos: true, equipment: true } },
         completedJob:    true,
         currentLocation: true,
         user:            true,

@@ -71,7 +71,6 @@ model RequestEquipment {
   requestId   Int
   equipmentId Int
   typeWorkId  Int // Тип работ для данного оборудования
-  quantity    Int @default(1)
 
   request   Request   @relation(fields: [requestId], references: [id], onDelete: Cascade)
   equipment Equipment @relation(fields: [equipmentId], references: [id])
@@ -123,8 +122,6 @@ model Carriage {
 model Equipment {
   id                Int                @id @default(autoincrement())
   name              String
-  deviceId          Int
-  device            Device             @relation(fields: [deviceId], references: [id])
   serialNumber      String?
   macAddress        String?
   lastService       DateTime?
@@ -168,13 +165,4 @@ model User {
   requests Request[]
 
   @@map("users")
-}
-
-model Device {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-
-  equipments Equipment[]
-
-  @@map("devices")
 }
