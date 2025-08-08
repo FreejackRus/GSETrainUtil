@@ -44,7 +44,6 @@ import { applicationApi } from '../../../entities/application';
 interface ApplicationOption {
   id: number;
   label: string;
-  applicationNumber: number;
   status: string;
   createdAt: string;
 }
@@ -93,8 +92,7 @@ export const ArchiveManagement: React.FC = () => {
       const response = await applicationApi.getAll();
       const applicationOptions: ApplicationOption[] = response.map((app) => ({
         id: app.id,
-        label: `Заявка №${app.applicationNumber} (ID: ${app.id}) - ${app.status}`,
-        applicationNumber: app.applicationNumber,
+        label: `Заявка №${app.id} - ${app.status}`,
         status: app.status,
         createdAt: app.createdAt,
       }));
@@ -119,7 +117,7 @@ export const ArchiveManagement: React.FC = () => {
     if (!applicationExists && applications.length > 0) {
       setError(
         `Заявка с ID ${targetId} не найдена. Доступные заявки: ${applications
-          .map((app) => `ID ${app.id} (№${app.applicationNumber})`)
+          .map((app) => `ID ${app.id}`)
           .join(', ')}`,
       );
       return;
@@ -138,7 +136,7 @@ export const ArchiveManagement: React.FC = () => {
       if (errorMessage.includes('не найдена') && applications.length > 0) {
         setError(
           `${errorMessage}. Доступные заявки: ${applications
-            .map((app) => `ID ${app.id} (№${app.applicationNumber})`)
+            .map((app) => `ID ${app.id}`)
             .join(', ')}`,
         );
       } else {
@@ -306,7 +304,7 @@ export const ArchiveManagement: React.FC = () => {
                     <TextField
                       {...params}
                       label="Выберите заявку"
-                      placeholder="Начните вводить номер заявки или ID"
+                      placeholder="Начните вводить ID"
                       InputProps={{
                         ...params.InputProps,
                         endAdornment: (
@@ -377,7 +375,6 @@ export const ArchiveManagement: React.FC = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell>ID</TableCell>
-                          <TableCell>Номер заявки</TableCell>
                           <TableCell>Статус</TableCell>
                           <TableCell>Дата создания</TableCell>
                           <TableCell align="center">Действие</TableCell>
@@ -387,7 +384,6 @@ export const ArchiveManagement: React.FC = () => {
                         {applications.map((app) => (
                           <TableRow key={app.id} hover>
                             <TableCell>{app.id}</TableCell>
-                            <TableCell>{app.applicationNumber}</TableCell>
                             <TableCell>
                               <Chip
                                 label={app.status}

@@ -6,34 +6,31 @@ import fs from 'fs';
 /**
  * Архивирует фотографии конкретной заявки
  */
-export const archiveApplicationPhotos = async (req: Request, res: Response) => {
+export const archiveApplicationPhotos = async (
+    req: Request,
+    res: Response
+) => {
   try {
-    const { applicationId } = req.params;
-    
-    if (!applicationId || isNaN(parseInt(applicationId))) {
-      return res.status(400).json({
-        success: false,
-        message: 'Некорректный ID заявки'
-      });
+    const id = parseInt(req.params.applicationId, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ success: false, message: 'Некорректный ID заявки' });
     }
 
-    const archiver = new PhotoArchiver();
-    const archivePath = await archiver.archiveApplicationPhotos(parseInt(applicationId));
-    
-    // Отправляем архив как файл для скачивания
-    const fileName = path.basename(archivePath);
-    
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-    res.setHeader('Content-Type', 'application/zip');
-    
-    const fileStream = fs.createReadStream(archivePath);
-    fileStream.pipe(res);
-    
-    // Удаляем временный архив после отправки
-    fileStream.on('end', () => {
-      fs.unlinkSync(archivePath);
-    });
+    const service = new PhotoArchiver();
+    const archivePath = await service.archiveApplicationPhotos(id);
 
+    const rusName = `заявка_${id}_фотографии.zip`;
+    const encoded = encodeURIComponent(rusName);
+
+    res.setHeader(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encoded}`
+    );
+    res.setHeader('Content-Type', 'application/zip');
+
+    const stream = fs.createReadStream(archivePath);
+    stream.pipe(res);
+    stream.on('end', () => fs.unlinkSync(archivePath));
   } catch (error) {
     console.error('Ошибка при архивировании фотографий заявки:', error);
     res.status(500).json({
@@ -46,61 +43,35 @@ export const archiveApplicationPhotos = async (req: Request, res: Response) => {
 /**
  * Архивирует фотографии за период
  */
-export const archivePhotosByDateRange = async (req: Request, res: Response) => {
+export const archivePhotosByDateRange = async (
+    req: Request,
+    res: Response
+) => {
   try {
     const { dateFrom, dateTo } = req.query;
-    
-    if (!dateFrom || !dateTo) {
-      return res.status(400).json({
-        success: false,
-        message: 'Необходимо указать dateFrom и dateTo'
-      });
+    if (!dateFrom || !dateTo) return res.status(400).json({ success: false, message: 'Необходимо указать dateFrom и dateTo' });
+    const from = new Date(dateFrom as string);
+    const to = new Date(dateTo as string);
+    if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+      return res.status(400).json({ success: false, message: 'Некорректный формат даты. Используйте YYYY-MM-DD' });
+    }
+    if (from > to) {
+      return res.status(400).json({ success: false, message: 'Дата начала не может быть больше даты окончания' });
     }
 
-    // Проверяем корректность дат
-    const fromDate = new Date(dateFrom as string);
-    const toDate = new Date(dateTo as string);
-    
-    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Некорректный формат даты. Используйте YYYY-MM-DD'
-      });
-    }
+    const service = new PhotoArchiver();
+    const archivePath = await service.archivePhotosByDateRange(dateFrom as string, dateTo as string);
 
-    if (fromDate > toDate) {
-      return res.status(400).json({
-        success: false,
-        message: 'Дата начала не может быть больше даты окончания'
-      });
-    }
+    const rusName = path.basename(archivePath);
+    res.attachment(rusName);
+    res.type('application/zip');
 
-    const archiver = new PhotoArchiver();
-    const archivePath = await archiver.archivePhotosByDateRange(
-      dateFrom as string, 
-      dateTo as string
-    );
-    
-    // Отправляем архив как файл для скачивания
-    const fileName = path.basename(archivePath);
-    
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-    res.setHeader('Content-Type', 'application/zip');
-    
-    const fileStream = fs.createReadStream(archivePath);
-    fileStream.pipe(res);
-    
-    // Удаляем временный архив после отправки
-    fileStream.on('end', () => {
-      fs.unlinkSync(archivePath);
-    });
-
-  } catch (error) {
-    console.error('Ошибка при архивировании фотографий за период:', error);
-    res.status(500).json({
-      success: false,
-      message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-    });
+    const stream = fs.createReadStream(archivePath);
+    stream.pipe(res);
+    stream.on('end', () => fs.unlinkSync(archivePath));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err instanceof Error ? err.message : String(err) });
   }
 };
 

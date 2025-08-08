@@ -2,8 +2,8 @@ import React from 'react';
 import { Box, Avatar, Typography, Card, CardContent } from "@mui/material";
 import { CameraAlt } from "@mui/icons-material";
 import { PhotoUpload } from "../../PhotoUpload";
-import { ApplicationFormData } from '../../../entities/application/model/types';
 import "./StepFinalPhoto.css";
+import type {ApplicationFormData} from "../../../../entities";
 
 interface StepFinalPhotoProps {
   formData: ApplicationFormData;

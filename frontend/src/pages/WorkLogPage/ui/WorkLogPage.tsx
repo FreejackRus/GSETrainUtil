@@ -137,14 +137,9 @@ export const WorkLogPage = () => {
 
         // Поиск по MAC-адресу только для точек доступа и маршрутизаторов
         for (const equipment of entry.equipmentDetails) {
-          const equipmentType = equipment.deviceType.toLowerCase();
           const mac = equipment.macAddress?.toLowerCase();
 
           if (
-            (equipmentType.includes('точка доступа') ||
-              equipmentType.includes('маршрутизатор') ||
-              equipmentType.includes('router') ||
-              equipmentType.includes('access point')) &&
             mac?.includes(searchLower)
           ) {
             return true;
@@ -632,12 +627,12 @@ export const WorkLogPage = () => {
             />
           </Box>
 
-          {entry.equipmentDetails && (
-            <Typography variant="body2" color="text.secondary" mb={1}>
-              <strong>Оборудования:</strong>{' '}
-              {entry.equipmentDetails.map((item) => item.name).join(', ')}
-            </Typography>
-          )}
+          {/*{entry.equipmentDetails && (*/}
+          {/*  <Typography variant="body2" color="text.secondary" mb={1}>*/}
+          {/*    <strong>Оборудования:</strong>{' '}*/}
+          {/*    {entry.equipmentDetails.map((item) => item.name).join(', ')}*/}
+          {/*  </Typography>*/}
+          {/*)}*/}
 
           {entry.completedJob && (
             <Box display="flex" alignItems="center">

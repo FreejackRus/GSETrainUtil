@@ -20,195 +20,189 @@ export class PhotoArchiver {
   /**
    * Создает архив фотографий для конкретной заявки
    */
-  async archiveApplicationPhotos(applicationId: number, outputPath?: string): Promise<string> {
-    try {
-      // 1) Получаем заявку с новыми связями
-      const application = await this.prisma.request.findUnique({
-        where: { id: applicationId },
-        include: {
-          requestTrains: {
-            include: { train: true }
-          },
-          requestCarriages: {
-            include: {
-              carriage: { include: { train: true } }
-            }
-          },
-          completedJob:    true,
-          currentLocation: true,
-          user:            true
+  async archiveApplicationPhotos(
+      applicationId: number,
+      outputPath?: string
+  ): Promise<string> {
+    // Загружаем данные заявки вместе с фотками
+    const application = await this.prisma.request.findUnique({
+      where: { id: applicationId },
+      include: {
+        requestCarriages: {
+          select: {
+            carriagePhoto: true,
+            carriage: { select: { number: true } }
+          }
+        },
+        requestEquipments: {
+          include: {
+            equipment: { select: { id: true, serialNumber: true } },
+            photos: true
+          }
         }
-      });
-      if (!application) {
-        throw new Error(`Заявка с ID ${applicationId} не найдена`);
+      }
+    });
+    if (!application) {
+      throw new Error(`Заявка с ID ${applicationId} не найдена`);
+    }
+
+    // Формируем русский имя архива
+    const archiveName = `заявка_${applicationId}_фотографии.zip`;
+    const archivePath = outputPath
+        ? outputPath
+        : path.join(process.cwd(), 'archives', archiveName);
+    fs.mkdirSync(path.dirname(archivePath), { recursive: true });
+
+    // Создаем поток для архивации
+    const output = fs.createWriteStream(archivePath);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    return new Promise<string>((resolve, reject) => {
+      output.on('close', () => resolve(archivePath));
+      archive.on('error', err => reject(err));
+      archive.pipe(output);
+
+      // Директории внутри архива
+      const appDir = 'Заявка';
+      const carrDir = 'Вагоны';
+      const eqDir = 'Оборудование';
+
+      // 1) Основное фото заявки
+      if (application.photo) {
+        const src = path.isAbsolute(application.photo)
+            ? application.photo
+            : path.join(this.uploadsPath, application.photo);
+        if (fs.existsSync(src)) {
+          const ext = path.extname(src);
+          const fileName = `заявка_${applicationId}${ext}`;
+          archive.file(src, { name: path.posix.join(appDir, fileName) });
+        }
       }
 
-      // 2) Готовим имя архива, используем createdAt
-      const dateStr = application.createdAt.toISOString().split('T')[0];
-      const archiveName = `application_${application.id}_${dateStr}.zip`;
-      const archivePath = outputPath
-          || path.join(process.cwd(), 'archives', archiveName);
-      fs.mkdirSync(path.dirname(archivePath), { recursive: true });
-
-      // 3) Создаем zip-поток
-      const output  = fs.createWriteStream(archivePath);
-      const archive = archiver('zip', { zlib: { level: 9 } });
-
-      return new Promise((resolve, reject) => {
-        output.on('close', () => {
-          console.log(`Архив создан: ${archivePath} (${archive.pointer()} байт)`);
-          resolve(archivePath);
-        });
-        archive.on('error', err => reject(err));
-        archive.pipe(output);
-
-        // 4) Метаданные заявки
-        const info = {
-          id:               application.id,
-          status:           application.status,
-          createdAt:        application.createdAt,
-          updatedAt:        application.updatedAt,
-          trainNumbers:     application.requestTrains.map(rt => rt.train.number),
-          carriage: {
-            number: application.requestCarriages[0]?.carriage?.number,
-            type:   application.requestCarriages[0]?.carriage?.type
-          },
-          completedJob:     application.completedJob?.name,
-          currentLocation:  application.currentLocation?.name,
-          user:             application.user?.name
-        };
-        archive.append(JSON.stringify(info, null, 2), { name: 'application_info.json' });
-
-        // 5) Папка uploads/<applicationId>/
-        const appFolder = path.join(this.uploadsPath, String(application.id));
-        if (fs.existsSync(appFolder)) {
-          archive.directory(appFolder, 'photos');
+      // 2) Фото вагонов
+      for (const rc of application.requestCarriages) {
+        if (!rc.carriagePhoto) continue;
+        const src = path.isAbsolute(rc.carriagePhoto)
+            ? rc.carriagePhoto
+            : path.join(this.uploadsPath, rc.carriagePhoto);
+        if (fs.existsSync(src)) {
+          const wagonNum = rc.carriage.number;
+          const ext = path.extname(src);
+          const fileName = `вагон_${wagonNum}${ext}`;
+          archive.file(src, { name: path.posix.join(carrDir, fileName) });
         }
+      }
 
-        // 6) Фото номера вагона
-        const carriagePhoto = application.requestCarriages[0]?.carriagePhoto;
-        if (carriagePhoto) {
-          const p = path.join(process.cwd(), carriagePhoto);
-          if (fs.existsSync(p)) {
-            archive.file(p, { name: `photos/carriage_photo_${path.basename(p)}` });
-          }
+      // 3) Фото оборудования
+      for (const reqEq of application.requestEquipments) {
+        const eq = reqEq.equipment;
+        const eqId = eq.id;
+        const serial = eq.serialNumber || '';
+        for (const photo of reqEq.photos) {
+          const src = path.isAbsolute(photo.photoPath)
+              ? photo.photoPath
+              : path.join(this.uploadsPath, photo.photoPath);
+          if (!fs.existsSync(src)) continue;
+          const ext = path.extname(src);
+          // Определяем тип на русском
+          const typeKey = photo.photoType.toLowerCase();
+          let rusType = 'общая';
+          if (typeKey.includes('serial')) rusType = 'серийный_номер';
+          else if (typeKey.includes('mac')) rusType = 'mac_адрес';
+          const fileName = `оборудование_${eqId}_${serial}_${rusType}${ext}`;
+          archive.file(src, { name: path.posix.join(eqDir, fileName) });
         }
+      }
 
-        // 7) Единое фото заявления
-        if (application.photo) {
-          const p = path.join(process.cwd(), application.photo);
-          if (fs.existsSync(p)) {
-            archive.file(p, { name: `photos/application_photo_${path.basename(p)}` });
-          }
-        }
-
-        archive.finalize();
-      });
-    } catch (error) {
-      console.error('Ошибка при создании архива заявки:', error);
-      throw error;
-    } finally {
+      archive.finalize();
+    }).finally(async () => {
       await this.prisma.$disconnect();
-    }
+    });
   }
 
   /**
    * Создает архив фотографий за период
    */
-  async archivePhotosByDateRange(dateFrom: string, dateTo: string, outputPath?: string): Promise<string> {
-    try {
-      // 1) Подбираем заявки по createdAt
-      const apps = await this.prisma.request.findMany({
-        where: {
-          createdAt: {
-            gte: new Date(dateFrom),
-            lte: new Date(dateTo)
-          }
-        },
-        include: {
-          requestTrains:    { include: { train: true } },
-          requestCarriages: { include: { carriage: { include: { train: true } } } },
-          completedJob:     true,
-          currentLocation:  true,
-          user:             true
-        },
-        orderBy: { createdAt: 'asc' }
-      });
-      if (apps.length === 0) {
-        throw new Error(`Заявки за период ${dateFrom} - ${dateTo} не найдены`);
-      }
+  async archivePhotosByDateRange(
+      dateFrom: string,
+      dateTo: string,
+      outputPath?: string
+  ): Promise<string> {
+    const apps = await this.prisma.request.findMany({
+      where: { createdAt: { gte: new Date(dateFrom), lte: new Date(dateTo) } },
+      include: {
+        requestCarriages: { select: { carriagePhoto: true, carriage: { select: { number: true } } } },
+        requestEquipments: { include: { equipment: { select: { id: true, serialNumber: true } }, photos: true } }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+    if (apps.length === 0) throw new Error(`Заявки за период ${dateFrom} - ${dateTo} не найдены`);
 
-      // 2) Подготовка архива
-      const archiveName = `applications_${dateFrom}_to_${dateTo}.zip`;
-      const archivePath = outputPath
-          || path.join(process.cwd(), 'archives', archiveName);
-      fs.mkdirSync(path.dirname(archivePath), { recursive: true });
+    const rusName = `заявки_${dateFrom}_по_${dateTo}_фотографии.zip`;
+    const archivePath = outputPath || path.join(process.cwd(), 'archives', rusName);
+    fs.mkdirSync(path.dirname(archivePath), { recursive: true });
 
-      const output  = fs.createWriteStream(archivePath);
-      const archive = archiver('zip', { zlib: { level: 9 } });
+    const output = fs.createWriteStream(archivePath);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.pipe(output);
 
-      return new Promise((resolve, reject) => {
-        output.on('close', () => {
-          console.log(`Архив создан: ${archivePath} (${archive.pointer()} байт)`);
-          resolve(archivePath);
-        });
-        archive.on('error', err => reject(err));
-        archive.pipe(output);
+    const baseDir = 'Заявки';
+    for (const app of apps) {
+      const appDir = path.posix.join(baseDir, `заявка_${app.id}`);
 
-        // 3) Сводная информация
-        const summary = {
-          period: {
-            from: dateFrom,
-            to:   dateTo
-          },
-          totalApplications: apps.length,
-          applications: apps.map(app => ({
-            id:              app.id,
-            status:          app.status,
-            createdAt:       app.createdAt,
-            updatedAt:       app.updatedAt,
-            trainNumbers:    app.requestTrains.map(rt => rt.train.number),
-            carriage: {
-              number: app.requestCarriages[0]?.carriage?.number,
-              type:   app.requestCarriages[0]?.carriage?.type
-            },
-            completedJob:    app.completedJob?.name,
-            currentLocation: app.currentLocation?.name,
-            user:            app.user?.name
-          }))
-        };
-        archive.append(JSON.stringify(summary, null, 2), { name: 'summary.json' });
-
-        // 4) Для каждой заявки собираем фото
-        for (const app of apps) {
-          const prefix = `application_${app.id}/photos`;
-          const appFolder = path.join(this.uploadsPath, String(app.id));
-          if (fs.existsSync(appFolder)) {
-            archive.directory(appFolder, prefix);
-          }
-          const cp = app.requestCarriages[0]?.carriagePhoto;
-          if (cp) {
-            const p = path.join(process.cwd(), cp);
-            if (fs.existsSync(p)) {
-              archive.file(p, { name: `${prefix}/carriage_photo_${path.basename(p)}` });
-            }
-          }
-          if (app.photo) {
-            const p = path.join(process.cwd(), app.photo);
-            if (fs.existsSync(p)) {
-              archive.file(p, { name: `${prefix}/application_photo_${path.basename(p)}` });
-            }
-          }
+      // основное
+      if (app.photo) {
+        const src = path.isAbsolute(app.photo) ? app.photo : path.join(this.uploadsPath, app.photo);
+        if (fs.existsSync(src)) {
+          const ext = path.extname(src);
+          archive.file(src, { name: path.posix.join(appDir, `заявка_${app.id}${ext}`) });
         }
-
-        archive.finalize();
-      });
-    } catch (error) {
-      console.error('Ошибка при создании архива по периоду:', error);
-      throw error;
-    } finally {
-      await this.prisma.$disconnect();
+      }
+      // вагоны
+      for (const rc of app.requestCarriages) {
+        if (!rc.carriagePhoto) continue;
+        const src = path.isAbsolute(rc.carriagePhoto)
+            ? rc.carriagePhoto
+            : path.join(this.uploadsPath, rc.carriagePhoto);
+        if (fs.existsSync(src)) {
+          const num = rc.carriage.number;
+          const ext = path.extname(src);
+          archive.file(src, {
+            name: path.posix.join(appDir, 'Вагоны', `вагон_${num}${ext}`)
+          });
+        }
+      }
+      // оборудование
+      for (const reqEq of app.requestEquipments) {
+        const eq = reqEq.equipment;
+        const serial = eq.serialNumber || '';
+        for (const photo of reqEq.photos) {
+          const src = path.isAbsolute(photo.photoPath)
+              ? photo.photoPath
+              : path.join(this.uploadsPath, photo.photoPath);
+          if (!fs.existsSync(src)) continue;
+          const ext = path.extname(src);
+          const key = photo.photoType.toLowerCase();
+          const rusType = key.includes('serial')
+              ? 'серийный_номер'
+              : key.includes('mac')
+                  ? 'mac_адрес'
+                  : 'общая';
+          archive.file(src, {
+            name: path.posix.join(
+                appDir,
+                'Оборудование',
+                `оборудование_${eq.id}_${serial}_${rusType}${ext}`
+            )
+          });
+        }
+      }
     }
+
+    await archive.finalize();
+    await new Promise<void>((resolve) => output.on('close', () => resolve()));
+    await this.prisma.$disconnect();
+    return archivePath;
   }
 
   /**

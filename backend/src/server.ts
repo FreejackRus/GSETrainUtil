@@ -11,7 +11,7 @@ import multer from "multer";
 
 const app = express();
 const upload = multer();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 if (!port) {
   throw new Error('❌ PORT is not defined in .env');
 }

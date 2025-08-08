@@ -27,10 +27,10 @@ import {
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
 } from '@mui/icons-material';
-import { CarriageFormItem, EquipmentFormItem } from '../../../entities/application/model/types';
-import { PhotoUpload } from '../../PhotoUpload/PhotoUpload';
-import { AutocompleteField } from '../../AutocompleteField/AutocompleteField';
-import { referenceApi } from '../../../api/reference';
+import { PhotoUpload } from '../../PhotoUpload';
+import { AutocompleteField } from '../../AutocompleteField';
+import { referenceApi } from '../../../api';
+import type {CarriageFormItem, EquipmentFormItem} from "../../../../entities/application/model/types.ts";
 
 interface StepCarriagesProps {
   carriages: CarriageFormItem[];
@@ -401,7 +401,6 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                             </ul>
                           </Alert>
                         )}
-                        {console.log(equipmentTypes)}
 
                         
                         <Grid container spacing={2} mb={2}>

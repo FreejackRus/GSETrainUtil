@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, TextField, Typography, Card, CardContent } from '@mui/material';
 import { PhotoUpload } from '../../PhotoUpload';
-import { ApplicationFormData } from '../../../entities/application/model/types';
 import './StepSerialNumber.css';
+import type {ApplicationFormData} from "../../../../entities";
 
 interface StepSerialNumberProps {
   formData: ApplicationFormData;
@@ -21,10 +21,10 @@ export const StepSerialNumber: React.FC<StepSerialNumberProps> = ({
   applicationData,
 }) => {
   const handlePhotoChange = (file: File | null) => {
-    onFormDataChange({ serialPhoto: file });
+    onFormDataChange({ photo: file });
   };
 
-  return (
+    return (
     <Box className="step-serial-number">
       <Typography variant="h6" className="step-serial-number__title">
         🔢 Серийный номер оборудования
@@ -43,15 +43,15 @@ export const StepSerialNumber: React.FC<StepSerialNumberProps> = ({
       <TextField
         fullWidth
         label="Серийный номер"
-        value={formData.serialNumber || ''}
-        onChange={(e) => onFormDataChange({ serialNumber: e.target.value })}
+        value={formData.photo || ''}
+        onChange={(e) => onFormDataChange({ photo: e.target.value as never })}
         placeholder="Введите серийный номер"
         className="step-serial-number__input"
         sx={{ mb: 3 }}
       />
       
       <PhotoUpload
-        photo={formData.serialPhoto || null}
+        photo={formData.photo || null}
         onPhotoChange={handlePhotoChange}
         label="Фотография серийного номера"
         description="Сделайте фото серийного номера оборудования"
