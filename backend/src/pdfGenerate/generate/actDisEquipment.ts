@@ -102,9 +102,8 @@ function createDismantlingAct(doc: jsPDF, data: DismantlingActData): number {
   const bodyData = data.equipment.map((item, index) => [
     (index + 1).toString(),
     item.carriageNumber ?? "-",
-    item.type ?? "-",
+    item.name ?? "-",
     item.serialNumber ?? "-",
-    item.quantity ?? "-",
   ]);
 
   autoTable(doc, {
@@ -118,7 +117,6 @@ function createDismantlingAct(doc: jsPDF, data: DismantlingActData): number {
           content: "Серийный номер оборудования",
           styles: { halign: "center" },
         },
-        { content: "Кол-во, шт.", styles: { halign: "center" } },
       ],
     ],
     body: bodyData,
@@ -145,9 +143,8 @@ function createDismantlingAct(doc: jsPDF, data: DismantlingActData): number {
     columnStyles: {
       0: { cellWidth: 10 },
       1: { cellWidth: 20 },
-      2: { cellWidth: 85 },
+      2: { cellWidth: 100 },
       3: { cellWidth: 50 },
-      4: { cellWidth: 15, halign: "center" },
     },
     margin: { left: marginLeft, right: marginRight },
   });
@@ -274,17 +271,11 @@ export const createPdfActDisEquipment = async (
 ) => {
   const doc = new jsPDF();
   const applicationNumber = json.applicationNumber;
-  const carriageNumber = json.carriageNumber;
   const applicationDate = json.applicationDate || "«___»______.____г.";
   const contractNumber = json.contractNumber || "____________________";
-  const equipmentDetails = json.equipmentDetails;
+  const equipmentDetails = json.equipmentDetails || [];
   const actDate = "«___»______.____г.";
 
-  const infoEquipmentAndCarriageNumber =
-    equipmentDetails?.map((item) => ({
-      ...item,
-      carriageNumber: carriageNumber,
-    })) ?? [];
 
   const resultJson: DismantlingActData = {
     actNumber: String(applicationNumber),
@@ -292,10 +283,12 @@ export const createPdfActDisEquipment = async (
     contractNumber: contractNumber,
     contractDate: formatRussianDate(applicationDate),
     applicationNumber: String(applicationNumber),
-    equipment: infoEquipmentAndCarriageNumber,
+    equipment: equipmentDetails,
   };
 
-  // createDismantlingAct(doc, resultJson);
+  console.log("$$$$$$");
+  console.log(resultJson);
+  
   createDismantlingAct(doc, resultJson);
 
   // Получаем PDF как Uint8Array

@@ -30,7 +30,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import {
   Search as SearchIcon,
   ArrowBack as ArrowBackIcon,
@@ -51,7 +50,6 @@ import { useNavigate } from 'react-router-dom';
 import { workLogApi } from '../../../entities/worklog';
 // import type { WorkLogEntry } from '../../../entities/application/model/types';
 import './WorkLogPage.css';
-import axios from 'axios';
 import { apiClient } from '../../../shared';
 import { formatRussianDate } from '../../../shared/transformation/stringTransform';
 import type { WorkLogEntry } from '../../../entities/worklog/model/types';
@@ -345,9 +343,8 @@ export const WorkLogPage = () => {
           '/pdfActDisEquipment',
           {
             // Если typeWork и applicationNumber есть в equipmentDetails[0], можно взять оттуда
-            typeWork: entry.equipmentDetails?.[0]?.typeWork || '',
-            applicationNumber: entry.id.toString(), // или замени на корректное поле, если нужно
-            carriageNumber: entry.carriages?.[0]?.number || '',
+            // applicationNumber: entry.id.toString(), // или замени на корректное поле, если нужно
+            applicationNumber: "__", // или замени на корректное поле, если нужно
             equipmentDetails: entry.equipmentDetails?.map(({ photos, ...rest }) => rest),
             applicationDate: entry.createdAt,
             contractNumber: '____________________',
@@ -373,16 +370,12 @@ export const WorkLogPage = () => {
         response = await apiClient.post(
           '/pdfTechnicalActAcceptance',
           {
-            applicationNumber: entry.id.toString(), // или подставь правильное поле
+            applicationNumber:"__", // или подставь правильное поле
             applicationDate: entry.createdAt,
             contractNumber: '____________________',
             contractDate: '«__».____.____ г.',
-            carriageNumber: entry.carriages?.[0]?.number || '',
-            carriageType: entry.carriages?.[0]?.type || '',
-            equipmentTypes: entry.equipmentTypes,
-            serialNumbers: entry.serialNumbers,
-            countEquipments: entry.countEquipment, // исправлено имя поля
-            typeWork: entry.equipmentDetails?.[0]?.typeWork || '', // если больше негде
+            equipmentDetails: entry.equipmentDetails?.map(({ photos, ...rest }) => rest),
+            carriageNumbers: entry.carriages || [],
             trainNumber: entry.trainNumbers?.[0] || '',
           },
           {
@@ -407,12 +400,11 @@ export const WorkLogPage = () => {
         response = await apiClient.post(
           '/pdfAppWork',
           {
-            applicationNumber: entry.id.toString(),
-            carriageNumber: entry.carriages?.[0]?.number || '',
-            carriageType: entry.carriages?.[0]?.type || '',
+            // applicationNumber: entry.id.toString(),
+            applicationNumber:"__",
+            carriageNumbers: entry.carriages|| '',
             currentLocation: entry.currentLocation,
-            equipmentTypes: entry.equipmentTypes,
-            countEquipments: entry.countEquipment,
+            equipmentDetails: entry.equipmentDetails,
           },
           {
             responseType: 'blob', // Важно: получаем как файл
@@ -779,7 +771,6 @@ export const WorkLogPage = () => {
               <MenuItem value="Скачать">Скачать</MenuItem>
               <MenuItem value="Заявка">Заявка</MenuItem>
               <MenuItem value="Акт демонтажа/монтажа">Акт демонтажа/монтажа</MenuItem>
-              <MenuItem value="Акт выполненных работ">Акт выполненных работ </MenuItem>
               <MenuItem value="Технический акт">Технический акт</MenuItem>
             </Select>
           </Box>
