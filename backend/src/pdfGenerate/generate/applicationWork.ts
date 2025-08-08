@@ -16,7 +16,7 @@ import { ResponseJson } from "../../types/types";
 
 interface Work {
   equipment: string;
-  equipmentCount: number;
+  equipmentCount: string;
 }
 
 interface Wagon {
@@ -28,7 +28,7 @@ interface Wagon {
 }
 
 interface TWagonPdf {
-  applicationNumber:number
+  applicationNumber: number;
   wagons: Wagon[];
 }
 
@@ -106,7 +106,9 @@ export const createRequestForm = (doc: jsPDF, data: TWagonPdf) => {
   let currentY = 20;
 
   doc.setFontSize(16).setFont("Font", "bold");
-  doc.text(`Заявка № ${data.applicationNumber}`, pageWidth / 2, currentY, { align: "center" });
+  doc.text(`Заявка № ${data.applicationNumber}`, pageWidth / 2, currentY, {
+    align: "center",
+  });
   currentY += 10;
 
   const leftText = "г. Москва";
@@ -155,7 +157,7 @@ export const createRequestForm = (doc: jsPDF, data: TWagonPdf) => {
       lineWidth: 0.1,
       halign: "center",
     },
-       alternateRowStyles: {
+    alternateRowStyles: {
       fillColor: [255, 255, 255],
     },
     columnStyles: {
@@ -195,7 +197,7 @@ export const createRequestForm = (doc: jsPDF, data: TWagonPdf) => {
       lineWidth: 0.15,
       overflow: "linebreak",
     },
-       alternateRowStyles: {
+    alternateRowStyles: {
       fillColor: [255, 255, 255],
     },
     columnStyles: {
@@ -212,7 +214,15 @@ export const createRequestForm = (doc: jsPDF, data: TWagonPdf) => {
   });
 
   currentY = (doc as any).lastAutoTable.finalY + 5;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  console.log(pageHeight);
+  console.log(currentY);
 
+  if (currentY + 30 > pageHeight) {
+    // 20 — запас под текст и таблицу
+    doc.addPage();
+    currentY = 20; // новый отступ сверху
+  }
   doc.setFont("Font", "italic");
   doc.text("Со стороны Подрядчика согласовал:", marginLeft, currentY);
   currentY += 5;
@@ -238,7 +248,7 @@ export const createRequestForm = (doc: jsPDF, data: TWagonPdf) => {
       lineWidth: 0.15,
       halign: "center",
     },
-       alternateRowStyles: {
+    alternateRowStyles: {
       fillColor: [255, 255, 255],
     },
     columnStyles: {
@@ -264,41 +274,44 @@ export const createPdfAppWork = async (
 ) => {
   const doc = new jsPDF();
 
-  const carriageNumber = json.carriageNumber;
-  const carriageType = json.carriageType;
-  const equipmentTypes = json.equipmentTypes;
-  const countEquipments = json.countEquipments;
+  const carriageNumbers = json.carriageNumbers;
   const currentLocation = json.currentLocation;
+  const equipmentDetails = json.equipmentDetails;
   const applicationNumber = json.applicationNumber;
 
-  let arrEquipment: { equipment: string; equipmentCount: number }[] = [];
-  equipmentTypes.map((item, index) => {
-    arrEquipment.push({
-      equipment: item,
-      equipmentCount: countEquipments[index],
-    });
+  let arrEquipment = [];
+  arrEquipment = carriageNumbers.map((item, index) => {
+    const equipments =
+      equipmentDetails
+        ?.filter((eq) => eq.carriageNumber === item.number)
+        .map((eq) => ({
+          equipment: eq.name ?? "-",
+          equipmentCount: " ", // или посчитай реальное количество
+        })) ?? [];
+
+    return {
+      wagonNumber: item.number,
+      wagonType: item.type,
+      workPlace: currentLocation ?? "",
+      works:
+        index === 0
+          ? [
+              "Выезд специалиста в депо",
+              "Дополнительные работы по демонтажу оборудования",
+              "Дополнительные Работы по монтажу оборудования",
+              "Проверка кабельных трасс",
+            ]
+          : [],
+      arrEquipment: equipments,
+    };
   });
 
   const resultJson = {
-    applicationNumber:applicationNumber,
-    wagons: [
-      {
-        
-        wagonNumber: carriageNumber,
-        wagonType: carriageType,
-        workPlace: currentLocation ?? "",
-        works: [
-          "Выезд специалиста в депо",
-          "Дополнительные работы по демонтажу оборудования",
-          "Дополнительные Работы по монтажу оборудования",
-          "Проверка кабельных трасс",
-        ],
-        arrEquipment,
-      }
-    ],
+    applicationNumber: applicationNumber,
+    wagons: arrEquipment,
   };
 
-  createRequestForm(doc,resultJson);
+  createRequestForm(doc, resultJson);
   // Получаем PDF как Uint8Array
   const pdfBytes = doc.output("arraybuffer");
   const buffer = Buffer.from(pdfBytes);

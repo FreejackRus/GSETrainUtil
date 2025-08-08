@@ -14,8 +14,13 @@ export const getWorkLog = async (_req: Request, res: Response) => {
           include: {
             typeWork:  true,
             photos:    true,
-            equipment: true,
+            equipment: {
+              include: {
+                carriage: true
+              } 
+            },
           }
+          
         },
         completedJob:    true,
         currentLocation: true,
@@ -41,6 +46,7 @@ export const getWorkLog = async (_req: Request, res: Response) => {
         typeWork:     re.typeWork?.name                || "—",
         serialNumber: re.equipment?.serialNumber       || "—",
         macAddress:   re.equipment?.macAddress         || "—",
+      carriageNumber : re.equipment.carriage?.number || '-',
         photos:       re.photos.map(p => ({
           type: p.photoType,
           path: p.photoPath,
@@ -186,7 +192,11 @@ export const getWorkLogById = async (req: Request, res: Response) => {
           include: {
             typeWork:  true,
             photos:    true,
-            equipment: true
+            equipment:  {
+              include: {
+                carriage: true
+              } 
+            },
           }
         },
         completedJob:    true,
@@ -213,6 +223,7 @@ export const getWorkLogById = async (req: Request, res: Response) => {
       typeWork:     re.typeWork?.name              || "—",
       serialNumber: re.equipment?.serialNumber     || "—",
       macAddress:   re.equipment?.macAddress       || "—",
+      carriageNumber : re.equipment.carriage?.number || '-',
       photos:       re.photos.map(p => ({
         type: p.photoType,
         path: p.photoPath,
