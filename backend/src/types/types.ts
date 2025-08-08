@@ -1,14 +1,20 @@
 export interface equipmentDetails {
   macAddress?: string;
-  quantity?: number;
   serialNumber?: string;
   carriageNumber?: string;
-  type?: string;
+  name: string;
+  typeWork: string;
+  carriageType?:string
 }[];
 
 export interface ResponseJson {
   applicationNumber: number;
-  carriageNumber: string;
+  carriageNumbers: {
+    number: string;
+    type: string;
+    train: string;
+    photo: string;
+}[];
   carriageType: string;
   equipmentTypes: string[];
   countEquipments: number[];
