@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Paper,
@@ -668,7 +668,6 @@ export const WorkLogPage = () => {
               <MenuItem value="Скачать">Скачать</MenuItem>
               <MenuItem value="Заявка">Заявка</MenuItem>
               <MenuItem value="Акт демонтажа/монтажа">Акт демонтажа/монтажа</MenuItem>
-              <MenuItem value="Акт выполненных работ">Акт выполненных работ </MenuItem>
               <MenuItem value="Технический акт">Технический акт</MenuItem>
             </Select>
           </Box>
