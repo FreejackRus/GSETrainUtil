@@ -9,17 +9,12 @@ async function checkRequestEquipment() {
     // Проверяем все заявки с оборудованием
     const requestsWithEquipment = await prisma.request.findMany({
       include: {
-        requestEquipment: {
+        requestEquipments: {
           include: {
-            equipment: {
-              include: {
-                photos: true
-              }
-            }
+            equipment: true
           }
         },
-        typeWork: true,
-        train: true,
+        requestTrains: true,
         requestCarriages: {
           include: {
             carriage: {
@@ -53,7 +48,7 @@ async function checkRequestEquipment() {
       if (hasEquipment) {
         request.requestEquipment.forEach((re: any) => {
           console.log(`  - ${re.equipment.type} (S/N: ${re.equipment.serialNumber || 'нет'}, MAC: ${re.equipment.macAddress || 'нет'}, Кол-во: ${re.quantity})`);
-          console.log(`  - Фотографий: ${re.equipment.photos.length}`);
+          // console.log(`  - Фотографий: ${re.equipment.photos.length}`);
         });
       }
     });
@@ -66,7 +61,7 @@ async function checkRequestEquipment() {
     // Проверяем таблицу equipment отдельно
     const allEquipment = await prisma.equipment.findMany({
       include: {
-        photos: true,
+        // photos: true,
         carriage: true
       }
     });

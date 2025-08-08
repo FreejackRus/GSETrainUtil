@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 // Настройки импорта
-const EXCEL_FILE_PATH = './Перечень работ по составам (1).xlsx';
+const EXCEL_FILE_PATH = './perechen.xlsx';
 const SHEET_NAME = 'Journal';
 const DEFAULT_COMPLETED_JOB_NAME = 'Перемена';
 const DEFAULT_CURRENT_LOCATION_NAME = 'Главный депо';

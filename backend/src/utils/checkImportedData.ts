@@ -22,11 +22,11 @@ async function checkImportedData() {
           },
         },
         // Оборудование в заявке + тип работ + фото в запросе + справочник устройств
-        requestEquipment: {
+        requestEquipments: {
           include: {
             typeWork:  true,
             photos:    true,
-            equipment: { include: { device: true } },
+            equipment: true,
           },
         },
         completedJob:    true,
@@ -59,15 +59,14 @@ async function checkImportedData() {
       }
 
       // Оборудование в заявке
-      console.log(`- Всего позиций оборудования: ${first.requestEquipment.length}`);
-      if (first.requestEquipment.length > 0) {
-        const re = first.requestEquipment[0];
+      console.log(`- Всего позиций оборудования: ${first.requestEquipments.length}`);
+      if (first.requestEquipments.length > 0) {
+        const re = first.requestEquipments[0];
         console.log('  Пример позиции:');
         console.log(`    - Equipment ID: ${re.equipmentId}`);
         console.log(`    - Название: ${re.equipment?.name || 'не указано'}`);
-        console.log(`    - Тип устройства: ${re.equipment?.device?.name || 'не указано'}`);
+        console.log(`    - Тип устройства: ${re.equipment?.name || 'не указано'}`);
         console.log(`    - Тип работ: ${re.typeWork?.name || 'не указан'}`);
-        console.log(`    - Количество: ${re.quantity}`);
         console.log(`    - Фото в запросе: ${re.photos.map(p => p.photoType).join(', ') || 'нет'}`);
       }
 
@@ -80,7 +79,6 @@ async function checkImportedData() {
     const equipment = await prisma.equipment.findMany({
       include: {
         carriage: { include: { train: true } },
-        device:   true,
       },
     });
 
@@ -90,7 +88,7 @@ async function checkImportedData() {
       console.log('\nПример оборудования:');
       console.log(`- ID: ${eq.id}`);
       console.log(`- Название: ${eq.name}`);
-      console.log(`- Тип устройства (device): ${eq.device?.name || 'не указано'}`);
+      console.log(`- Тип устройства (device): ${eq?.name || 'не указано'}`);
       console.log(`- S/N: ${eq.serialNumber || 'не указан'}`);
       console.log(`- MAC: ${eq.macAddress || 'не указан'}`);
       console.log(`- Последнее обслуживание: ${eq.lastService?.toISOString() || 'не указано'}`);
@@ -98,14 +96,13 @@ async function checkImportedData() {
     }
 
     // 3. Проверяем справочники
-    const [typeWorkList, trains, carriages, completedJobs, currentLocations, users, devices] = await Promise.all([
+    const [typeWorkList, trains, carriages, completedJobs, currentLocations, users] = await Promise.all([
       prisma.typeWork.findMany(),
       prisma.train.findMany(),
       prisma.carriage.findMany(),
       prisma.completedJob.findMany(),
       prisma.currentLocation.findMany(),
       prisma.user.findMany(),
-      prisma.device.findMany(),
     ]);
 
     console.log('\nСправочники:');
@@ -115,7 +112,6 @@ async function checkImportedData() {
     console.log(`- Выполненные работы: ${completedJobs.length}`);
     console.log(`- Местоположения: ${currentLocations.length}`);
     console.log(`- Пользователи: ${users.length}`);
-    console.log(`- Типы устройств (Device): ${devices.length}`);
   } catch (error) {
     console.error('Ошибка при проверке данных:', error);
   } finally {

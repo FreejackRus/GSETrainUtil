@@ -9,7 +9,7 @@ async function checkRequest() {
       include: {
         requestTrains:    true,
         requestCarriages: true,
-        requestEquipment: {
+        requestEquipments: {
           include: { photos: true, typeWork: true }
         },
       },
@@ -29,7 +29,7 @@ async function checkRequest() {
     
     console.log('\nВсе заявки:');
     allRequests.forEach(req => {
-      console.log(`ID: ${req.id}, Номер: ${req.applicationNumber}, UserID: ${req.userId}, Статус: ${req.status}`);
+      console.log(`ID: ${req.id}, Номер: ${req.id}, UserID: ${req.userId}, Статус: ${req.status}`);
     });
     
   } catch (error) {
