@@ -2,8 +2,8 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 ARG BACKEND_PORT
-ENV VITE_API_BASE_URL=http://localhost:${BACKEND_PORT}/api/v1
-ENV VITE_API_STORAGE_PHOTOS_URL=http://localhost:${BACKEND_PORT}/uploads
+ENV VITE_API_BASE_URL=http://10.10.36.35:${BACKEND_PORT}/api/v1
+ENV VITE_API_STORAGE_PHOTOS_URL=http://10.10.36.35:${BACKEND_PORT}/uploads
 
 COPY package.json package-lock.json ./
 RUN npm install
