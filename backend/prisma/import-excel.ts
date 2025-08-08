@@ -95,7 +95,8 @@ async function main() {
 
     // 6. Обработка каждой валидной строки
     for (const row of validRows) {
-        const requestId = Number(row.getCell('B').value);
+        const dateValue = row.getCell('A').value;
+        const date = dateValue instanceof Date ? dateValue : null;        const requestId = Number(row.getCell('B').value);
         const typeWorkName = String(row.getCell('C').value);
         const trainNumber = String(row.getCell('D').value);
         const carriageType = String(row.getCell('E').value);
@@ -155,7 +156,7 @@ async function main() {
             if (existing) {
                 equipmentId = existing.id;
             } else {
-                const eq = await prisma.equipment.create({ data: { name: equipmentName, serialNumber, macAddress, carriageId } });
+                const eq = await prisma.equipment.create({ data: { name: equipmentName, serialNumber, macAddress, carriageId, lastService: date } });
                 equipmentId = eq.id;
             }
             equipmentMap.set(equipmentKey, equipmentId);
