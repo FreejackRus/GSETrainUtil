@@ -13,7 +13,19 @@ import {
   TableRow,
   Table,
   TableHead,
+  Grid,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
+import {
+  Train as TrainIcon,
+  ExpandMore as ExpandMoreIcon,
+  Search as SearchIcon,
+} from '@mui/icons-material';
 import {
   ArrowBack as ArrowBackIcon,
   Assignment as AssignmentIcon,
@@ -24,44 +36,63 @@ import { deviceApi, type Device } from '../../../entities';
 import { useEffect, useState } from 'react';
 export const EquipmentLog = () => {
   const navigate = useNavigate();
-  const [equipmentList, serEquipmentList] = useState<Device[]>();
+  const [equipmentList, setEquipmentList] = useState<Device[]>([]);
+  const [filteredList, setFilteredList] = useState<Device[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchDeviceCount = async () => {
       try {
         const response = await deviceApi.getDevices();
-        console.log(response);
-
-        // Безопасная проверка структуры данных
-        if (response && response.data && Array.isArray(response.data)) {
-          serEquipmentList(response.data);
+        if (response?.data && Array.isArray(response.data)) {
+          setEquipmentList(response.data);
+          setFilteredList(response.data); // сразу показываем все
         } else {
           console.warn('Неожиданная структура данных:', response);
-          serEquipmentList([]);
+          setEquipmentList([]);
+          setFilteredList([]);
         }
       } catch (error) {
         console.error('Error fetching device count:', error);
-        serEquipmentList([]);
+        setEquipmentList([]);
+        setFilteredList([]);
       }
     };
-
     fetchDeviceCount();
   }, []);
+
   const handleRefresh = async () => {
     try {
       const response = await deviceApi.getDevices();
-      // Безопасная проверка структуры данных
-      if (response && response.data && Array.isArray(response.data)) {
-        serEquipmentList(response.data);
+      if (response?.data && Array.isArray(response.data)) {
+        setEquipmentList(response.data);
+        setFilteredList(response.data);
       } else {
         console.warn('Неожиданная структура данных:', response);
-        serEquipmentList([]);
+        setEquipmentList([]);
+        setFilteredList([]);
       }
     } catch (error) {
       console.error('Error fetching device count:', error);
-      serEquipmentList([]);
+      setEquipmentList([]);
+      setFilteredList([]);
     }
   };
+
+  // Фильтрация по любому полю
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredList(equipmentList);
+      return;
+    }
+
+    const lowerTerm = searchTerm.toLowerCase();
+    const filtered = equipmentList.filter((item) =>
+      Object.values(item).some((val) => val?.toString().toLowerCase().includes(lowerTerm)),
+    );
+
+    setFilteredList(filtered);
+  }, [searchTerm, equipmentList]);
 
   return (
     <Container maxWidth="xl" className="work-log-page">
@@ -168,41 +199,63 @@ export const EquipmentLog = () => {
                 </Tooltip>
               </Box>
             </Box>
+
             {/* Таблица оборудования */}
-            <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Статус</TableCell>
-                    <TableCell>Название</TableCell>
-                    <TableCell>Серийный номер</TableCell>
-                    <TableCell>MAC</TableCell>
-                    <TableCell>Последнее обслуживание</TableCell>
-                    <TableCell>Тип вагона</TableCell>
-                    <TableCell>Номер вагона</TableCell>
-                    <TableCell>Номер поезда</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {equipmentList?.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        {item.carriageNumber ? 'Установлено' : 'Не установлено'}
-                      </TableCell>
-                      <TableCell>{item.name || '-'}</TableCell>
-                      <TableCell>{item.snNumber || '-'}</TableCell>
-                      <TableCell>{item.mac || '-'}</TableCell>
-                      <TableCell>{new Date(item.lastService).toLocaleString() || '-'}</TableCell>
-                      <TableCell>{item.carriageType || '-'}</TableCell>
-                      <TableCell>{item.carriageNumber || '-'}</TableCell>
-                      <TableCell>{item.trainNumber || '-'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
           </Box>
         </Paper>
+
+        <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+          <Grid container spacing={3} alignItems="center">
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                fullWidth
+                label="Поиск по оборудованию"
+                variant="outlined"
+                size="small"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                placeholder="Введите название, серийный номер, MAC..."
+              />
+            </Grid>
+          </Grid>
+        </Paper>
+        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Статус</TableCell>
+                <TableCell>Название</TableCell>
+                <TableCell>Серийный номер</TableCell>
+                <TableCell>MAC</TableCell>
+                <TableCell>Последнее обслуживание</TableCell>
+                <TableCell>Тип вагона</TableCell>
+                <TableCell>Номер вагона</TableCell>
+                <TableCell>Номер поезда</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredList?.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.carriageNumber ? 'Установлено' : 'Не установлено'}</TableCell>
+                  <TableCell>{item.name || '-'}</TableCell>
+                  <TableCell>{item.snNumber || '-'}</TableCell>
+                  <TableCell>{item.mac || '-'}</TableCell>
+                  <TableCell>{new Date(item.lastService).toLocaleString() || '-'}</TableCell>
+                  <TableCell>{item.carriageType || '-'}</TableCell>
+                  <TableCell>{item.carriageNumber || '-'}</TableCell>
+                  <TableCell>{item.trainNumber || '-'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
     </Container>
   );

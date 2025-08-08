@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-  // Add DevicesIcon import at the top of the file
+// Add DevicesIcon import at the top of the file
 import { Devices as DevicesIcon } from '@mui/icons-material';
 import {
   Container,
@@ -65,8 +65,11 @@ export const CarriagesPage = () => {
   const [filteredCarriages, setFilteredCarriages] = useState<Carriage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'installed' | 'not_installed' | 'partial'>('all');
-  const [searchTerm, setSearchTerm] = useState('');useEffect(() => {
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'installed' | 'not_installed' | 'partial'
+  >('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  useEffect(() => {
     const fetchCarriages = async () => {
       try {
         setLoading(true);
@@ -97,21 +100,24 @@ export const CarriagesPage = () => {
   }, []);
 
   // Получаем статус вагона на основе статуса оборудования
-  const getCarriageStatus = useCallback((carriage: Carriage): 'installed' | 'not_installed' | 'partial' => {
-    if (!carriage.equipment || carriage.equipment.length === 0) {
-      return 'not_installed';
-    }
+  const getCarriageStatus = useCallback(
+    (carriage: Carriage): 'installed' | 'not_installed' | 'partial' => {
+      if (!carriage.equipment || carriage.equipment.length === 0) {
+        return 'not_installed';
+      }
 
-    const installedEquipment = carriage.equipment.filter(eq => isEquipmentInstalled(eq.status));
-    
-    if (installedEquipment.length === 0) {
-      return 'not_installed';
-    } else if (installedEquipment.length === carriage.equipment.length) {
-      return 'installed';
-    } else {
-      return 'partial';
-    }
-  }, [isEquipmentInstalled]);
+      const installedEquipment = carriage.equipment.filter((eq) => isEquipmentInstalled(eq.status));
+
+      if (installedEquipment.length === 0) {
+        return 'not_installed';
+      } else if (installedEquipment.length === carriage.equipment.length) {
+        return 'installed';
+      } else {
+        return 'partial';
+      }
+    },
+    [isEquipmentInstalled],
+  );
 
   // Фильтрация и поиск
   useEffect(() => {
@@ -119,7 +125,7 @@ export const CarriagesPage = () => {
 
     // Фильтрация по статусу
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(carriage => {
+      filtered = filtered.filter((carriage) => {
         const status = getCarriageStatus(carriage);
         return status === statusFilter;
       });
@@ -128,31 +134,40 @@ export const CarriagesPage = () => {
     // Поиск по номеру вагона, MAC-адресу и серийному номеру
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(carriage => {
+      filtered = filtered.filter((carriage) => {
         // Поиск по номеру вагона
-        if (carriage.carriageNumber && carriage.carriageNumber.toLowerCase().includes(searchLower)) {
+        if (
+          carriage.carriageNumber &&
+          carriage.carriageNumber.toLowerCase().includes(searchLower)
+        ) {
           return true;
         }
 
         // Поиск по оборудованию
-        return carriage.equipment && carriage.equipment.some(equipment => {
-          // Поиск по серийному номеру
-          if (equipment.snNumber && equipment.snNumber.toLowerCase().includes(searchLower)) {
-            return true;
-          }
+        return (
+          carriage.equipment &&
+          carriage.equipment.some((equipment) => {
+            // Поиск по серийному номеру
+            if (equipment.snNumber && equipment.snNumber.toLowerCase().includes(searchLower)) {
+              return true;
+            }
 
-          // Поиск по MAC-адресу только для точек доступа и маршрутизаторов
-          if (equipment.mac && equipment.type &&
-              (equipment.type.toLowerCase().includes('точка доступа') || 
-               equipment.type.toLowerCase().includes('маршрутизатор') ||
-               equipment.type.toLowerCase().includes('router') ||
-               equipment.type.toLowerCase().includes('access point')) &&
-              equipment.mac.toLowerCase().includes(searchLower)) {
-            return true;
-          }
+            // Поиск по MAC-адресу только для точек доступа и маршрутизаторов
+            if (
+              equipment.mac &&
+              equipment.type &&
+              (equipment.type.toLowerCase().includes('точка доступа') ||
+                equipment.type.toLowerCase().includes('маршрутизатор') ||
+                equipment.type.toLowerCase().includes('router') ||
+                equipment.type.toLowerCase().includes('access point')) &&
+              equipment.mac.toLowerCase().includes(searchLower)
+            ) {
+              return true;
+            }
 
-          return false;
-        });
+            return false;
+          })
+        );
       });
     }
 
@@ -177,7 +192,7 @@ export const CarriagesPage = () => {
 
   // Проверяем, есть ли в вагоне неустановленное оборудование
   const hasNotInstalledEquipment = (carriage: Carriage): boolean => {
-    return carriage.equipment.some(eq => !isEquipmentInstalled(eq.status));
+    return carriage.equipment.some((eq) => !isEquipmentInstalled(eq.status));
   };
 
   const handleStatusFilterChange = (event: SelectChangeEvent) => {
@@ -208,12 +223,16 @@ export const CarriagesPage = () => {
     );
   }
 
-  const installedCount = carriages.reduce((total, carriage) => 
-    total + carriage.equipment.filter(eq => isEquipmentInstalled(eq.status)).length, 0
+  const installedCount = carriages.reduce(
+    (total, carriage) =>
+      total + carriage.equipment.filter((eq) => isEquipmentInstalled(eq.status)).length,
+    0,
   );
 
-  const notInstalledCount = carriages.reduce((total, carriage) => 
-    total + carriage.equipment.filter(eq => !isEquipmentInstalled(eq.status)).length, 0
+  const notInstalledCount = carriages.reduce(
+    (total, carriage) =>
+      total + carriage.equipment.filter((eq) => !isEquipmentInstalled(eq.status)).length,
+    0,
   );
 
   return (
@@ -226,13 +245,13 @@ export const CarriagesPage = () => {
               startIcon={<ArrowBackIcon />}
               onClick={() => navigate('/')}
               variant="contained"
-              sx={{ 
-                mr: 2, 
+              sx={{
+                mr: 2,
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 color: 'primary.main',
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 1)',
-                }
+                },
               }}
             >
               Назад
@@ -247,10 +266,10 @@ export const CarriagesPage = () => {
               <Typography variant="h6" className="carriages-page__subtitle">
                 Просмотр списка вагонов и установленного в них оборудования
               </Typography>
-              <Chip 
-                label={`Всего вагонов: ${carriages.length}`} 
-                color="primary" 
-                size="small" 
+              <Chip
+                label={`Всего вагонов: ${carriages.length}`}
+                color="primary"
+                size="small"
                 className="carriages-page__status-chip"
               />
             </Box>
@@ -259,19 +278,17 @@ export const CarriagesPage = () => {
 
         {/* Статистика */}
         <Grid container spacing={3} className="carriages-page__stats">
-          <Grid size={{xs:12,sm:6,md:3}} >
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card elevation={4}>
               <CardContent>
                 <Typography variant="h6" color="primary">
                   Всего вагонов
                 </Typography>
-                <Typography variant="h4">
-                  {carriages.length}
-                </Typography>
+                <Typography variant="h4">{carriages.length}</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{xs:12,sm:6,md:3}} >
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card elevation={4}>
               <CardContent>
                 <Typography variant="h6" color="primary">
@@ -283,27 +300,23 @@ export const CarriagesPage = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{xs:12,sm:6,md:3}} >
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card elevation={4}>
               <CardContent>
                 <Typography variant="h6" color="success.main">
                   Установлено
                 </Typography>
-                <Typography variant="h4">
-                  {installedCount}
-                </Typography>
+                <Typography variant="h4">{installedCount}</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{xs:12,sm:6,md:3}} >
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card elevation={4}>
               <CardContent>
                 <Typography variant="h6" color="error.main">
                   Не установлено
                 </Typography>
-                <Typography variant="h4">
-                  {notInstalledCount}
-                </Typography>
+                <Typography variant="h4">{notInstalledCount}</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -312,7 +325,7 @@ export const CarriagesPage = () => {
         {/* Панель управления */}
         <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
           <Grid container spacing={3} alignItems="center">
-            <Grid size={{xs:12,sm:6}} >
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Поиск по номеру вагона, MAC-адресу или серийному номеру"
@@ -330,7 +343,7 @@ export const CarriagesPage = () => {
                 placeholder="Введите номер вагона, MAC-адрес или серийный номер..."
               />
             </Grid>
-            <Grid  size={{xs:12,md:4}} >
+            <Grid size={{ xs: 12, md: 4 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>Фильтр по статусу</InputLabel>
                 <Select
@@ -345,7 +358,7 @@ export const CarriagesPage = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{xs:12,md:4}} >
+            <Grid size={{ xs: 12, md: 4 }}>
               <Box display="flex" justifyContent="flex-end">
                 <Typography variant="body2" color="text.secondary">
                   {filteredCarriages.length} из {carriages.length}
@@ -364,14 +377,16 @@ export const CarriagesPage = () => {
           </Box>
 
           {filteredCarriages.map((carriage) => (
-            <Accordion 
-              key={carriage.carriageNumber} 
+            <Accordion
+              key={carriage.carriageNumber}
               className="carriages-page__accordion"
               sx={{
                 backgroundColor: hasNotInstalledEquipment(carriage) ? '#ffebee' : 'inherit',
                 '&:before': {
-                  backgroundColor: hasNotInstalledEquipment(carriage) ? '#ffcdd2' : 'rgba(0, 0, 0, 0.12)',
-                }
+                  backgroundColor: hasNotInstalledEquipment(carriage)
+                    ? '#ffcdd2'
+                    : 'rgba(0, 0, 0, 0.12)',
+                },
               }}
             >
               <AccordionSummary
@@ -379,31 +394,25 @@ export const CarriagesPage = () => {
                 className="carriages-page__accordion-summary"
               >
                 <Box display="flex" alignItems="center" gap={2} width="100%">
-                  <Avatar sx={{ 
-                    backgroundColor: hasNotInstalledEquipment(carriage) ? '#f44336' : 'primary.main' 
-                  }}>
+                  <Avatar
+                    sx={{
+                      backgroundColor: hasNotInstalledEquipment(carriage)
+                        ? '#f44336'
+                        : 'primary.main',
+                    }}
+                  >
                     <TrainIcon />
                   </Avatar>
                   <Box flex={1}>
-                    <Typography variant="h6">
-                      Вагон № {carriage.carriageNumber}
-                    </Typography>
+                    <Typography variant="h6">Вагон № {carriage.carriageNumber}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       Тип: {carriage.carriageType} • Оборудования: {carriage.equipment.length}
                     </Typography>
                   </Box>
-                  <Box display="flex" flexWrap={"wrap"} gap={1}>
-                    <Chip 
-                      label={`${carriage.equipment.length} ед.`} 
-                      color="primary" 
-                      size="small" 
-                    />
+                  <Box display="flex" flexWrap={'wrap'} gap={1}>
+                    <Chip label={`${carriage.equipment.length} ед.`} color="primary" size="small" />
                     {hasNotInstalledEquipment(carriage) && (
-                      <Chip 
-                        label="Требует внимания" 
-                        color="error" 
-                        size="small" 
-                      />
+                      <Chip label="Требует внимания" color="error" size="small" />
                     )}
                   </Box>
                 </Box>
@@ -432,10 +441,10 @@ export const CarriagesPage = () => {
                           <TableCell>{equipment.snNumber || 'Не указан'}</TableCell>
                           <TableCell>{equipment.mac || 'Не указан'}</TableCell>
                           <TableCell>
-                            <Chip 
-                              label={getEquipmentStatusLabel(equipment.status)} 
-                              color={getEquipmentStatusColor(equipment.status)} 
-                              size="small" 
+                            <Chip
+                              label={getEquipmentStatusLabel(equipment.status)}
+                              color={getEquipmentStatusColor(equipment.status)}
+                              size="small"
                             />
                           </TableCell>
                           <TableCell>{formatDate(equipment.lastService)}</TableCell>
