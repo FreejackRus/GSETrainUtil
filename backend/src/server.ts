@@ -30,7 +30,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (origin === clientUrl) {
+      if (origin === clientUrl || origin === "http://localhost:5173") {
         return callback(null, true);
       }
       callback(new Error(`CORS: Origin ${origin} не разрешён`));

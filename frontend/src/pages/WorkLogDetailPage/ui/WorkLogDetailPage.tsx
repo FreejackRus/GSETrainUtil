@@ -18,9 +18,6 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  FormControl,
-  Select,
-  MenuItem,
   Divider,
   Alert,
   CircularProgress,
@@ -43,13 +40,11 @@ import {
   AccessTime as AccessTimeIcon,
   Visibility as VisibilityIcon,
   CalendarToday as CalendarTodayIcon,
-  Work as WorkIcon,
 } from '@mui/icons-material';
 import { workLogApi } from '../../../entities/worklog/api/workLogApi';
 import type { WorkLogEntry } from '../../../entities/worklog/model/types';
 import './WorkLogDetailPage.css';
 import { FALLBACK_DATA, referenceApi } from '../../../shared';
-import { API_BASE_URL } from '../../../shared/api/base';
 
 export const WorkLogDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

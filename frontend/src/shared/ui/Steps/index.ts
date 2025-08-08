@@ -4,7 +4,7 @@ export { StepCarriageType } from './StepCarriageType/StepCarriageType';
 export { StepCarriageNumber } from './StepCarriageNumber/StepCarriageNumber';
 export { StepCarriages } from './StepCarriages';
 export { StepEquipmentWithPhoto } from './StepEquipmentWithPhoto/StepEquipmentWithPhoto';
-export { StepSerialNumber } from './StepSerialNumber/StepSerialNumber';
+// export { StepSerialNumber } from './StepSerialNumber/StepSerialNumber';
 export { StepMacAddress } from './StepMacAddress/StepMacAddress';
 export { StepCount } from './StepCount/StepCount';
 export { StepWorkCompleted } from './StepWorkCompleted/StepWorkCompleted';

@@ -1,4 +1,3 @@
-import { Build } from "@mui/icons-material";
 import { AutocompleteField } from "../../AutocompleteField";
 import "./StepWorkType.css";
 

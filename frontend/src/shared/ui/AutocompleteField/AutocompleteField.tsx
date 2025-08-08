@@ -9,7 +9,8 @@ import {
   Typography,
   ClickAwayListener,
   InputAdornment,
-  Collapse
+  Collapse,
+  ListItemButton
 } from '@mui/material';
 import { Search, TrendingUp } from '@mui/icons-material';
 import './AutocompleteField.css';
@@ -23,6 +24,8 @@ interface AutocompleteFieldProps {
   size?: 'small' | 'medium';
   fullWidth?: boolean;
   required?: boolean;
+  error?: boolean;
+  helperText?:string
 }
 
 export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
@@ -130,7 +133,7 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
     );
   };
 
-  const showDropdown = isOpen && (filteredOptions.length > 0 || inputValue.trim());
+  const showDropdown = isOpen && (filteredOptions.length > 0 || !!inputValue.trim());
 
   return (
     <ClickAwayListener onClickAway={handleClickAway}>
@@ -161,9 +164,8 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
             <List className="search-results">
               {filteredOptions.length > 0 ? (
                 filteredOptions.map((option, index) => (
-                  <ListItem
+                  <ListItemButton
                     key={index}
-                    component="button"
                     selected={index === highlightedIndex}
                     onClick={() => handleOptionSelect(option)}
                     className={`search-result-item ${index === highlightedIndex ? 'highlighted' : ''}`}
@@ -173,7 +175,7 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
                       primary={highlightMatch(option, inputValue)}
                       className="search-result-text"
                     />
-                  </ListItem>
+                  </ListItemButton>
                 ))
               ) : inputValue.trim() ? (
                 <ListItem className="no-results">

@@ -12,10 +12,6 @@ import {
   AccordionSummary,
   AccordionDetails,
   Chip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Alert,
   InputAdornment,
 } from '@mui/material';
@@ -23,14 +19,13 @@ import {
   Add as AddIcon,
   Delete as DeleteIcon,
   ExpandMore as ExpandMoreIcon,
-  PhotoCamera as PhotoCameraIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
 } from '@mui/icons-material';
-import { CarriageFormItem, EquipmentFormItem } from '../../../entities/application/model/types';
 import { PhotoUpload } from '../../PhotoUpload/PhotoUpload';
 import { AutocompleteField } from '../../AutocompleteField/AutocompleteField';
 import { referenceApi } from '../../../api/reference';
+import type { CarriageFormItem, EquipmentFormItem } from '../../../../entities/application/model/types';
 
 interface StepCarriagesProps {
   carriages: CarriageFormItem[];
@@ -401,9 +396,6 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                             </ul>
                           </Alert>
                         )}
-                        {console.log(equipmentTypes)}
-
-                        
                         <Grid container spacing={2} mb={2}>
                           <Grid size={{ xs: 12, md: 6 }}>
                             <AutocompleteField
@@ -496,7 +488,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                               <Grid size={{ xs: 12, md: 4 }}>
                                 <PhotoUpload
                                   label="Фото оборудования"
-                                  photo={equipment.photos.equipment}
+                                  photo={equipment.photos.equipment || null} 
                                   onPhotoChange={(file) =>
                                     handleEquipmentPhotoChange(
                                       carriageIndex,
@@ -511,7 +503,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                               <Grid size={{ xs: 12, md: 4 }}>
                                 <PhotoUpload
                                   label="Фото серийного номера"
-                                  photo={equipment.photos.serial}
+                                  photo={equipment.photos.serial|| null}
                                   onPhotoChange={(file) =>
                                     handleEquipmentPhotoChange(
                                       carriageIndex,
@@ -527,7 +519,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
                                 <Grid size={{ xs: 12, md: 4 }}>
                                   <PhotoUpload
                                     label="Фото MAC-адреса"
-                                    photo={equipment.photos.mac}
+                                    photo={equipment.photos.mac|| null}
                                     onPhotoChange={(file) =>
                                       handleEquipmentPhotoChange(
                                         carriageIndex,

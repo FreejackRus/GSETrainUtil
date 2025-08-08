@@ -99,7 +99,7 @@ const handleLogoutAdmin = () => {
     navigate("/")
     onLogout();
   };
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     if (newValue === 0) {
       navigate('/create-application');
     } else if (newValue === 1) {

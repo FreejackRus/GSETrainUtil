@@ -1,5 +1,4 @@
 import React from 'react';
-import { LocationOn } from '@mui/icons-material';
 import { AutocompleteField } from '../../AutocompleteField';
 import './StepLocation.css';
 

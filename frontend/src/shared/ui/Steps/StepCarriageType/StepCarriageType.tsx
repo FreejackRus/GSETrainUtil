@@ -1,5 +1,4 @@
 import React from 'react';
-import { DirectionsCar } from '@mui/icons-material';
 import { AutocompleteField } from '../../AutocompleteField';
 import './StepCarriageType.css';
 

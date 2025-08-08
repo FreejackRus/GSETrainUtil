@@ -1,10 +1,11 @@
 import React from 'react';
-import { TextField, Box, Typography, Alert } from "@mui/material";
-import { PhotoUpload } from "../../PhotoUpload";
+import { TextField, Box, Typography, Alert } from '@mui/material';
+import { PhotoUpload } from '../../PhotoUpload';
 interface ApplicationFormData {
   macAddress: string;
+  macPhoto: File | null;
 }
-import "./StepMacAddress.css";
+import './StepMacAddress.css';
 
 export const StepMacAddress = ({
   formData,
@@ -35,12 +36,11 @@ export const StepMacAddress = ({
       <Typography variant="h6" className="step-mac-address__title">
         🌐 MAC-адрес (если есть)
       </Typography>
-      
+
       <Alert severity="info" sx={{ mt: 2, mb: 3 }}>
-        MAC-адрес указывается только для сетевого оборудования. 
-        Формат: XX:XX:XX:XX:XX:XX
+        MAC-адрес указывается только для сетевого оборудования. Формат: XX:XX:XX:XX:XX:XX
       </Alert>
-      
+
       <TextField
         fullWidth
         label="MAC-адрес"
@@ -51,7 +51,7 @@ export const StepMacAddress = ({
         sx={{ mb: 3 }}
         helperText="Введите MAC-адрес в формате XX:XX:XX:XX:XX:XX"
       />
-      
+
       <PhotoUpload
         photo={formData.macPhoto || null}
         onPhotoChange={handlePhotoChange}

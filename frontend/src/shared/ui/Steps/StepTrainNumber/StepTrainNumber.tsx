@@ -1,4 +1,3 @@
-import { Train } from "@mui/icons-material";
 import { AutocompleteField } from "../../AutocompleteField";
 import "./StepTrainNumber.css";
 
