@@ -296,11 +296,14 @@ export const createPdfActDisEquipment = async (
   const buffer = Buffer.from(pdfBytes);
   // Формируем путь к файлу
 
-  const filePath = path.resolve(
-    outputDir,
-    `Акт демонтажа№${applicationNumber}.pdf`
-  );
+  // гарантируем каталог
+  await fs.mkdir(outputDir, { recursive: true });
 
-  // Записываем файл
+  // итоговый путь (в одном месте)
+  const fileName = `Акт демонтажа №${String(applicationNumber).trim() || "unknown"}.pdf`;
+  const filePath = path.resolve(outputDir, fileName);
+
   await fs.writeFile(filePath, buffer);
+
+  return filePath; // важно: возвращаем, чтобы контроллер скачал именно этот файл
 };

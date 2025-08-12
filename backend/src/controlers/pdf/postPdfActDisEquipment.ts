@@ -3,26 +3,31 @@ import { createPdfActDisEquipment } from "../../pdfGenerate/generate/actDisEquip
 import { testJsonActDisEquipment } from "../../pdfGenerate/utils/testJson/testJsonActDisEquipment";
 import path from "path";
 import fs from "fs";
+import {resolvePdfDir} from "../../config/pdf";
 
 export const postPdfActDisEquipment = async (req: Request, res: Response) => {
   const body = req.body;
   console.log(body);
    try {
-    // Генерация PDF (или любого файла)
-    await createPdfActDisEquipment(req.body, "./src/pdfFiles");
+       const PDF_DIR = resolvePdfDir();
+       const fileName = `Акт демонтажа №${String(body.applicationNumber).trim() || "unknown"}.pdf`;
 
-    // Название файла (то, что ты ожидаешь скачать)
-    const fileName = `Акт демонтажа№${req.body.applicationNumber}.pdf`;
-
-    // Путь к файлу на сервере
-    const filePath = path.resolve(__dirname, "../../pdfFiles", fileName);
-    console.log(filePath);
+       // генерим прямо в PDF_DIR, генератор вернёт полный путь
+       const filePath = await createPdfActDisEquipment(body, PDF_DIR);
+        console.log(filePath);
     
     // Проверка: файл существует?
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).send("Файл не найден");
-    }
+       if (!fs.existsSync(filePath)) {
+           // подстрахуемся на случай иного имени
+           const alt = path.resolve(PDF_DIR, fileName);
+           if (!fs.existsSync(alt)) {
+               return res.status(404).send("Файл не найден после генерации");
+           }
+       }
 
+       const encoded = encodeURIComponent(fileName);
+       res.setHeader("Content-Type", "application/pdf");
+       res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${encoded}`);
     // Отправка файла клиенту
     res.download(filePath, fileName, (err) => {
       if (err) {

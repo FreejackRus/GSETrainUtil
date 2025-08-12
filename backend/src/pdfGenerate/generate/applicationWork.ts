@@ -320,4 +320,6 @@ export const createPdfAppWork = async (
 
   // Записываем файл
   await fs.writeFile(filePath, buffer);
+
+  return filePath;
 };

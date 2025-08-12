@@ -4,27 +4,32 @@ import { testJsonTechnicalActAcceptance } from "../../pdfGenerate/utils/testJson
 import { formatRussianDate } from "../../pdfGenerate/utils/stringConvertDate";
 import path from "path";
 import fs from "fs";
+import {resolvePdfDir} from "../../config/pdf";
 
 export const postPdfTechnicalActAcceptance = async (
   req: Request,
   res: Response
 ) => {
   try {
-    await createTechnicalActAcceptance(req.body, "./src/pdfFiles");
+    const { trainNumber, applicationDate } = req.body || {};
+    if (!trainNumber || !applicationDate) {
+      return res.status(400).send("trainNumber и applicationDate обязательны");
+    }
 
-    // Название файла (то, что ты ожидаешь скачать)
-    const fileName = `${req.body.trainNumber} от ${formatRussianDate(
-      req.body.applicationDate
-    )}pdf`;
-
-    // Путь к файлу на сервере
-    const filePath = path.resolve(__dirname, "../../pdfFiles", fileName);
+    const pdfDir = resolvePdfDir();
+    // генератор создаёт и возвращает полный путь к файлу
+    const filePath = await createTechnicalActAcceptance(req.body, pdfDir);
+    const fileName = path.basename(filePath);
     console.log(filePath);
 
     // Проверка: файл существует?
     if (!fs.existsSync(filePath)) {
-      return res.status(404).send("Файл не найден");
+      return res.status(404).send("Файл не найден после генерации");
     }
+
+    const encoded = encodeURIComponent(fileName);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${encoded}`);
 
     // Отправка файла клиенту
     res.download(filePath, fileName, (err) => {

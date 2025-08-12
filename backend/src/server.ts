@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 app.use(upload.any());
 app.use(express.static('public'));
 
-const clientUrl = process.env.CLIENT_URL;
+const clientUrl = process.env.CLIENT_ORIGIN;
 if (!clientUrl) {
   throw new Error('❌ CLIENT_URL is not defined in .env');
 }

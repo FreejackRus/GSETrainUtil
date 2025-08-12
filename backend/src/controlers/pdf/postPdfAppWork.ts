@@ -3,24 +3,28 @@ import { createPdfAppWork } from "../../pdfGenerate/generate/applicationWork";
 import { testJsonAppWork } from "../../pdfGenerate/utils/testJson/testJsonAppWork";
 import path from "path";
 import fs from "fs";
+import {makePdfFilename, resolvePdfDir} from "../../config/pdf";
 
 export const postPdfAppWork = async (req: Request, res: Response) => {
   const body = req.body;
   // await createPdfAppWork(testJsonAppWork,"./src/pdfFiles");
 try {
-     await createPdfAppWork(body,"./src/pdfFiles");
+    const PDF_DIR = resolvePdfDir();
+    const fileName = makePdfFilename(body.applicationNumber);
 
-    // Название файла (то, что ты ожидаешь скачать)
-    const fileName = `Заявка_№${body.applicationNumber}.pdf`;
-
-    // Путь к файлу на сервере
-    const filePath = path.resolve(__dirname, "../../pdfFiles", fileName);
-    console.log(filePath);
+    const filePath = await createPdfAppWork(body, PDF_DIR);
 
     // Проверка: файл существует?
     if (!fs.existsSync(filePath)) {
-      return res.status(404).send("Файл не найден");
+        const alt = path.resolve(PDF_DIR, fileName);
+        if (!fs.existsSync(alt)) {
+            return res.status(404).send("Файл не найден после генерации");
+        }
     }
+
+    const encoded = encodeURIComponent(fileName);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${encoded}`);
 
     // Отправка файла клиенту
     res.download(filePath, fileName, (err) => {

@@ -34,6 +34,10 @@ interface Act {
   equipmentData: arrEquipment[];
 }
 
+function safeName(s: string) {
+  return String(s).replace(/[\\/:*?"<>|]+/g, "").trim();
+}
+
 function createAct(doc: jspdf.jsPDF, act: Act): void {
   // Добавляем шрифты один раз
   doc.addFileToVFS(
@@ -324,12 +328,14 @@ console.log(carriageNumbers);
   // Получаем PDF как Uint8Array
   const pdfBytes = doc.output("arraybuffer");
   const buffer = Buffer.from(pdfBytes);
-  // Формируем путь к файлу
-  const filePath = path.resolve(
-    outputDir,
-    `${trainNumber} от ${formatRussianDate(applicationDate)}pdf`
-  );
+  // гарантируем каталог
+  await fs.mkdir(outputDir, { recursive: true });
 
-  // Записываем файл
+  // имя файла: "<поезд> от <дата>.pdf"
+  const prettyDate = formatRussianDate(applicationDate);
+  const fileName = `${safeName(trainNumber)} от ${safeName(prettyDate)}.pdf`;
+  const filePath = path.resolve(outputDir, fileName);
+
   await fs.writeFile(filePath, buffer);
+  return filePath;
 };
