@@ -1,23 +1,38 @@
 import type { ApplicationStep, ApplicationFormData } from '../../entities/application';
 
-export const APPLICATION_STEPS: ApplicationStep[] = [
-  { key: "workType", label: "Тип работ", type: "select" },
-  { key: "trainNumber", label: "Номер поезда", type: "select" },
-  { key: "carriages", label: "Вагоны и оборудование", type: "carriages" }, // Объединенный шаг для вагонов и оборудования
+// export const APPLICATION_STEPS: ApplicationStep[] = [
+//   { key: "workType", label: "Тип работ", type: "select" },
+//   { key: "trainNumber", label: "Номер поезда", type: "select" },
+//   { key: "carriages", label: "Вагоны и оборудование", type: "carriages" }, // Объединенный шаг для вагонов и оборудования
+//   { key: "workCompleted", label: "Работы выполнены", type: "select" },
+//   { key: "location", label: "Текущее место (депо/станция)", type: "select" },
+//   { key: "finalPhoto", label: "Общая фотография", type: "photo" },
+// ];
+
+export const APPLICATION_STEPS = [
+  { key: "carriages", label: "Поезда, вагоны и оборудование", type: "carriages" },
   { key: "workCompleted", label: "Работы выполнены", type: "select" },
   { key: "location", label: "Текущее место (депо/станция)", type: "select" },
-  { key: "finalPhoto", label: "Общая фотография", type: "photo" },
-];
+] as const;
+
+
+// export const INITIAL_FORM_DATA: ApplicationFormData = {
+//   workType: '',
+//   trainNumber: '',
+//   carriages: [], // Массив вагонов
+//   workCompleted: '',
+//   location: '',
+//
+//   // Пути к изображениям
+//   photo: null
+// };
 
 export const INITIAL_FORM_DATA: ApplicationFormData = {
-  workType: '',
-  trainNumber: '',
-  carriages: [], // Массив вагонов
-  workCompleted: '',
-  location: '',
-  
-  // Пути к изображениям
-  photo: null
+  trains: [
+    { trainNumber: "", carriages: [] }, // стартуем с одного поезда
+  ],
+  workCompleted: "",
+  location: "",
 };
 
 export const FALLBACK_DATA = {

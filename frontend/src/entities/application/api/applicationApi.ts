@@ -2,180 +2,161 @@ import { apiClient } from '../../../shared/api';
 import type { Application, CreateApplicationRequest } from '../model/types';
 
 export const applicationApi = {
-//   create: async (data: CreateApplicationRequest): Promise<Application> => {
-//     try {
-//       console.log("=== API: Отправка запроса на создание заявки ===");
-//       console.log("URL:", '/applications');
-//       console.log("Данные запроса:", data);
-
-//       // TODO: сделать через абстрактную функцию
-//       const fd = new FormData();
-
-//       if (data.id != null) fd.append('id', String(data.id));
-//       if (data.applicationDate) fd.append('applicationDate', data.applicationDate);
-//       if (data.typeWork) fd.append('typeWork', data.typeWork);
-//       if (data.trainNumber) fd.append('trainNumber', data.trainNumber);
-//       // if (data.carriageType) fd.append('carriageType', data.carriageType);
-//       // if (data.carriageNumber) fd.append('carriageNumber', data.carriageNumber);
-//       if (data.completedJob) fd.append('completedJob', data.completedJob);
-//       if (data.currentLocation) fd.append('currentLocation', data.currentLocation);
-//       fd.append('userId',   String(data.userId));
-//       fd.append('userName', data.userName);
-//       fd.append('userRole', data.userRole);
-//       fd.append('status',   data.status);
-
-//       data.equipment.forEach((item, index) => {
-//         fd.append(`equipment[${index}][equipmentType]`, item.equipmentType);
-//         fd.append(`equipment[${index}][serialNumber]`, item.serialNumber);
-//         fd.append(`equipment[${index}][macAddress]`, item.macAddress);
-//         fd.append(`equipment[${index}][quantity]`, String(item.quantity));
-//         if (item.photos.equipmentPhoto) {
-//           fd.append(
-//               `equipment[${index}][photos][equipmentPhoto]`,
-//               item.photos.equipmentPhoto
-//           );
-//         }
-//         if (item.photos.serialPhoto) {
-//           fd.append(
-//               `equipment[${index}][photos][serialPhoto]`,
-//               item.photos.serialPhoto
-//           );
-//         }
-//         if (item.photos.macPhoto) {
-//           fd.append(
-//               `equipment[${index}][photos][macPhoto]`,
-//               item.photos.macPhoto
-//           );
-//         }
-//       });
-//       fd.append('equipmentLength', String(data.equipment.length));
-
-//       if (data.carriagePhoto) fd.append('carriagePhoto', data.carriagePhoto);
-//       if (data.generalPhoto) fd.append('generalPhoto', data.generalPhoto);
-//       if (data.finalPhoto) fd.append('finalPhoto', data.finalPhoto);
-
-//       // TODO: Проверить тут
-//       const response = await apiClient.post('/applications', fd);
-      
-//       console.log("=== API: Успешный ответ ===");
-//       console.log("Статус:", response.status);
-//       console.log("Данные ответа:", response.data);
-      
-//       return response.data;
-//     } catch (error) {
-//       console.error("=== API: Ошибка при создании заявки ===");
-//       console.error("Тип ошибки:", error?.constructor?.name);
-//       console.error("Сообщение:", error?.message);
-//       console.error("Статус:", error?.response?.status);
-//       console.error("Данные ошибки:", error?.response?.data);
-//       console.error("Заголовки ошибки:", error?.response?.headers);
-//       console.error("Конфигурация запроса:", error?.config);
-//       console.error("Полная ошибка:", error);
-//       throw error;
-//     }
-//   },
+  // create: async (data: CreateApplicationRequest): Promise<Application> => {
+  //   const fd = new FormData();
+  //
+  //   if (data.id != null) fd.append('id', String(data.id));
+  //   fd.append('status', data.status);
+  //   fd.append('userId', String(data.userId));
+  //   fd.append('performer', data.performer);
+  //   fd.append('currentLocation', data.currentLocation);
+  //
+  //   data.requestTrains.forEach((t, ti) => {
+  //     fd.append(`requestTrains[${ti}][trainNumber]`, t.trainNumber);
+  //
+  //     t.carriages.forEach((c, ci) => {
+  //       fd.append(`requestTrains[${ti}][carriages][${ci}][carriageNumber]`, c.carriageNumber);
+  //       fd.append(`requestTrains[${ti}][carriages][${ci}][carriageType]`, c.carriageType);
+  //
+  //       if (c.carriagePhotos?.carriage) {
+  //         fd.append(
+  //             `requestTrains[${ti}][carriages][${ci}][carriagePhotos][carriage]`,
+  //             c.carriagePhotos.carriage
+  //         );
+  //       }
+  //       if (c.carriagePhotos?.equipment) {
+  //         fd.append(
+  //             `requestTrains[${ti}][carriages][${ci}][carriagePhotos][equipment]`,
+  //             c.carriagePhotos.equipment
+  //         );
+  //       }
+  //
+  //       c.equipments.forEach((e, ei) => {
+  //         fd.append(
+  //             `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][equipmentName]`,
+  //             e.equipmentName
+  //         );
+  //         if (e.serialNumber) {
+  //           fd.append(
+  //               `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][serialNumber]`,
+  //               e.serialNumber
+  //           );
+  //         }
+  //         if (e.macAddress) {
+  //           fd.append(
+  //               `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][macAddress]`,
+  //               e.macAddress
+  //           );
+  //         }
+  //         fd.append(
+  //             `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][typeWork]`,
+  //             e.typeWork
+  //         );
+  //
+  //         // новые ключи фото: equipment | serial | mac
+  //         if (e.photos?.equipment) {
+  //           fd.append(
+  //               `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][equipment]`,
+  //               e.photos.equipment
+  //           );
+  //         }
+  //         if (e.photos?.serial) {
+  //           fd.append(
+  //               `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][serial]`,
+  //               e.photos.serial
+  //           );
+  //         }
+  //         if (e.photos?.mac) {
+  //           fd.append(
+  //               `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][mac]`,
+  //               e.photos.mac
+  //           );
+  //         }
+  //       });
+  //     });
+  //   });
+  //
+  //   const res = await apiClient.post('/applications', fd, {
+  //     headers: { 'Content-Type': 'multipart/form-data' },
+  //   });
+  //
+  //   // бэк отвечает { success, data } — вернём data
+  //   return res.data.data as Application;
+  // },
 
   create: async (data: CreateApplicationRequest): Promise<Application> => {
-    try {
-      console.log("=== API: Отправка запроса на создание заявки ===");
-      console.log("URL:", '/applications');
-      console.log("Данные запроса:", data);
+    const fd = new FormData();
 
-      const fd = new FormData();
+    if (data.id != null) fd.append('id', String(data.id));
+    fd.append('status', data.status);
+    fd.append('userId', String(data.userId));
+    fd.append('performer', data.performer);
+    fd.append('currentLocation', data.currentLocation);
 
-      // Если обновление черновика
-      if (data.id != null) {
-        fd.append('id', String(data.id));
-      }
+    // 1) JSON-часть (без файлов) — это ОБЯЗАТЕЛЬНО
+    const requestTrainsJson = data.requestTrains.map((t) => ({
+      trainNumber: t.trainNumber,
+      carriages: t.carriages.map((c) => ({
+        carriageNumber: c.carriageNumber,
+        carriageType: c.carriageType,
+        // carriagePhotos НЕ добавляем сюда — это файлы ниже
+        equipments: c.equipments.map((e) => ({
+          equipmentName: e.equipmentName,
+          serialNumber: e.serialNumber ?? undefined,
+          macAddress: e.macAddress ?? undefined,
+          typeWork: e.typeWork, // тип работ на уровне оборудования
+          // photos НЕ добавляем сюда — это файлы ниже
+        })),
+      })),
+    }));
+    fd.append('requestTrains', JSON.stringify(requestTrainsJson));
 
-      // Массив trainNumbers
-      data.trainNumbers.forEach((tn, i) => {
-        fd.append(`trainNumbers[${i}]`, tn);
-      });
-
-      fd.append('trainNumbersLength', String(data.trainNumbers.length));
-
-      fd.append('carriagesLength', String(data.carriages.length));
-
-      // Вложенные carriages
-      data.carriages.forEach((carriage, i) => {
-        fd.append(`carriages[${i}][carriageNumber]`, carriage.carriageNumber);
-        fd.append(`carriages[${i}][carriageType]`, carriage.carriageType);
-        if (carriage.carriagePhoto) {
-          fd.append(`carriages[${i}][carriagePhoto]`, carriage.carriagePhoto);
+    // 2) Файлы — строго по ключам, которые ожидает бэкенд
+    data.requestTrains.forEach((t, ti) => {
+      t.carriages.forEach((c, ci) => {
+        if (c.carriagePhotos?.carriage) {
+          fd.append(
+              `requestTrains[${ti}][carriages][${ci}][carriagePhotos][carriage]`,
+              c.carriagePhotos.carriage
+          );
+        }
+        if (c.carriagePhotos?.equipment) {
+          fd.append(
+              `requestTrains[${ti}][carriages][${ci}][carriagePhotos][equipment]`,
+              c.carriagePhotos.equipment
+          );
         }
 
-        // В каждом вагоне — своё оборудование
-        carriage.equipment.forEach((item, j) => {
-          fd.append(
-            `carriages[${i}][equipment][${j}][equipmentName]`,
-            item.equipmentName
-          );
-          fd.append(
-            `carriages[${i}][equipment][${j}][serialNumber]`,
-            item.serialNumber
-          );
-          if (item.macAddress) {
+        c.equipments.forEach((e, ei) => {
+          if (e.photos?.equipment) {
             fd.append(
-              `carriages[${i}][equipment][${j}][macAddress]`,
-              item.macAddress
+                `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][equipment]`,
+                e.photos.equipment
             );
           }
-          fd.append(
-            `carriages[${i}][equipment][${j}][typeWork]`,
-            item.typeWork
-          );
-          fd.append(
-            `carriages[${i}][equipment][${j}][quantity]`,
-            String(item.quantity)
-          );
-
-          if (item.photos?.equipmentPhoto) {
+          if (e.photos?.serial) {
             fd.append(
-              `carriages[${i}][equipment][${j}][photos][equipmentPhoto]`,
-              item.photos.equipmentPhoto
+                `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][serial]`,
+                e.photos.serial
             );
           }
-          if (item.photos?.serialPhoto) {
+          if (e.photos?.mac) {
             fd.append(
-              `carriages[${i}][equipment][${j}][photos][serialPhoto]`,
-              item.photos.serialPhoto
-            );
-          }
-          if (item.photos?.macPhoto) {
-            fd.append(
-              `carriages[${i}][equipment][${j}][photos][macPhoto]`,
-              item.photos.macPhoto
+                `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][mac]`,
+                e.photos.mac
             );
           }
         });
-
-        // Для сервера может пригодиться длина массива оборудования в этом вагоне
-        fd.append(
-          `carriages[${i}][equipmentLength]`,
-          String(carriage.equipment.length)
-        );
       });
+    });
 
-      // Остальные поля
-      fd.append('completedJob', data.completedJob);
-      fd.append('currentLocation', data.currentLocation);
-      if (data.photo) {
-        fd.append('photo', data.photo);
-      }
-      fd.append('userId', String(data.userId));
-      fd.append('userName', data.userName);
-      fd.append('userRole', data.userRole);
-      fd.append('status', data.status);
+    const res = await apiClient.post('/applications', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' }, // можно и не указывать — axios сам проставит boundary
+    });
 
-      const response = await apiClient.post('/applications', fd);
-      console.log("=== API: Успешный ответ ===", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("=== API: Ошибка при создании заявки ===", error);
-      throw error;
-    }
+    return res.data.data as Application;
   },
+
 
   getAll: async (): Promise<Application[]> => {
     const response = await apiClient.get('/applications');
@@ -203,9 +184,9 @@ export const applicationApi = {
   },
 
   // Сохранить черновик
-  saveDraft: async (data: CreateApplicationRequest): Promise<Application> => {
-    const response = await apiClient.post('/applications/draft', { ...data, status: 'draft' });
-    return response.data.data; // Извлекаем данные из структуры { success, message, data }
+  saveDraft: async (fd: FormData): Promise<Application> => {
+    const res = await apiClient.post('/applications/draft', fd);
+    return res.data.data;
   },
 
   // Получить все черновики
@@ -215,9 +196,10 @@ export const applicationApi = {
   },
 
   // Обновить черновик
-  updateDraft: async (id: number, data: CreateApplicationRequest): Promise<Application> => {
-    const response = await apiClient.put(`/applications/draft/${id}`, { ...data, status: 'draft' });
-    return response.data.data; // Извлекаем данные из структуры { success, message, data }
+  updateDraft: async (id: number, fd: FormData): Promise<Application> => {
+    if (!fd.has('id')) fd.append('id', String(id));
+    const res = await apiClient.put(`/applications/draft/${id}`, fd);
+    return res.data.data;
   },
 
   // Завершить черновик (перевести в статус completed)

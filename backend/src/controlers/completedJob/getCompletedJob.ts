@@ -5,7 +5,7 @@ export const getCompletedJob = async (req: Request, res: Response) => {
   try {
     const prisma = new PrismaClient();
   
-    const completedJobList = await prisma.completedJob.findMany();
+    const completedJobList = await prisma.performer.findMany();
 
     await prisma.$disconnect();
     res.status(200).json(completedJobList);

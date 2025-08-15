@@ -62,7 +62,7 @@ export const referenceApi = {
 
   getEquipmentTypes: async (): Promise<string[]> => {
     const response = await apiClient.get('/equipment');
-    return response.data.map((item: EquipmentResponse) => item.name);
+    return Array.from(response.data.data.reduce((a: Set<string>, v: EquipmentResponse) => a.add(v.name), new Set<string>()));
   },
 
   getLocations: async (): Promise<string[]> => {

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import {toAbsUploadPath, UPLOADS_DIR} from "../../config/uploads";
 
 // Настройка multer для загрузки файлов
 const storage = multer.diskStorage({
@@ -78,27 +79,24 @@ export const uploadFiles = async (req: Request, res: Response) => {
 };
 
 // Контроллер для получения файла
-export const getFile = async (req: Request, res: Response) => {
+export const getFile = (req: Request, res: Response) => {
   try {
-    const { filename } = req.params;
-    const filePath = path.join(__dirname, '../../../uploads', filename);
+    const rel = (req.params[0] || "").replace(/^[/\\]+/, "");
+    if (!rel) return res.status(400).json({ success: false, message: "Путь не указан" });
 
-    // Проверяем, существует ли файл
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({
-        success: false,
-        message: 'Файл не найден'
-      });
-    }
+    if (rel.includes(".."))
+      return res.status(400).json({ success: false, message: "Недопустимый путь" });
 
-    // Отправляем файл
-    res.sendFile(filePath);
+    const abs = toAbsUploadPath(rel);
+    if (!abs.startsWith(UPLOADS_DIR))
+      return res.status(400).json({ success: false, message: "Выход за пределы хранилища" });
 
+    if (!fs.existsSync(abs) || !fs.statSync(abs).isFile())
+      return res.status(404).json({ success: false, message: "Файл не найден" });
+
+    res.sendFile(abs);
   } catch (error) {
-    console.error('Ошибка при получении файла:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Внутренняя ошибка сервера при получении файла'
-    });
+    console.error("Ошибка при получении файла:", error);
+    res.status(500).json({ success: false, message: "Внутренняя ошибка сервера при получении файла" });
   }
 };

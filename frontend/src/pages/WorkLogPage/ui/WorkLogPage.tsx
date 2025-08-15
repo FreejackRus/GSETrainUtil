@@ -78,7 +78,9 @@ export const WorkLogPage = () => {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [filterWorkType, setFilterWorkType] = useState<string>('all');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  
+
+  console.log('filteredEntries', filteredEntries);
+
   useEffect(() => {
     const fetchWorkLog = async () => {
       try {

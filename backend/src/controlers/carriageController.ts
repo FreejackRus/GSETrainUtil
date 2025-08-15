@@ -3,28 +3,58 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+const uniq = <T, K extends keyof any>(arr: T[], by: (x: T) => K) => {
+  const seen = new Set<K>();
+  const out: T[] = [];
+  for (const x of arr) {
+    const k = by(x);
+    if (!seen.has(k)) {
+      seen.add(k);
+      out.push(x);
+    }
+  }
+  return out;
+};
+
 export const getCarriages = async (_req: Request, res: Response) => {
   try {
-    // Получаем все вагоны вместе с поездом и оборудованием (включая тип устройства)
+    // У Carriage больше нет прямой связи с Train — берём поезда через заявки:
+    // Carriage -> RequestCarriage -> RequestTrain -> Train
     const carriages = await prisma.carriage.findMany({
       include: {
-        train:    true,
-        equipments: true
+        equipments: true,
+        requestCarriages: {
+          include: {
+            requestTrain: {
+              include: { train: true },
+            },
+          },
+        },
       },
     });
 
-    const carriagesData = carriages.map(c => ({
-      carriageNumber: c.number,
-      carriageType:   c.type,
-      trainNumber:    c.train?.number ?? 'Неизвестно',
-      equipment: c.equipments.map(item => ({
-        id:           item.id,
-        name:         item.name,
-        snNumber:     item.serialNumber ?? '—',
-        mac:          item.macAddress ?? '—',
-        lastService:  item.lastService,
-      })),
-    }));
+    const carriagesData = carriages.map((c) => {
+      const trainNumsAll = c.requestCarriages
+          .map((rc) => rc.requestTrain?.train?.number)
+          .filter((n): n is string => Boolean(n));
+
+      const trainNumbers = uniq(trainNumsAll, (n) => n);
+
+      return {
+        carriageNumber: c.number,
+        carriageType: c.type,
+        // для обратной совместимости — первый номер поезда (если нужен)
+        trainNumber: trainNumbers[0] ?? '—',
+        trainNumbers, // новый массив с уникальными номерами поездов
+        equipment: c.equipments.map((item) => ({
+          id: item.id,
+          name: item.name,
+          snNumber: item.serialNumber ?? '—',
+          mac: item.macAddress ?? '—',
+          lastService: item.lastService, // можно .toISOString(), если фронт ждёт строку
+        })),
+      };
+    });
 
     res.status(200).json({ success: true, data: carriagesData });
   } catch (error) {
@@ -44,8 +74,12 @@ export const getCarriageById = async (req: Request, res: Response) => {
     const c = await prisma.carriage.findFirst({
       where: { number: carriageNumber },
       include: {
-        train:    true,
-        equipments: true
+        equipments: true,
+        requestCarriages: {
+          include: {
+            requestTrain: { include: { train: true } },
+          },
+        },
       },
     });
 
@@ -56,16 +90,24 @@ export const getCarriageById = async (req: Request, res: Response) => {
       });
     }
 
+    const trainNumsAll = c.requestCarriages
+        .map((rc) => rc.requestTrain?.train?.number)
+        .filter((n): n is string => Boolean(n));
+
+    const trainNumbers = uniq(trainNumsAll, (n) => n);
+
     const carriageData = {
       carriageNumber: c.number,
-      carriageType:   c.type,
-      trainNumber:    c.train?.number ?? 'Неизвестно',
-      equipment: c.equipments.map(item => ({
-        id:           item.id,
-        name:         item.name,
-        snNumber:     item.serialNumber ?? '—',
-        mac:          item.macAddress ?? '—',
-        lastService:  item.lastService,
+      carriageType: c.type,
+      // для обратной совместимости
+      trainNumber: trainNumbers[0] ?? '—',
+      trainNumbers,
+      equipment: c.equipments.map((item) => ({
+        id: item.id,
+        name: item.name,
+        snNumber: item.serialNumber ?? '—',
+        mac: item.macAddress ?? '—',
+        lastService: item.lastService,
       })),
     };
 

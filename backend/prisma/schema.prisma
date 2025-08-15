@@ -13,32 +13,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// Основная таблица заявок
-model Request {
-  id     Int    @id @default(autoincrement())
-  status String @default("draft")
+/**
+ * ==== Enums ====
+ */
+enum RequestStatus {
+  draft
+  completed
+}
 
+enum UserRole {
+  admin
+  engineer
+}
+
+enum EquipmentPhotoType {
+  equipment
+  serial
+  mac
+}
+
+enum CarriagePhotoType {
+  carriage
+  equipment
+}
+
+/**
+ * ==== Core ====
+ */
+model Request {
+  id                Int           @id @default(autoincrement())
+  status            RequestStatus @default(draft)
   currentLocationId Int?
-  completedJobId    Int?
+  performerId       Int?
   userId            Int
-  photo             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
   currentLocation CurrentLocation? @relation(fields: [currentLocationId], references: [id])
-  completedJob    CompletedJob?    @relation(fields: [completedJobId], references: [id])
+  performer       Performer?       @relation(fields: [performerId], references: [id])
   user            User             @relation(fields: [userId], references: [id])
 
-  // Связи к join-таблицам
-  requestTrains     RequestTrain[] // Поезда в заявке
-  requestCarriages  RequestCarriage[] // Вагоны в заявке + фото номера вагона
-  requestEquipments RequestEquipment[] // Оборудование в заявке + тип работ + количество
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  requestTrains     RequestTrain[]
+  requestEquipments RequestEquipment[]
 
   @@map("requests")
 }
 
-/// Таблица связи заявки с поездами
 model RequestTrain {
   id        Int @id @default(autoincrement())
   requestId Int
@@ -47,105 +67,130 @@ model RequestTrain {
   request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
   train   Train   @relation(fields: [trainId], references: [id])
 
+  requestCarriages RequestCarriage[]
+
   @@unique([requestId, trainId])
   @@map("request_trains")
 }
 
-/// Вагоны в заявке + фото номера
 model RequestCarriage {
-  id            Int     @id @default(autoincrement())
-  requestId     Int
-  carriageId    Int
-  carriagePhoto String? // Фото номера вагона в рамках заявки
+  id             Int @id @default(autoincrement())
+  requestTrainId Int
+  carriageId     Int
 
-  request  Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  carriage Carriage @relation(fields: [carriageId], references: [id])
+  requestTrain RequestTrain @relation(fields: [requestTrainId], references: [id], onDelete: Cascade)
+  carriage     Carriage     @relation(fields: [carriageId], references: [id])
 
-  @@unique([requestId, carriageId])
+  requestEquipments RequestEquipment[]
+  carriagePhotos    RequestCarriagePhoto[]
+
+  @@unique([requestTrainId, carriageId])
   @@map("request_carriages")
 }
 
-/// Оборудование в заявке + тип работ + количество
 model RequestEquipment {
-  id          Int @id @default(autoincrement())
-  requestId   Int
-  equipmentId Int
-  typeWorkId  Int // Тип работ для данного оборудования
+  id                Int @id @default(autoincrement())
+  requestId         Int
+  requestCarriageId Int
+  equipmentId       Int
+  typeWorkId        Int
 
-  request   Request   @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  equipment Equipment @relation(fields: [equipmentId], references: [id])
-  typeWork  TypeWork  @relation(fields: [typeWorkId], references: [id])
+  request         Request         @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestCarriage RequestCarriage @relation(fields: [requestCarriageId], references: [id])
+  equipment       Equipment       @relation(fields: [equipmentId], references: [id])
+  typeWork        TypeWork        @relation(fields: [typeWorkId], references: [id])
 
   photos RequestEquipmentPhoto[]
 
-  @@unique([requestId, equipmentId])
+  // Удобная защита от дублей «в пределах заявки»:
+  @@unique([requestId, equipmentId, typeWorkId])
+  @@index([requestId])
+  @@index([requestCarriageId])
   @@map("request_equipment")
 }
 
-/// Фото оборудования в заявке
+/**
+ * ==== Photos ====
+ */
 model RequestEquipmentPhoto {
-  id                 Int      @id @default(autoincrement())
+  id                 Int                @id @default(autoincrement())
   requestEquipmentId Int
-  photoType          String // 'serial', 'mac', 'equipment', и т.д.
+  photoType          EquipmentPhotoType
   photoPath          String
-  createdAt          DateTime @default(now())
+  createdAt          DateTime           @default(now())
 
   requestEquipment RequestEquipment @relation(fields: [requestEquipmentId], references: [id], onDelete: Cascade)
 
-  @@unique([requestEquipmentId, photoType])
+  @@index([requestEquipmentId, photoType])
   @@map("request_equipment_photos")
 }
 
-/// Доменные таблицы без фото
+model RequestCarriagePhoto {
+  id                Int               @id @default(autoincrement())
+  requestCarriageId Int
+  photoType         CarriagePhotoType
+  photoPath         String
+  createdAt         DateTime          @default(now())
+
+  requestCarriage RequestCarriage @relation(fields: [requestCarriageId], references: [id], onDelete: Cascade)
+
+  @@index([requestCarriageId, photoType])
+  @@map("request_carriage_photos")
+}
+
+/**
+ * ==== Domain ====
+ */
 model Train {
-  id            Int            @id @default(autoincrement())
-  number        String         @unique
-  carriages     Carriage[]
+  id     Int    @id @default(autoincrement())
+  number String @unique
+
   requestTrains RequestTrain[]
 
   @@map("trains")
 }
 
 model Carriage {
-  id               Int               @id @default(autoincrement())
-  number           String
-  type             String
-  trainId          Int // Привязка к поезду
-  train            Train             @relation(fields: [trainId], references: [id])
+  id     Int    @id @default(autoincrement())
+  number String @unique // если по домену номера не уникальны — убери @unique
+  type   String
+
   requestCarriages RequestCarriage[]
   equipments       Equipment[]
 
-  @@unique([number, trainId])
   @@map("carriages")
 }
 
 model Equipment {
-  id                Int                @id @default(autoincrement())
-  name              String
-  serialNumber      String?
-  macAddress        String?
-  lastService       DateTime?
-  carriageId        Int?
-  carriage          Carriage?          @relation(fields: [carriageId], references: [id])
+  id           Int       @id @default(autoincrement())
+  name         String
+  serialNumber String?   @unique
+  macAddress   String?   @unique
+  lastService  DateTime?
+  carriageId   Int?
+
+  carriage Carriage? @relation(fields: [carriageId], references: [id])
+
   requestEquipments RequestEquipment[]
 
   @@map("equipment")
 }
 
 model TypeWork {
-  id                Int                @id @default(autoincrement())
-  name              String             @unique
-  requestEquipments RequestEquipment[] // Привязка через RequestEquipment
+  id   Int    @id @default(autoincrement())
+  name String @unique // "Монтаж", "Демонтаж", ...
 
-  @@map("type_work")
+  requestEquipments RequestEquipment[]
+
+  @@map("work_types")
 }
 
-model CompletedJob {
+model Performer {
   id       Int       @id @default(autoincrement())
   name     String    @unique
   requests Request[]
 
-  @@map("completed_jobs")
+  @@map("performers")
 }
 
 model CurrentLocation {
@@ -157,11 +202,12 @@ model CurrentLocation {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  login    String    @unique
+  id       Int      @id @default(autoincrement())
+  login    String   @unique
   password String
-  role     String
+  role     UserRole
   name     String
+
   requests Request[]
 
   @@map("users")

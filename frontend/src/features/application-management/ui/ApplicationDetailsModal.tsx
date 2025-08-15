@@ -79,6 +79,8 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
     });
   };
 
+  console.log('application', application);
+
   return (
     <Dialog
       open={open}
@@ -327,6 +329,27 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                           </Grid>
                         ),
                     )}
+
+                  {application.carriages
+                      .map((item) => item.equipment)
+                      .map((item1, index1) => (
+                          item1.map((item2, index2) => (
+                            item2.photos.map((item3) => (
+                                <Grid size={{ xs: 12, sm: 4 }}>
+                                  <Box>
+                                    <Typography variant="body2" gutterBottom>
+                                      Фото {item3.type === 'serial' ? 'серийного номера оборудования' : item3.type === 'mac' ? 'mac адреса оборудования' : 'оборудования'} №{index2 + 1} вагона №{index1 + 1}
+                                    </Typography>
+                                    <img
+                                        src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${item3.path}`}
+                                        alt={`Фото ${item3.type === 'serial' ? 'серийного номера оборудования' : item3.type === 'mac' ? 'mac адреса оборудования' : 'оборудования'} №${index2 + 1} вагона №${index1 + 1}`}
+                                        className={styles.photoImage}
+                                    />
+                                  </Box>
+                                </Grid>
+                            ))
+                          ))
+                      ))}
 
                   {application.photo && (
                     <Grid size={{ xs: 12, sm: 4 }}>

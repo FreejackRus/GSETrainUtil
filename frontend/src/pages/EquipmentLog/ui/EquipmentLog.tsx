@@ -16,14 +16,9 @@ import {
   Grid,
   TextField,
   InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  TableSortLabel,
 } from '@mui/material';
 import {
-  Train as TrainIcon,
-  ExpandMore as ExpandMoreIcon,
   Search as SearchIcon,
 } from '@mui/icons-material';
 import {
@@ -33,12 +28,62 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { deviceApi, type Device } from '../../../entities';
-import { useEffect, useState } from 'react';
+import {useEffect, useMemo, useState} from 'react';
+
+type ColumnKey =
+    | 'status'
+    | 'name'
+    | 'snNumber'
+    | 'mac'
+    | 'lastService'
+    | 'carriageType'
+    | 'carriageNumber'
+    | 'trainNumber';
+
 export const EquipmentLog = () => {
   const navigate = useNavigate();
   const [equipmentList, setEquipmentList] = useState<Device[]>([]);
   const [filteredList, setFilteredList] = useState<Device[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [orderBy, setOrderBy] = useState<ColumnKey>('name');
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const collator = useMemo(
+      () => new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' }),
+      []
+  );
+
+  const getCellValue = (item: Device, key: ColumnKey) => {
+    switch (key) {
+      case 'status':
+        return item.carriageNumber ? 'Установлено' : 'Не установлено';
+      case 'lastService':
+        return item.lastService ? new Date(item.lastService).getTime() : 0;
+      default:
+        return (item as any)[key] ?? '';
+    }
+  };
+
+  const handleRequestSort = (property: ColumnKey) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const sortedList = useMemo(() => {
+    const arr = [...filteredList];
+    arr.sort((a, b) => {
+      const va = getCellValue(a, orderBy);
+      const vb = getCellValue(b, orderBy);
+
+      if (typeof va === 'number' && typeof vb === 'number') {
+        return order === 'asc' ? va - vb : vb - va;
+      }
+
+      const res = collator.compare(String(va), String(vb));
+      return order === 'asc' ? res : -res;
+    });
+    return arr;
+  }, [filteredList, order, orderBy, collator]);
 
   useEffect(() => {
     const fetchDeviceCount = async () => {
@@ -230,18 +275,89 @@ export const EquipmentLog = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Статус</TableCell>
-                <TableCell>Название</TableCell>
-                <TableCell>Серийный номер</TableCell>
-                <TableCell>MAC</TableCell>
-                <TableCell>Последнее обслуживание</TableCell>
-                <TableCell>Тип вагона</TableCell>
-                <TableCell>Номер вагона</TableCell>
-                <TableCell>Номер поезда</TableCell>
+                <TableCell sortDirection={orderBy === 'status' ? order : false}>
+                  <TableSortLabel
+                      active={orderBy === 'status'}
+                      direction={orderBy === 'status' ? order : 'asc'}
+                      onClick={() => handleRequestSort('status')}
+                  >
+                    Статус
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell sortDirection={orderBy === 'name' ? order : false}>
+                  <TableSortLabel
+                      active={orderBy === 'name'}
+                      direction={orderBy === 'name' ? order : 'asc'}
+                      onClick={() => handleRequestSort('name')}
+                  >
+                    Название
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell sortDirection={orderBy === 'snNumber' ? order : false}>
+                  <TableSortLabel
+                      active={orderBy === 'snNumber'}
+                      direction={orderBy === 'snNumber' ? order : 'asc'}
+                      onClick={() => handleRequestSort('snNumber')}
+                  >
+                    Серийный номер
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell sortDirection={orderBy === 'mac' ? order : false}>
+                  <TableSortLabel
+                      active={orderBy === 'mac'}
+                      direction={orderBy === 'mac' ? order : 'asc'}
+                      onClick={() => handleRequestSort('mac')}
+                  >
+                    MAC
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell sortDirection={orderBy === 'lastService' ? order : false}>
+                  <TableSortLabel
+                      active={orderBy === 'lastService'}
+                      direction={orderBy === 'lastService' ? order : 'asc'}
+                      onClick={() => handleRequestSort('lastService')}
+                  >
+                    Последнее обслуживание
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell sortDirection={orderBy === 'carriageType' ? order : false}>
+                  <TableSortLabel
+                      active={orderBy === 'carriageType'}
+                      direction={orderBy === 'carriageType' ? order : 'asc'}
+                      onClick={() => handleRequestSort('carriageType')}
+                  >
+                    Тип вагона
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell sortDirection={orderBy === 'carriageNumber' ? order : false}>
+                  <TableSortLabel
+                      active={orderBy === 'carriageNumber'}
+                      direction={orderBy === 'carriageNumber' ? order : 'asc'}
+                      onClick={() => handleRequestSort('carriageNumber')}
+                  >
+                    Номер вагона
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell sortDirection={orderBy === 'trainNumber' ? order : false}>
+                  <TableSortLabel
+                      active={orderBy === 'trainNumber'}
+                      direction={orderBy === 'trainNumber' ? order : 'asc'}
+                      onClick={() => handleRequestSort('trainNumber')}
+                  >
+                    Номер поезда
+                  </TableSortLabel>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredList?.map((item) => (
+              {sortedList?.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>{item.carriageNumber ? 'Установлено' : 'Не установлено'}</TableCell>
                   <TableCell>{item.name || '-'}</TableCell>

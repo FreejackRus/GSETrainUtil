@@ -19,6 +19,7 @@ services:
       # Переопределяем для контейнера
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
       PDF_DIR: /app/var/pdf
+      UPLOADS_DIR: /app/var/uploads
       # В проде можно раскомментировать:
       # NODE_ENV: production
       # CLIENT_ORIGIN: "http://YOUR_PUBLIC_IP_OR_DOMAIN"
@@ -28,7 +29,9 @@ services:
       - "${PORT}:${PORT}"
     volumes:
       - pdf_data:/app/var/pdf
+      - uploads_data:/app/var/uploads
 
 volumes:
   db_data:
-  pdf_data:   # <-- создаётся/хранится Docker’ом на хосте
+  pdf_data:
+  uploads_data:

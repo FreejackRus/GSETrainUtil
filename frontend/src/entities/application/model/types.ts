@@ -47,47 +47,86 @@
 
 import type { WorkLogEntry } from "../../worklog/model/types";
 
-// Интерфейс для одного элемента оборудования
+// // Интерфейс для одного элемента оборудования
+// export interface EquipmentPhoto {
+//   type: string;
+//   path: string;
+// }
+//
+// export interface EquipmentDetail {
+//   id: number;
+//   name: string;
+//   deviceType: string;
+//   typeWork: string;
+//   serialNumber: string;
+//   macAddress: string;
+//   quantity: number;
+//   photos: EquipmentPhoto[];
+// }
+//
+// export interface CarriageWithEquipment {
+//   number: string;
+//   type: string;
+//   train: string;
+//   photo: string | null;
+//   equipment: EquipmentDetail[];
+// }
+//
+// export interface Application {
+//   id: number;
+//   photo: string | null;           // фото самой заявки
+//   status: string;
+//   trainNumbers: string[];         // массив номеров поездов
+//   carriages: CarriageWithEquipment[];
+//   countEquipment: number;         // суммарное количество
+//   completedJob: string;
+//   currentLocation: string;
+//   user: {
+//     id: number;
+//     name: string;
+//     role: string;
+//   };
+//   createdAt: string;              // ISO
+//   updatedAt: string;              // ISO
+// }
+
+// Фото, которые приходят с бэка и которые мы же шлём при аплоаде
+export type EquipmentPhotoType = 'equipment' | 'serial' | 'mac';
+
 export interface EquipmentPhoto {
-  type: string;
-  path: string;
+  type: EquipmentPhotoType;
+  path: string; // относительный путь, дергать как GET /files/<path>
 }
 
 export interface EquipmentDetail {
   id: number;
   name: string;
-  deviceType: string;
   typeWork: string;
-  serialNumber: string;
-  macAddress: string;
-  quantity: number;
+  serialNumber: string | null;
+  macAddress: string | null;
   photos: EquipmentPhoto[];
 }
 
 export interface CarriageWithEquipment {
   number: string;
   type: string;
-  train: string;
-  photo: string | null;
+  train: string;         // номер поезда
+  photo: string | null;  // фото типа "carriage" (если есть)
   equipment: EquipmentDetail[];
 }
 
 export interface Application {
   id: number;
-  photo: string | null;           // фото самой заявки
-  status: string;
-  trainNumbers: string[];         // массив номеров поездов
+  photo: null; // общего фото заявки больше нет
+  status: 'draft' | 'completed';
+  trainNumbers: string[];
   carriages: CarriageWithEquipment[];
-  countEquipment: number;         // суммарное количество
-  completedJob: string;
+  countEquipment: number;
+  performer: string;
   currentLocation: string;
-  user: {
-    id: number;
-    name: string;
-    role: string;
-  };
-  createdAt: string;              // ISO
-  updatedAt: string;              // ISO
+  user: { id: number; name: string; role: 'admin' | 'engineer' };
+  createdAt: string;
+  updatedAt: string;
 }
 
 
@@ -104,13 +143,47 @@ export interface EquipmentItem {
   };
 }
 
-// Интерфейс для одного элемента оборудования в форме
+// // Интерфейс для одного элемента оборудования в форме
+// export interface EquipmentFormItem {
+//   equipmentType: string;
+//   serialNumber: string;
+//   macAddress: string;
+//   quantity: number;
+//   carriageId?: string; // ID вагона, к которому привязано оборудование
+//   photos: {
+//     equipment?: File | null;
+//     serial?: File | null;
+//     mac?: File | null;
+//   };
+// }
+
+// // Интерфейс для вагона в форме
+// export interface CarriageFormItem {
+//   id?: string; // Уникальный ID для связи с оборудованием
+//   carriageNumber: string;
+//   carriageType: string;
+//   carriagePhoto?: File | null;
+//   equipment?: EquipmentFormItem[]; // Оборудование, привязанное к этому вагону
+// }
+
+// export interface ApplicationFormData {
+//   id?: number; // Для сохранения черновика
+//   workType: string;
+//   trainNumber: string;
+//   carriages: CarriageFormItem[]; // Массив вагонов
+//   workCompleted: string;
+//   location: string;
+//   photo?: File | null;
+//   status?: 'draft' | 'completed';
+// }
+
 export interface EquipmentFormItem {
   equipmentType: string;
+  typeWork: string;
   serialNumber: string;
   macAddress: string;
   quantity: number;
-  carriageId?: string; // ID вагона, к которому привязано оборудование
+  carriageId?: string;
   photos: {
     equipment?: File | null;
     serial?: File | null;
@@ -118,85 +191,58 @@ export interface EquipmentFormItem {
   };
 }
 
-// Интерфейс для вагона в форме
 export interface CarriageFormItem {
-  id?: string; // Уникальный ID для связи с оборудованием
+  id?: string;
   carriageNumber: string;
   carriageType: string;
-  carriagePhoto?: File | null;
-  equipment?: EquipmentFormItem[]; // Оборудование, привязанное к этому вагону
+  carriagePhotos: {
+    carriage: File | null;
+    equipment: File | null;
+  };
+  equipment?: EquipmentFormItem[];
+}
+
+export interface TrainFormItem {
+  trainNumber: string;
+  carriages: CarriageFormItem[];
 }
 
 export interface ApplicationFormData {
-  id?: number; // Для сохранения черновика
-  workType: string;
-  trainNumber: string;
-  carriages: CarriageFormItem[]; // Массив вагонов
+  trains: TrainFormItem[];
   workCompleted: string;
   location: string;
-  photo?: File | null;
+  // photo?: File | null;
   status?: 'draft' | 'completed';
 }
 
-// Интерфейс для создания заявки (соответствует бэкенду)
-// export interface CreateApplicationRequest {
-//   id?: number; // Для обновления черновика
-//   applicationDate?: string;
-//   typeWork?: string;
-//   trainNumber?: string;
-//   carriages: Array<{
-//     carriageNumber: string;
-//     carriageType: string;
-//     carriagePhoto?: File | null;
-//     equipment?: Array<{ // Теперь оборудование может быть привязано к вагонам
-//       equipmentType: string;
-//       serialNumber: string;
-//       macAddress: string;
-//       quantity: number;
-//       photos: {
-//         equipmentPhoto?: File | null;
-//         serialPhoto?: File | null;
-//         macPhoto?: File | null;
-//       };
-//     }>;
-//   }>;
-//   completedJob?: string;
-//   currentLocation?: string;
-//   generalPhoto?: File | null;
-//   finalPhoto?: File | null;
-//   userId: number;
-//   userName: string;
-//   userRole: string;
-//   status: 'draft' | 'completed';
-// }
-
 export interface CreateApplicationRequest {
   id?: number;
-  trainNumbers: string[];
-  carriages: Array<{
-    carriageNumber: string;
-    carriageType: string;
-    carriagePhoto?: File | null;
-    equipment: Array<{
-      equipmentName: string;
-      serialNumber: string;
-      macAddress?: string;
-      typeWork: string;
-      quantity: number;
-      photos?: {
-        equipmentPhoto?: File | null;
-        serialPhoto?: File | null;
-        macPhoto?: File | null;
+  status: 'draft' | 'completed';
+  userId: number;
+  performer: string;         // раньше не было — теперь ОБЯЗАТЕЛЬНО для completed
+  currentLocation: string;   // тоже обязательно для completed
+  requestTrains: Array<{
+    trainNumber: string;
+    carriages: Array<{
+      carriageNumber: string;
+      carriageType: string;
+      carriagePhotos?: {
+        carriage?: File | null;    // фото номера вагона
+        equipment?: File | null;   // общий снимок "оборудования в вагоне"
       };
+      equipments: Array<{
+        equipmentName: string;
+        serialNumber?: string;
+        macAddress?: string;
+        typeWork: string;
+        photos?: {
+          equipment?: File | null; // общий вид
+          serial?: File | null;    // серийник
+          mac?: File | null;       // MAC
+        };
+      }>;
     }>;
   }>;
-  completedJob: string;
-  currentLocation: string;
-  photo?: File | null;
-  userId: number;
-  userName: string;
-  userRole: string;
-  status: 'draft' | 'completed';
 }
 
 // Интерфейс для шага формы заявки

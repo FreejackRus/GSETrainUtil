@@ -9,6 +9,7 @@ interface PhotoUploadNewProps {
   onPhotoChange: (file: File | null) => void;
   label: string;
   description?: string;
+  inputId?: string;
   required?: boolean;
   accept?: string;
   compact?: boolean;
@@ -22,6 +23,7 @@ interface PhotoUploadLegacyProps {
   autoUpload: boolean;
   label: string;
   description?: string;
+  inputId?: string;
   required?: boolean;
   accept?: string;
   compact?: boolean;
@@ -47,10 +49,13 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
     accept = 'image/*',
     compact = false,
     size = 'medium',
+    inputId,
   } = props;
 
+  console.log('inputId', inputId);
+
   const handleButtonClick = () => {
-    const input = document.getElementById(`photo-input-${label.replace(/\s+/g, '-')}`);
+    const input = document.getElementById(`photo-input-${[label.replace(/\s+/g, '-'), inputId].filter(Boolean).join('-')}`);
     input?.click();
   };
 
@@ -105,7 +110,7 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
         )}
 
         <input
-          id={`photo-input-${label.replace(/\s+/g, '-')}`}
+          id={`photo-input-${[label.replace(/\s+/g, '-'), inputId].filter(Boolean).join('-')}`}
           type="file"
           accept={accept}
           className="photo-upload-input-hidden"

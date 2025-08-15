@@ -8,6 +8,7 @@ import { routerWorkLog } from "./router/routerWorkLog";
 import { routerPdfGenerate } from "./router/routerPdfGenerate";
 import archiveRoutes from "./routes/archiveRoutes";
 import multer from "multer";
+import {UPLOADS_DIR} from "./config/uploads";
 
 const app = express();
 const upload = multer();
@@ -62,49 +63,68 @@ app.use("/api/v1", routerPdfGenerate);
 app.use("/api/v1/archive", archiveRoutes);
 
 // Middleware для декодирования URL и обслуживания статических файлов (изображений)
-app.use('/uploads', (req, res, next) => {
-  try {
-    // Декодируем URL для правильной обработки кириллических символов
-    req.url = decodeURIComponent(req.url);
-  } catch (error) {
-    console.error('URL decode error:', error);
-  }
-  next();
-}, express.static(path.join(process.cwd(), 'uploads'), {
-  setHeaders: (res, filePath) => {
-    // Добавляем CORS заголовки для изображений
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Range');
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    res.setHeader('Cache-Control', 'public, max-age=31536000');
-    
-    // Устанавливаем правильный Content-Type для изображений
-    const ext = path.extname(filePath).toLowerCase();
-    switch (ext) {
-      case '.png':
-        res.setHeader('Content-Type', 'image/png');
-        break;
-      case '.jpg':
-      case '.jpeg':
-        res.setHeader('Content-Type', 'image/jpeg');
-        break;
-      case '.gif':
-        res.setHeader('Content-Type', 'image/gif');
-        break;
-      case '.svg':
-        res.setHeader('Content-Type', 'image/svg+xml');
-        break;
-      case '.webp':
-        res.setHeader('Content-Type', 'image/webp');
-        break;
-      default:
-        res.setHeader('Content-Type', 'application/octet-stream');
-    }
-  },
-  fallthrough: false,
-  index: false
-}));
+// app.use('/uploads', (req, res, next) => {
+//   try {
+//     // Декодируем URL для правильной обработки кириллических символов
+//     req.url = decodeURIComponent(req.url);
+//   } catch (error) {
+//     console.error('URL decode error:', error);
+//   }
+//   next();
+// }, express.static(path.join(process.cwd(), 'uploads'), {
+//   setHeaders: (res, filePath) => {
+//     // Добавляем CORS заголовки для изображений
+//     res.setHeader('Access-Control-Allow-Origin', '*');
+//     res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Range');
+//     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+//     res.setHeader('Cache-Control', 'public, max-age=31536000');
+//
+//     // Устанавливаем правильный Content-Type для изображений
+//     const ext = path.extname(filePath).toLowerCase();
+//     switch (ext) {
+//       case '.png':
+//         res.setHeader('Content-Type', 'image/png');
+//         break;
+//       case '.jpg':
+//       case '.jpeg':
+//         res.setHeader('Content-Type', 'image/jpeg');
+//         break;
+//       case '.gif':
+//         res.setHeader('Content-Type', 'image/gif');
+//         break;
+//       case '.svg':
+//         res.setHeader('Content-Type', 'image/svg+xml');
+//         break;
+//       case '.webp':
+//         res.setHeader('Content-Type', 'image/webp');
+//         break;
+//       default:
+//         res.setHeader('Content-Type', 'application/octet-stream');
+//     }
+//   },
+//   fallthrough: false,
+//   index: false
+// }));
+
+app.use(
+    "/uploads",
+    (req, _res, next) => {
+      try { req.url = decodeURIComponent(req.url); } catch {}
+      next();
+    },
+    express.static(UPLOADS_DIR, {
+      fallthrough: false,
+      index: false,
+      setHeaders: (res, filePath) => {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, Range");
+        res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+        res.setHeader("Cache-Control", "public, max-age=31536000");
+      },
+    })
+);
 
 // Middleware для обслуживания статических файлов из корневой директории (для временных файлов)
 app.use((req, res, next) => {
