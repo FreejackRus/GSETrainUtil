@@ -77,8 +77,8 @@ async function main() {
 
     // 0) базовые сущности
     const [adminHash, engHash] = await Promise.all([bcrypt.hash('admin', 10), bcrypt.hash('engineer', 10)]);
-    await prisma.user.upsert({ where: { login: 'admin' }, update: {}, create: { login: 'admin', password: adminHash, role: 'admin', name: 'Администратор' } });
-    const engineer = await prisma.user.upsert({ where: { login: 'engineer' }, update: {}, create: { login: 'engineer', password: engHash, role: 'engineer', name: 'Инженер' } });
+    await prisma.users.upsert({ where: { login: 'admin' }, update: {}, create: { login: 'admin', password: adminHash, role: 'admin', name: 'Администратор' } });
+    const engineer = await prisma.users.upsert({ where: { login: 'engineer' }, update: {}, create: { login: 'engineer', password: engHash, role: 'engineer', name: 'Инженер' } });
     const performer = await prisma.performer.upsert({ where: { name: DEFAULT_PERFORMER }, update: {}, create: { name: DEFAULT_PERFORMER } });
     const location = await prisma.currentLocation.upsert({ where: { name: DEFAULT_LOCATION }, update: {}, create: { name: DEFAULT_LOCATION } });
 
