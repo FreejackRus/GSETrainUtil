@@ -706,7 +706,7 @@ export const WorkLogPage = () => {
               <MenuItem value="Заявка">Заявка</MenuItem>
               <MenuItem value="Технический акт">Технический акт</MenuItem>
             </Select>
-          </Box>
+          </Box> 
         </CardActions>
       </Card>
     </Grid>
