@@ -174,7 +174,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="body2" color="text.secondary">
-                      Исполнитель: <strong>{application.completedJob || '-'}</strong>
+                      Исполнитель: <strong>{application.performer || '-'}</strong>
                     </Typography>
                   </Grid>
                 </Grid>
@@ -199,7 +199,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                 <Box display="flex" alignItems="center" gap={1} mb={2}>
                   <TrainIcon fontSize="small" color="action" />
                   <Typography variant="body2">
-                    Номер поезда: <strong>{application.trainNumbers[0] || '-'}</strong>
+                    Номер поездов: <strong>{application.trainNumbers.join(", ") || '-'}</strong>
                   </Typography>
                 </Box>
 

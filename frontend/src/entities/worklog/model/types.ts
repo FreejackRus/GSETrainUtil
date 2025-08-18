@@ -4,6 +4,7 @@ export interface EquipmentDetail {
   typeWork: string;
   serialNumber: string;
   macAddress: string;
+  carriageNumber?:string
   photos: { type: string; path: string }[];
 }
 

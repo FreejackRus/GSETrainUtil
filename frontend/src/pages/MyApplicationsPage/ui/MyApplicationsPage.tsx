@@ -373,13 +373,13 @@ export const MyApplicationsPage: React.FC = () => {
                         <TableCell>
                           <Box className="table-header-cell">
                             <TrainIcon sx={{ mr: 1, fontSize: 18 }} />
-                            Поезд
+                            Поезда
                           </Box>
                         </TableCell>
                         <TableCell>
                           <Box className="table-header-cell">
                             <CarIcon sx={{ mr: 1, fontSize: 18 }} />
-                            Вагон
+                            Вагоны
                           </Box>
                         </TableCell>
                         <TableCell>
@@ -408,7 +408,7 @@ export const MyApplicationsPage: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {application.trainNumbers[0] || '-'}
+                              {application.trainNumbers.join(", ") || '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>
