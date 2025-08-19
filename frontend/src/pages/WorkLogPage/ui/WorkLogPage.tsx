@@ -685,6 +685,7 @@ export const WorkLogPage = () => {
             <Button
               size="small"
               variant="outlined"
+              
               onClick={() => navigate(`/work-log/${entry.id}`)}
             >
               Подробнее
