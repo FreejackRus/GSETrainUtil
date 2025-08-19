@@ -84,6 +84,9 @@ export const WorkLogDetailPage: React.FC = () => {
   interface PhotoItem {
     label: string;
     url: string;
+    name?: string;
+    typeWork?: string;
+    carriageNumber?: string;
   }
 
   function collectPhotos(entry: WorkLogEntry): PhotoItem[] {
@@ -96,25 +99,47 @@ export const WorkLogDetailPage: React.FC = () => {
     }
 
     // 2) Фото вагонов
-    entry.carriages.forEach((c) => {
+    entry.carriages.forEach((c, index) => {
       if (c.photo) {
-        items.push({ label: 'Фото вагона', url: `${base}/${c.photo}` });
+        items.push({
+          label: 'Фото вагона',
+          url: `${base}/${c.photo}`,
+          carriageNumber: entry.carriages[index].number,
+        });
       }
     });
 
     // 3) Фото оборудования
-    entry.equipmentPhotos.forEach((p) => {
-      items.push({ label: 'Фото оборудования', url: `${base}/${p}` });
+    entry.equipmentPhotos.forEach((p, index) => {
+      items.push({
+        label: 'Фото оборудования',
+        url: `${base}/${p}`,
+        name: entry.equipmentDetails[index].name,
+        typeWork: entry.equipmentDetails[index].typeWork,
+        carriageNumber: entry.equipmentDetails[index].carriageNumber,
+      });
     });
 
     // 4) Фото серийного номера
-    entry.serialPhotos.forEach((p) => {
-      items.push({ label: 'Фото серийного номера', url: `${base}/${p}` });
+    entry.serialPhotos.forEach((p, index) => {
+      items.push({
+        label: 'Фото серийного номера',
+        url: `${base}/${p}`,
+        name: entry.equipmentDetails[index].name,
+        typeWork: entry.equipmentDetails[index].typeWork,
+        carriageNumber: entry.equipmentDetails[index].carriageNumber,
+      });
     });
 
     // 5) Фото MAC-адреса
-    entry.macPhotos.forEach((p) => {
-      items.push({ label: 'Фото MAC-адреса', url: `${base}/${p}` });
+    entry.macPhotos.forEach((p, index) => {
+      items.push({
+        label: 'Фото MAC-адреса',
+        url: `${base}/${p}`,
+        name: entry.equipmentDetails[index].name,
+        typeWork: entry.equipmentDetails[index].typeWork,
+        carriageNumber: entry.equipmentDetails[index].carriageNumber,
+      });
     });
 
     return items;
@@ -413,7 +438,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 </Card>
               </Grid>
 
-              <Grid size={{ xs: 12, sm: 12, md: 4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card
                   sx={{
                     background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
@@ -462,7 +487,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 border: '1px solid #ff9800',
                 borderRadius: 2,
                 mb: 3,
-                mx: 3,
+                mx: 2,
               }}
             >
               <Box display="flex" alignItems="center" my={2} pl={2}>
@@ -499,117 +524,119 @@ export const WorkLogDetailPage: React.FC = () => {
                               </Typography>
                             </AccordionSummary>
                             <AccordionDetails>
+                              <Typography variant="subtitle2" color="textSecondary" mb={2}>
+                                Фотографии:
+                              </Typography>
+                              {photos.map(({ label, url, carriageNumber }, index) =>
+                                item.number === carriageNumber && label === 'Фото вагона' ? (
+                                  <Grid size={{ xs: 12, sm: 12, md: 6 }} key={index}>
+                                    <Card
+                                      className="photo-card"
+                                      onClick={() =>
+                                        handlePhotoClick(
+                                          typeof url === 'string'
+                                            ? getFullPhotoUrl(url)
+                                            : getFullPhotoUrl(url[0]),
+                                        )
+                                      }
+                                      sx={{ cursor: 'pointer' }}
+                                    >
+                                      <CardMedia
+                                        component="img"
+                                        height="120"
+                                        image={getFullPhotoUrl(Array.isArray(url) ? url[0] : url)}
+                                        alt={label}
+                                        sx={{ objectFit: 'cover' }}
+                                      />
+                                      <CardContent sx={{ p: 1 }}>
+                                        <Typography variant="caption" color="textSecondary">
+                                          {label}
+                                        </Typography>
+                                      </CardContent>
+                                    </Card>
+                                  </Grid>
+                                ) : (
+                                  <></>
+                                ),
+                              )}
+                              <Typography variant="subtitle2" color="textSecondary" mb={2}>
+                                Названия оборудования
+                              </Typography>
                               {workLog.equipmentDetails
                                 .filter((equipment) => equipment.carriageNumber === item.number)
                                 .map((equipment) => (
-                                  <Grid container spacing={3}>
-                                    <Grid size={{ xs: 12 }}>
-                                      <Box className="info-item">
-                                        {workLog.equipmentDetails &&
-                                        workLog.equipmentDetails.length > 0 ? (
-                                          <Box>
-                                            <Card
-                                              key={equipment.id}
-                                              sx={{ mb: 2, border: '1px solid #e0e0e0' }}
-                                            >
-                                              <CardContent sx={{ p: 2 }}>
-                                                <Grid container spacing={2}>
-                                                  <Grid size={{ xs: 12, sm: 6 }}>
-                                                    <Typography
-                                                      variant="subtitle2"
-                                                      color="textSecondary"
-                                                    >
-                                                      Название оборудования
-                                                    </Typography>
-                                                    <Typography variant="body1" fontWeight={500}>
-                                                      {equipment.name}
-                                                    </Typography>
-                                                  </Grid>
-                                                  <Grid size={{ xs: 12, sm: 6 }}>
-                                                    <Typography
-                                                      variant="subtitle2"
-                                                      color="textSecondary"
-                                                    >
-                                                      Серийный номер
-                                                    </Typography>
-                                                    <Typography variant="body1">
-                                                      {equipment.serialNumber || 'Не указан'}
-                                                    </Typography>
-                                                  </Grid>
-                                                  <Grid size={{ xs: 12, sm: 6 }}>
-                                                    <Typography
-                                                      variant="subtitle2"
-                                                      color="textSecondary"
-                                                    >
-                                                      MAC-адрес
-                                                    </Typography>
-                                                    <Typography variant="body1">
-                                                      {equipment.macAddress || 'Не указан'}
-                                                    </Typography>
-                                                  </Grid>
-                                                  <Grid size={{ xs: 12, sm: 6 }}>
-                                                    <Typography
-                                                      variant="subtitle2"
-                                                      color="textSecondary"
-                                                    >
-                                                      Тип работы
-                                                    </Typography>
-                                                    <Typography variant="body1">
-                                                      {equipment.typeWork || 'Не указан'}
-                                                    </Typography>
-                                                  </Grid>
+                                  <>
+                                    <Accordion>
+                                      <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1-content"
+                                        id="panel1-header"
+                                      >
+                                        <Typography variant="subtitle2" fontWeight={400}>
+                                          {equipment.name}
+                                        </Typography>
+                                      </AccordionSummary>
+                                      <AccordionDetails>
+                                        <Typography variant="subtitle2" fontWeight={400}>
+                                          Серийный номер: {equipment.serialNumber}
+                                        </Typography>
+                                        <Typography variant="subtitle2" fontWeight={400}>
+                                          MAC-адрес: {equipment.macAddress}
+                                        </Typography>
+                                        <Typography variant="subtitle2" fontWeight={400} mb={2}>
+                                          Тип работы: {equipment.typeWork}
+                                        </Typography>
+                                        <Typography variant="subtitle2" fontWeight={400}>
+                                          Фотографии:
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                          {photos.map(
+                                            (
+                                              { label, url, name, typeWork, carriageNumber },
+                                              index,
+                                            ) =>
+                                              equipment.name === name &&
+                                              equipment.typeWork === typeWork &&
+                                              equipment.carriageNumber === carriageNumber ? (
+                                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                                                  <Card
+                                                    className="photo-card"
+                                                    onClick={() =>
+                                                      handlePhotoClick(
+                                                        typeof url === 'string'
+                                                          ? getFullPhotoUrl(url)
+                                                          : getFullPhotoUrl(url[0]),
+                                                      )
+                                                    }
+                                                    sx={{ cursor: 'pointer' }}
+                                                  >
+                                                    <CardMedia
+                                                      component="img"
+                                                      height="120"
+                                                      image={getFullPhotoUrl(
+                                                        Array.isArray(url) ? url[0] : url,
+                                                      )}
+                                                      alt={label}
+                                                      sx={{ objectFit: 'cover' }}
+                                                    />
+                                                    <CardContent sx={{ p: 1 }}>
+                                                      <Typography
+                                                        variant="caption"
+                                                        color="textSecondary"
+                                                      >
+                                                        {label}
+                                                      </Typography>
+                                                    </CardContent>
+                                                  </Card>
                                                 </Grid>
-                                              </CardContent>
-                                            </Card>
-                                          </Box>
-                                        ) : (
-                                          <Box>
-                                            <Card sx={{ border: '1px solid #e0e0e0' }}>
-                                              <CardContent sx={{ p: 2 }}>
-                                                <Grid container spacing={2}>
-                                                  <Grid size={{ xs: 12, sm: 6 }}>
-                                                    <Typography
-                                                      variant="subtitle2"
-                                                      color="textSecondary"
-                                                    >
-                                                      Тип оборудования
-                                                    </Typography>
-                                                  </Grid>
-                                                  <Grid size={{ xs: 12, sm: 6 }}>
-                                                    <Typography
-                                                      variant="subtitle2"
-                                                      color="textSecondary"
-                                                    >
-                                                      Количество
-                                                    </Typography>
-                                                    <Typography variant="body1">
-                                                      {workLog.countEquipment} ед.
-                                                    </Typography>
-                                                  </Grid>
-                                                  <Grid size={{ xs: 12, sm: 6 }}>
-                                                    <Typography
-                                                      variant="subtitle2"
-                                                      color="textSecondary"
-                                                    >
-                                                      Серийный номер
-                                                    </Typography>
-                                                  </Grid>
-                                                  <Grid size={{ xs: 12, sm: 6 }}>
-                                                    <Typography
-                                                      variant="subtitle2"
-                                                      color="textSecondary"
-                                                    >
-                                                      MAC-адрес
-                                                    </Typography>
-                                                  </Grid>
-                                                </Grid>
-                                              </CardContent>
-                                            </Card>
-                                          </Box>
-                                        )}
-                                      </Box>
-                                    </Grid>
-                                  </Grid>
+                                              ) : (
+                                                <></>
+                                              ),
+                                          )}
+                                        </Grid>
+                                      </AccordionDetails>
+                                    </Accordion>
+                                  </>
                                 ))}
                             </AccordionDetails>
                           </Accordion>
@@ -630,6 +657,44 @@ export const WorkLogDetailPage: React.FC = () => {
                 <Typography variant="subtitle2" color="textSecondary">
                   Общее количество оборудования: {workLog.countEquipment} ед.
                 </Typography>
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" color="textSecondary" mb={2}>
+                  Фото заявки:
+                </Typography>
+
+                {photos.map(({ label, url }, index) =>
+                  label === 'Фото заявки' ? (
+                    <Grid size={{ xs: 12, sm: 12, md: 6 }} sx={{mb:4}} key={index}>
+                      <Card
+                        className="photo-card"
+                        onClick={() =>
+                          handlePhotoClick(
+                            typeof url === 'string'
+                              ? getFullPhotoUrl(url)
+                              : getFullPhotoUrl(url[0]),
+                          )
+                        }
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <CardMedia
+                          component="img"
+                          height="120"
+                          image={getFullPhotoUrl(Array.isArray(url) ? url[0] : url)}
+                          alt={label}
+                          sx={{ objectFit: 'cover' }}
+                        />
+                        <CardContent sx={{ p: 1 }}>
+                          <Typography variant="caption" color="textSecondary">
+                            {label}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ) : (
+                    <></>
+                  ),
+                )}
               </Box>
               <Grid size={{ xs: 12 }}>
                 <Box className="info-item">
@@ -658,52 +723,6 @@ export const WorkLogDetailPage: React.FC = () => {
               </Grid>
             </Box>
           </Paper>
-
-          {/* Фотографии */}
-          {/* {(() => {
-            return (
-              photos.length > 0 && (
-                <Paper className="detail-section" elevation={2}>
-                  <Typography variant="h6" className="section-title" gutterBottom>
-                    <PhotoCameraIcon sx={{ mr: 1 }} />
-                    Фотографии ({photos.length})
-                  </Typography>
-                  <Divider sx={{ mb: 2 }} />
-
-                  <Grid container spacing={2}>
-                    {photos.map(({ label, url }, index) => (
-                      <Grid size={{ xs: 6, sm: 4, md: 3 }} key={index}>
-                        <Card
-                          className="photo-card"
-                          onClick={() =>
-                            handlePhotoClick(
-                              typeof url === 'string'
-                                ? getFullPhotoUrl(url)
-                                : getFullPhotoUrl(url[0]),
-                            )
-                          }
-                          sx={{ cursor: 'pointer' }}
-                        >
-                          <CardMedia
-                            component="img"
-                            height="120"
-                            image={getFullPhotoUrl(Array.isArray(url) ? url[0] : url)}
-                            alt={label}
-                            sx={{ objectFit: 'cover' }}
-                          />
-                          <CardContent sx={{ p: 1 }}>
-                            <Typography variant="caption" color="textSecondary">
-                              {label}
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Paper>
-              )
-            );
-          })()} */}
         </Grid>
 
         {/* Боковая панель */}
