@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # === Настраиваемые переменные ===
 PG_USER="postgres"
 PG_HOST="localhost"
@@ -25,7 +23,7 @@ backup_db() {
 
     DUMP_FILE="${DATE_DIR}/${DB_NAME}.sql"
     echo "Создаю дамп базы: $DB_NAME → $DUMP_FILE"
-    echo "Введите от базы данных"
+    echo "Введите пароль от базы данных"
     pg_dump -U "$PG_USER" -h "$PG_HOST" -p "$PG_PORT" "$DB_NAME" > "$DUMP_FILE"
 
     gzip "$DUMP_FILE"
@@ -52,7 +50,6 @@ cleanup_old_backups() {
 
     echo "🗑 Проверяем папки в $DB_DIR на возраст старше $MAX_AGE..."
 
-    # Переводим max_age в секунды
     case "$MAX_AGE" in
         *m) SECONDS=$(( ${MAX_AGE%m} * 60 )) ;;
         *h) SECONDS=$(( ${MAX_AGE%h} * 3600 )) ;;
@@ -68,7 +65,6 @@ cleanup_old_backups() {
         [ -d "$FOLDER" ] || continue
         BASENAME=$(basename "$FOLDER")
 
-        # Парсим новый формат
         FOLDER_DATE=$(date -d "${BASENAME:0:8} ${BASENAME:9:2}:${BASENAME:11:2}:${BASENAME:13:2}" +%s 2>/dev/null)
         if [ -z "$FOLDER_DATE" ]; then
             echo "⚠ Пропускаем папку с неверной датой: $BASENAME"
@@ -84,6 +80,7 @@ cleanup_old_backups() {
 
     echo "✅ Очистка старых бэкапов завершена."
 }
+
 restore_db() {
     DUMP_PATH="$1"
     DB_NAME="$2"
@@ -93,16 +90,14 @@ restore_db() {
         exit 1
     fi
 
-
     echo "🧹 Чищу базу $DB_NAME..."
     sudo -u "$PG_USER" psql -d "$DB_NAME" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 
     echo "♻ Восстанавливаю базу $DB_NAME из $DUMP_PATH..."
-    if [[ "$DUMP_PATH" == *.gz ]]; then
-        gunzip -c "$DUMP_PATH" | sudo -u "$PG_USER" psql -d "$DB_NAME"
-    else
-        sudo -u "$PG_USER" psql -d "$DB_NAME" < "$DUMP_PATH"
-    fi
+    case "$DUMP_PATH" in
+        *.gz) gunzip -c "$DUMP_PATH" | sudo -u "$PG_USER" psql -d "$DB_NAME" ;;
+        *)    sudo -u "$PG_USER" psql -d "$DB_NAME" < "$DUMP_PATH" ;;
+    esac
 
     if [ $? -eq 0 ]; then
         echo "✅ База $DB_NAME успешно восстановлена!"
@@ -110,7 +105,6 @@ restore_db() {
         echo "❌ Ошибка при восстановлении базы!"
     fi
 }
-
 
 # === Основная логика ===
 case "$1" in

@@ -1,50 +1,16 @@
-=======================================================
-Дамп одной базы
+пока скрипты можно запускать только от /GSETrainUtil/backend/scripts (папки scripts)
 
-pg_dump -U username -h localhost -p 5432 dbname > dump.sql
+бэкап оперделённой базы данных
+sh saveData.sh backup <название существующей базы данных>
+пример:
+sh saveData.sh backup gse_train_util
 
--U username — имя пользователя PostgreSQL
-
--h localhost — хост (обычно localhost)
-
--p 5432 — порт (по умолчанию 5432)
-
-dbname — имя базы, которую хотите сохранить
-
-dump.sql — файл, куда будет сохранён дамп
-
-=======================================================
-
-=======================================================
-Восстановление из дампа
-sudo -u postgres psql -d test < /home/prm.local/vvoronov/Projects/shellScripts/dump.sql
-=======================================================
-
-*m) SECONDS=$(( ${MAX_AGE%m} * 60 )) ;;
-        *h) SECONDS=$(( ${MAX_AGE%h} * 3600 )) ;;
-        *d) SECONDS=$(( ${MAX_AGE%d} * 86400 )) ;;
-        *w) SECONDS=$(( ${MAX_AGE%w} * 604800 )) ;;
-        *M) SECONDS=$(( ${MAX_AGE%M} * 2592000 )) ;;
-
-
-команды
-pg_dump -U username -h localhost -p 5432 dbname > dump.sql
-sudo -u postgres psql -d test < /home/prm.local/vvoronov/Projects/shellScripts/dump.sql
-sudo -u postgres dropdb test
-
-chmod +x saveData.sh
-
-бэкап оперделённой базы данных 
-./saveData.sh backup gse_train_util
-
-удаление бэкапа если слишком старый
-./saveData.sh cleanup gse_train_util 1m
+удаление бэкапов если слишком старые чем одна минута (поддерживает и m,h,d,w,M) 
+sh saveData.sh cleanup <название существующей базы данных> <минуты,часы,дни,недели,месяцы, старее чего удаляются>
+пример:
+sh saveData.sh cleanup gse_train_util 1m
 
 востановление базы по дампу
-./saveData.sh restore /var/backups/gse_train_util/20250820-172552/gse_train_util.sql.gz gse_train_util
-
-gunzip gse_train_util.sql.gz
-
-
-надо создать  shell скрипт,который будет создавать дамбы
-
+sh saveData.sh restore <путь до дампа> <название существующей базы данных,хоть пустой> 
+пример:
+sh saveData.sh restore /var/backups/gse_train_util/20250820-174937/gse_train_util.sql.gz test2
