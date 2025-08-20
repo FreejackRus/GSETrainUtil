@@ -140,9 +140,7 @@ export const WorkLogPage = () => {
         for (const equipment of entry.equipmentDetails) {
           const mac = equipment.macAddress?.toLowerCase();
 
-          if (
-            mac?.includes(searchLower)
-          ) {
+          if (mac?.includes(searchLower)) {
             return true;
           }
         }
@@ -334,16 +332,50 @@ export const WorkLogPage = () => {
   const handleDownloadPdf = async (entry: WorkLogEntry, typePdf: string) => {
     console.log(entry);
     let response;
+    console.log(typePdf);
 
     try {
-      if (typePdf === 'Акт демонтажа/монтажа') {
+      if (typePdf === 'Акт монтажа') {
+        response = await apiClient.post(
+          '/pdfActInstEquipment',
+          {
+            // Если typeWork и applicationNumber есть в equipmentDetails[0], можно взять оттуда
+            // applicationNumber: entry.id.toString(), // или замени на корректное поле, если нужно
+            applicationNumber: '__', // или замени на корректное поле, если нужно
+            equipmentDetails: entry.equipmentDetails
+              ?.map(({ photos, ...rest }) => rest)
+              .filter((item) => item.typeWork === 'Монтаж'),
+
+            applicationDate: entry.createdAt,
+            contractNumber: '____________________',
+          },
+          {
+            responseType: 'blob', // Важно: получаем как файл
+          },
+        );
+        const blob = new Blob([response?.data], {
+          type: 'application/pdf',
+        });
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Акт монтажа №${entry.id.toString()}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        console.log(response);
+      } else if (typePdf === 'Акт демонтажа') {
         response = await apiClient.post(
           '/pdfActDisEquipment',
           {
             // Если typeWork и applicationNumber есть в equipmentDetails[0], можно взять оттуда
             // applicationNumber: entry.id.toString(), // или замени на корректное поле, если нужно
-            applicationNumber: "__", // или замени на корректное поле, если нужно
-            equipmentDetails: entry.equipmentDetails?.map(({ photos, ...rest }) => rest),
+            applicationNumber: '__', // или замени на корректное поле, если нужно
+            equipmentDetails: entry.equipmentDetails
+              ?.map(({ photos, ...rest }) => rest)
+              .filter((item) => item.typeWork === 'Демонтаж'),
             applicationDate: entry.createdAt,
             contractNumber: '____________________',
           },
@@ -368,7 +400,7 @@ export const WorkLogPage = () => {
         response = await apiClient.post(
           '/pdfTechnicalActAcceptance',
           {
-            applicationNumber:"__", // или подставь правильное поле
+            applicationNumber: '__', // или подставь правильное поле
             applicationDate: entry.createdAt,
             contractNumber: '____________________',
             contractDate: '«__».____.____ г.',
@@ -399,8 +431,8 @@ export const WorkLogPage = () => {
           '/pdfAppWork',
           {
             // applicationNumber: entry.id.toString(),
-            applicationNumber:"__",
-            carriageNumbers: entry.carriages|| '',
+            applicationNumber: '__',
+            carriageNumbers: entry.carriages || '',
             currentLocation: entry.currentLocation,
             equipmentDetails: entry.equipmentDetails,
           },
@@ -653,6 +685,7 @@ export const WorkLogPage = () => {
             <Button
               size="small"
               variant="outlined"
+              
               onClick={() => navigate(`/work-log/${entry.id}`)}
             >
               Подробнее
@@ -664,11 +697,17 @@ export const WorkLogPage = () => {
               onChange={(e) => handleDownloadPdf(entry, e.target.value as string)}
             >
               <MenuItem value="Скачать">Скачать</MenuItem>
+              {/* {console.log()} */}
+              {(entry.equipmentTypes.some((item) => item === 'Демонтаж')) && (
+                <MenuItem value="Акт демонтажа">Акт демонтажа</MenuItem>
+              )}
+              {(entry.equipmentTypes.some((item) => item === 'Монтаж')) && (
+               <MenuItem value="Акт монтажа">Акт монтажа</MenuItem>
+              )}
               <MenuItem value="Заявка">Заявка</MenuItem>
-              <MenuItem value="Акт демонтажа/монтажа">Акт демонтажа/монтажа</MenuItem>
               <MenuItem value="Технический акт">Технический акт</MenuItem>
             </Select>
-          </Box>
+          </Box> 
         </CardActions>
       </Card>
     </Grid>
@@ -767,7 +806,8 @@ export const WorkLogPage = () => {
             >
               <MenuItem value="Скачать">Скачать</MenuItem>
               <MenuItem value="Заявка">Заявка</MenuItem>
-              <MenuItem value="Акт демонтажа/монтажа">Акт демонтажа/монтажа</MenuItem>
+              <MenuItem value="Акт демонтажа">Акт демонтажа</MenuItem>
+              <MenuItem value="Акт монтажа">Акт монтажа</MenuItem>
               <MenuItem value="Технический акт">Технический акт</MenuItem>
             </Select>
           </Box>

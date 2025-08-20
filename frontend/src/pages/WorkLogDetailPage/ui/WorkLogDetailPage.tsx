@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useParams, useNavigate } from 'react-router';
 import {
   Container,
@@ -26,6 +27,9 @@ import {
   CircularProgress,
   Tooltip,
   Fab,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -80,6 +84,9 @@ export const WorkLogDetailPage: React.FC = () => {
   interface PhotoItem {
     label: string;
     url: string;
+    name?: string;
+    typeWork?: string;
+    carriageNumber?: string;
   }
 
   function collectPhotos(entry: WorkLogEntry): PhotoItem[] {
@@ -92,25 +99,47 @@ export const WorkLogDetailPage: React.FC = () => {
     }
 
     // 2) Фото вагонов
-    entry.carriages.forEach((c) => {
+    entry.carriages.forEach((c, index) => {
       if (c.photo) {
-        items.push({ label: 'Фото вагона', url: `${base}/${c.photo}` });
+        items.push({
+          label: 'Фото вагона',
+          url: `${base}/${c.photo}`,
+          carriageNumber: entry.carriages[index].number,
+        });
       }
     });
 
     // 3) Фото оборудования
-    entry.equipmentPhotos.forEach((p) => {
-      items.push({ label: 'Фото оборудования', url: `${base}/${p}` });
+    entry.equipmentPhotos.forEach((p, index) => {
+      items.push({
+        label: 'Фото оборудования',
+        url: `${base}/${p}`,
+        name: entry.equipmentDetails[index].name,
+        typeWork: entry.equipmentDetails[index].typeWork,
+        carriageNumber: entry.equipmentDetails[index].carriageNumber,
+      });
     });
 
     // 4) Фото серийного номера
-    entry.serialPhotos.forEach((p) => {
-      items.push({ label: 'Фото серийного номера', url: `${base}/${p}` });
+    entry.serialPhotos.forEach((p, index) => {
+      items.push({
+        label: 'Фото серийного номера',
+        url: `${base}/${p}`,
+        name: entry.equipmentDetails[index].name,
+        typeWork: entry.equipmentDetails[index].typeWork,
+        carriageNumber: entry.equipmentDetails[index].carriageNumber,
+      });
     });
 
     // 5) Фото MAC-адреса
-    entry.macPhotos.forEach((p) => {
-      items.push({ label: 'Фото MAC-адреса', url: `${base}/${p}` });
+    entry.macPhotos.forEach((p, index) => {
+      items.push({
+        label: 'Фото MAC-адреса',
+        url: `${base}/${p}`,
+        name: entry.equipmentDetails[index].name,
+        typeWork: entry.equipmentDetails[index].typeWork,
+        carriageNumber: entry.equipmentDetails[index].carriageNumber,
+      });
     });
 
     return items;
@@ -152,6 +181,8 @@ export const WorkLogDetailPage: React.FC = () => {
 
       if (response.success) {
         setWorkLog(response.data);
+        console.log(response.data);
+
         setEditedWorkLog(response.data);
       } else {
         setError('Не удалось загрузить данные заявки');
@@ -299,7 +330,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 }}
               >
                 {/* {workLog.typeWork} • {workLog.trainNumber} • Вагон {workLog.carriageNumber} */}
-                {workLog.trainNumbers[0]} • Вагон{' '}
+                {workLog.trainNumbers.join(', ')} • Вагон{' '}
                 {workLog.carriages.map((item) => item.number).join(', ')}
               </Typography>
             </Box>
@@ -407,7 +438,7 @@ export const WorkLogDetailPage: React.FC = () => {
                 </Card>
               </Grid>
 
-              <Grid size={{ xs: 12, sm: 12, md: 4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card
                   sx={{
                     background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
@@ -456,255 +487,215 @@ export const WorkLogDetailPage: React.FC = () => {
                 border: '1px solid #ff9800',
                 borderRadius: 2,
                 mb: 3,
+                mx: 2,
               }}
             >
-              <CardContent sx={{ p: 3 }}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <TrainIcon sx={{ color: '#f57c00', mr: 1, fontSize: 24 }} />
-                  <Typography variant="h6" color="#e65100" fontWeight={700}>
-                    Информация о составе
-                  </Typography>
-                </Box>
-
-                <Grid container spacing={3}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <Box>
-                      <Typography variant="subtitle2" color="#bf360c" fontWeight={600} gutterBottom>
-                        Номер поезда
-                      </Typography>
-                      {isEditing ? (
-                        <TextField
-                          fullWidth
-                          value={editedWorkLog?.trainNumbers[0] || ''}
-                          onChange={(e) =>
-                            setEditedWorkLog((prev) =>
-                              prev ? { ...prev, trainNumber: e.target.value } : null,
-                            )
-                          }
-                          size="small"
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              backgroundColor: 'rgba(255,255,255,0.8)',
-                            },
-                          }}
-                        />
-                      ) : (
-                        <Typography variant="h5" fontWeight={700} color="#d84315">
-                          №{workLog.trainNumbers[0]}
-                        </Typography>
-                      )}
-                    </Box>
-                  </Grid>
-
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <Box>
-                      <Typography variant="subtitle2" color="#bf360c" fontWeight={600} gutterBottom>
-                        Номера вагонов
-                      </Typography>
-                      <Typography variant="body1" fontWeight={600} color="#d84315">
-                        {workLog.carriages.map((item) => item.number).join(', ')}
-                      </Typography>
-
-                      {/* {isEditing ? (
-                        <FormControl fullWidth size="small">
-                          <Select
-                            // value={editedWorkLog?.carriageType || ''}
-                            onChange={(e) =>
-                              setEditedWorkLog((prev) =>
-                                prev ? { ...prev, carriageType: e.target.value } : null,
-                              )
-                            }
-                            sx={{
-                              '& .MuiOutlinedInput-root': {
-                                backgroundColor: 'rgba(255,255,255,0.8)',
-                              },
-                            }}
-                          >
-                            {carriageTypes.map((item, index) => (
-                              <MenuItem key={`carriagetype-${index}`} value={item}>
-                                {item}
-                              </MenuItem>
-                            ))}
-
-                          </Select>
-                        </FormControl>
-                      ) : (
-                        <Typography variant="body1" fontWeight={600} color="#d84315">
-                        </Typography>
-                      )} */}
-                    </Box>
-                  </Grid>
-
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    {/* <Box>
-                      <Typography variant="subtitle2" color="#bf360c" fontWeight={600} gutterBottom>
-                        Номер вагона
-                      </Typography>
-                      {isEditing ? (
-                        <TextField
-                          fullWidth
-                          value={editedWorkLog?.carriageNumber || ''}
-                          onChange={(e) =>
-                            setEditedWorkLog((prev) =>
-                              prev ? { ...prev, carriageNumber: e.target.value } : null,
-                            )
-                          }
-                          size="small"
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              backgroundColor: 'rgba(255,255,255,0.8)',
-                            },
-                          }}
-                        />
-                      ) : (
-                        <Typography variant="h5" fontWeight={700} color="#d84315">
-                          №{workLog.carriageNumber}
-                        </Typography>
-                      )}
-                    </Box> */}
-                  </Grid>
-                </Grid>
-              </CardContent>
+              <Box display="flex" alignItems="center" my={2} pl={2}>
+                <TrainIcon sx={{ color: '#f57c00', mr: 1, fontSize: 24 }} />
+                <Typography variant="h6" color="#e65100" fontWeight={700}>
+                  Информация о составе
+                </Typography>
+              </Box>
             </Card>
 
-            {/* Информация об оборудовании */}
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }}>
-                <Box className="info-item">
-                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                    Установленное оборудование
-                  </Typography>
-                  {workLog.equipmentDetails && workLog.equipmentDetails.length > 0 ? (
-                    <Box>
-                      {workLog.equipmentDetails.map((equipment) => (
-                        <Card key={equipment.id} sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
-                          <CardContent sx={{ p: 2 }}>
-                            <Grid container spacing={2}>
-                              <Grid size={{ xs: 12, sm: 6 }}>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                  Тип оборудования
-                                </Typography>
-                                <Typography variant="body1" fontWeight={500}>
-                                  {equipment.deviceType}
-                                </Typography>
-                              </Grid>
-                              <Grid size={{ xs: 12, sm: 6 }}>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                  Количество
-                                </Typography>
-                                <Typography variant="body1">{equipment.quantity} ед.</Typography>
-                              </Grid>
-                              <Grid size={{ xs: 12, sm: 6 }}>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                  Серийный номер
-                                </Typography>
-                                <Typography variant="body1">
-                                  {equipment.serialNumber || 'Не указан'}
-                                </Typography>
-                              </Grid>
-                              <Grid size={{ xs: 12, sm: 6 }}>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                  MAC-адрес
-                                </Typography>
-                                <Typography variant="body1">
-                                  {equipment.macAddress || 'Не указан'}
-                                </Typography>
-                              </Grid>
-                              <Grid size={{ xs: 12, sm: 6 }}>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                  Тип работы
-                                </Typography>
-                                <Typography variant="body1">
-                                  {equipment.typeWork || 'Не указан'}
-                                </Typography>
-                              </Grid>
-                            </Grid>
-                          </CardContent>
-                        </Card>
-                      ))}
-                      <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
-                        <Typography variant="subtitle2" color="textSecondary">
-                          Общее количество оборудования: {workLog.countEquipment} ед.
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ) : (
-                    // Fallback для старого формата данных
-                    <Box>
-                      <Card sx={{ border: '1px solid #e0e0e0' }}>
-                        <CardContent sx={{ p: 2 }}>
-                          <Grid container spacing={2}>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                              <Typography variant="subtitle2" color="textSecondary">
-                                Тип оборудования
+            <Box mb={3}>
+              {workLog.trainNumbers.map((train) => {
+                return (
+                  <Accordion>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls="panel1-content"
+                      id="panel1-header"
+                    >
+                      <Typography component="span">Поезд: {train} </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {workLog.carriages
+                        .filter((item) => item.train === train)
+                        .map((item) => (
+                          <Accordion>
+                            <AccordionSummary
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls="panel1-content"
+                              id="panel1-header"
+                            >
+                              <Typography component="span">
+                                Вагон: {item.number}, тип вагона: {item.type}
                               </Typography>
-                              {/* {isEditing ? (
-                                <TextField
-                                  fullWidth
-                                  value={editedWorkLog?.equipmentType || ''}
-                                  onChange={(e) =>
-                                    setEditedWorkLog((prev) =>
-                                      prev ? { ...prev, equipmentType: e.target.value } : null,
-                                    )
-                                  }
-                                  size="small"
-                                />
-                              ) : (
-                                <Typography variant="body1">{workLog.equipmentType}</Typography>
-                              )} */}
-                            </Grid>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                              <Typography variant="subtitle2" color="textSecondary">
-                                Количество
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <Typography variant="subtitle2" color="textSecondary" mb={2}>
+                                Фотографии:
                               </Typography>
-                              <Typography variant="body1">{workLog.countEquipment} ед.</Typography>
-                            </Grid>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                              <Typography variant="subtitle2" color="textSecondary">
-                                Серийный номер
+                              {photos.map(({ label, url, carriageNumber }, index) =>
+                                item.number === carriageNumber && label === 'Фото вагона' ? (
+                                  <Grid size={{ xs: 12, sm: 12, md: 6 }} key={index}>
+                                    <Card
+                                      className="photo-card"
+                                      onClick={() =>
+                                        handlePhotoClick(
+                                          typeof url === 'string'
+                                            ? getFullPhotoUrl(url)
+                                            : getFullPhotoUrl(url[0]),
+                                        )
+                                      }
+                                      sx={{ cursor: 'pointer' }}
+                                    >
+                                      <CardMedia
+                                        component="img"
+                                        height="120"
+                                        image={getFullPhotoUrl(Array.isArray(url) ? url[0] : url)}
+                                        alt={label}
+                                        sx={{ objectFit: 'cover' }}
+                                      />
+                                      <CardContent sx={{ p: 1 }}>
+                                        <Typography variant="caption" color="textSecondary">
+                                          {label}
+                                        </Typography>
+                                      </CardContent>
+                                    </Card>
+                                  </Grid>
+                                ) : (
+                                  <></>
+                                ),
+                              )}
+                              <Typography variant="subtitle2" color="textSecondary" mb={2}>
+                                Названия оборудования
                               </Typography>
-                              {/* {isEditing ? (
-                                <TextField
-                                  fullWidth
-                                  value={editedWorkLog?.serialNumber || ''}
-                                  onChange={(e) =>
-                                    setEditedWorkLog((prev) =>
-                                      prev ? { ...prev, serialNumber: e.target.value } : null,
-                                    )
-                                  }
-                                  size="small"
-                                />
-                              ) : (
-                                <Typography variant="body1">{workLog.serialNumber}</Typography>
-                              )} */}
-                            </Grid>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                              <Typography variant="subtitle2" color="textSecondary">
-                                MAC-адрес
-                              </Typography>
-                              {/* {isEditing ? (
-                                <TextField
-                                  fullWidth
-                                  value={editedWorkLog?.macAddress || ''}
-                                  onChange={(e) =>
-                                    setEditedWorkLog((prev) =>
-                                      prev ? { ...prev, macAddress: e.target.value } : null,
-                                    )
-                                  }
-                                  size="small"
-                                />
-                              ) : (
-                                <Typography variant="body1">{workLog.macAddress}</Typography>
-                              )} */}
-                            </Grid>
-                          </Grid>
+                              {workLog.equipmentDetails
+                                .filter((equipment) => equipment.carriageNumber === item.number)
+                                .map((equipment) => (
+                                  <>
+                                    <Accordion>
+                                      <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1-content"
+                                        id="panel1-header"
+                                      >
+                                        <Typography variant="subtitle2" fontWeight={400}>
+                                          {equipment.name}
+                                        </Typography>
+                                      </AccordionSummary>
+                                      <AccordionDetails>
+                                        <Typography variant="subtitle2" fontWeight={400}>
+                                          Серийный номер: {equipment.serialNumber}
+                                        </Typography>
+                                        <Typography variant="subtitle2" fontWeight={400}>
+                                          MAC-адрес: {equipment.macAddress}
+                                        </Typography>
+                                        <Typography variant="subtitle2" fontWeight={400} mb={2}>
+                                          Тип работы: {equipment.typeWork}
+                                        </Typography>
+                                        <Typography variant="subtitle2" fontWeight={400}>
+                                          Фотографии:
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                          {photos.map(
+                                            (
+                                              { label, url, name, typeWork, carriageNumber },
+                                              index,
+                                            ) =>
+                                              equipment.name === name &&
+                                              equipment.typeWork === typeWork &&
+                                              equipment.carriageNumber === carriageNumber ? (
+                                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                                                  <Card
+                                                    className="photo-card"
+                                                    onClick={() =>
+                                                      handlePhotoClick(
+                                                        typeof url === 'string'
+                                                          ? getFullPhotoUrl(url)
+                                                          : getFullPhotoUrl(url[0]),
+                                                      )
+                                                    }
+                                                    sx={{ cursor: 'pointer' }}
+                                                  >
+                                                    <CardMedia
+                                                      component="img"
+                                                      height="120"
+                                                      image={getFullPhotoUrl(
+                                                        Array.isArray(url) ? url[0] : url,
+                                                      )}
+                                                      alt={label}
+                                                      sx={{ objectFit: 'cover' }}
+                                                    />
+                                                    <CardContent sx={{ p: 1 }}>
+                                                      <Typography
+                                                        variant="caption"
+                                                        color="textSecondary"
+                                                      >
+                                                        {label}
+                                                      </Typography>
+                                                    </CardContent>
+                                                  </Card>
+                                                </Grid>
+                                              ) : (
+                                                <></>
+                                              ),
+                                          )}
+                                        </Grid>
+                                      </AccordionDetails>
+                                    </Accordion>
+                                  </>
+                                ))}
+                            </AccordionDetails>
+                          </Accordion>
+                        ))}
+                    </AccordionDetails>
+                  </Accordion>
+                );
+              })}
+              <Box
+                sx={{
+                  mt: 2,
+                  mb: 4,
+                  p: 2,
+                  bgcolor: '#f5f5f5',
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="subtitle2" color="textSecondary">
+                  Общее количество оборудования: {workLog.countEquipment} ед.
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" color="textSecondary" mb={2}>
+                  Фото заявки:
+                </Typography>
+
+                {photos.map(({ label, url }, index) =>
+                  label === 'Фото заявки' ? (
+                    <Grid size={{ xs: 12, sm: 12, md: 6 }} sx={{mb:4}} key={index}>
+                      <Card
+                        className="photo-card"
+                        onClick={() =>
+                          handlePhotoClick(
+                            typeof url === 'string'
+                              ? getFullPhotoUrl(url)
+                              : getFullPhotoUrl(url[0]),
+                          )
+                        }
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <CardMedia
+                          component="img"
+                          height="120"
+                          image={getFullPhotoUrl(Array.isArray(url) ? url[0] : url)}
+                          alt={label}
+                          sx={{ objectFit: 'cover' }}
+                        />
+                        <CardContent sx={{ p: 1 }}>
+                          <Typography variant="caption" color="textSecondary">
+                            {label}
+                          </Typography>
                         </CardContent>
                       </Card>
-                    </Box>
-                  )}
-                </Box>
-              </Grid>
-
+                    </Grid>
+                  ) : (
+                    <></>
+                  ),
+                )}
+              </Box>
               <Grid size={{ xs: 12 }}>
                 <Box className="info-item">
                   <Typography variant="subtitle2" color="textSecondary">
@@ -730,58 +721,8 @@ export const WorkLogDetailPage: React.FC = () => {
                   )}
                 </Box>
               </Grid>
-            </Grid>
+            </Box>
           </Paper>
-
-          {/* Фотографии */}
-          {(() => {
-            // const photos = Object.entries(workLog.photo)
-            //   .filter(([, url]) => url)
-            //   .map(([key, url]) => ({ key, url: url! }));
-
-            return (
-              photos.length > 0 && (
-                <Paper className="detail-section" elevation={2}>
-                  <Typography variant="h6" className="section-title" gutterBottom>
-                    <PhotoCameraIcon sx={{ mr: 1 }} />
-                    Фотографии ({photos.length})
-                  </Typography>
-                  <Divider sx={{ mb: 2 }} />
-
-                  <Grid container spacing={2}>
-                    {photos.map(({ label, url }, index) => (
-                      <Grid size={{ xs: 6, sm: 4, md: 3 }} key={index}>
-                        <Card
-                          className="photo-card"
-                          onClick={() =>
-                            handlePhotoClick(
-                              typeof url === 'string'
-                                ? getFullPhotoUrl(url)
-                                : getFullPhotoUrl(url[0]),
-                            )
-                          }
-                          sx={{ cursor: 'pointer' }}
-                        >
-                          <CardMedia
-                            component="img"
-                            height="120"
-                            image={getFullPhotoUrl(Array.isArray(url) ? url[0] : url)}
-                            alt={label}
-                            sx={{ objectFit: 'cover' }}
-                          />
-                          <CardContent sx={{ p: 1 }}>
-                            <Typography variant="caption" color="textSecondary">
-                              {label}
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Paper>
-              )
-            );
-          })()}
         </Grid>
 
         {/* Боковая панель */}
