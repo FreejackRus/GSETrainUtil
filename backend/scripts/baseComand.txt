@@ -34,9 +34,14 @@ sudo -u postgres dropdb test
 
 chmod +x saveData.sh
 
-./saveData.sh backup
+бэкап оперделённой базы данных 
 ./saveData.sh backup gse_train_util
-./saveData.sh cleanup gse_train_util 1m./saveData.sh cleanup gse_train_util 1m
+
+удаление бэкапа если слишком старый
+./saveData.sh cleanup gse_train_util 1m
+
+востановление базы по дампу
+./saveData.sh restore /var/backups/gse_train_util/20250820-172552/gse_train_util.sql.gz gse_train_util
 
 gunzip gse_train_util.sql.gz
 

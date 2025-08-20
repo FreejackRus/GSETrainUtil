@@ -24,8 +24,8 @@ backup_db() {
     mkdir -p "$DATE_DIR"
 
     DUMP_FILE="${DATE_DIR}/${DB_NAME}.sql"
-
     echo "Создаю дамп базы: $DB_NAME → $DUMP_FILE"
+    echo "Введите от базы данных"
     pg_dump -U "$PG_USER" -h "$PG_HOST" -p "$PG_PORT" "$DB_NAME" > "$DUMP_FILE"
 
     gzip "$DUMP_FILE"
