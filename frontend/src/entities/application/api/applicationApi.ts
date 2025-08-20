@@ -116,39 +116,40 @@ export const applicationApi = {
       t.carriages.forEach((c, ci) => {
         if (c.carriagePhotos?.carriage) {
           fd.append(
-              `requestTrains[${ti}][carriages][${ci}][carriagePhotos][carriage]`,
-              c.carriagePhotos.carriage
+            `requestTrains[${ti}][carriages][${ci}][carriagePhotos][carriage]`,
+            c.carriagePhotos.carriage,
           );
         }
         if (c.carriagePhotos?.equipment) {
           fd.append(
-              `requestTrains[${ti}][carriages][${ci}][carriagePhotos][equipment]`,
-              c.carriagePhotos.equipment
+            `requestTrains[${ti}][carriages][${ci}][carriagePhotos][equipment]`,
+            c.carriagePhotos.equipment,
           );
         }
 
         c.equipments.forEach((e, ei) => {
           if (e.photos?.equipment) {
             fd.append(
-                `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][equipment]`,
-                e.photos.equipment
+              `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][equipment]`,
+              e.photos.equipment,
             );
           }
           if (e.photos?.serial) {
             fd.append(
-                `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][serial]`,
-                e.photos.serial
+              `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][serial]`,
+              e.photos.serial,
             );
           }
           if (e.photos?.mac) {
             fd.append(
-                `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][mac]`,
-                e.photos.mac
+              `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][mac]`,
+              e.photos.mac,
             );
           }
         });
       });
     });
+    console.log(fd);
 
     const res = await apiClient.post('/applications', fd, {
       headers: { 'Content-Type': 'multipart/form-data' }, // можно и не указывать — axios сам проставит boundary
@@ -156,7 +157,6 @@ export const applicationApi = {
 
     return res.data.data as Application;
   },
-
 
   getAll: async (): Promise<Application[]> => {
     const response = await apiClient.get('/applications');
@@ -191,7 +191,9 @@ export const applicationApi = {
 
   // Получить все черновики
   getDrafts: async (userId: number, userRole: string = 'engineer'): Promise<Application[]> => {
-    const response = await apiClient.get(`/applications/drafts?userId=${userId}&userRole=${userRole}`);
+    const response = await apiClient.get(
+      `/applications/drafts?userId=${userId}&userRole=${userRole}`,
+    );
     return response.data.data; // Извлекаем данные из структуры { success, message, data }
   },
 
@@ -203,30 +205,98 @@ export const applicationApi = {
   },
 
   // Завершить черновик (перевести в статус completed)
-  completeDraft: async (id: number, data: Partial<CreateApplicationRequest>): Promise<Application> => {
+  completeDraft: async (
+    id: number,
+    data: Partial<CreateApplicationRequest>,
+  ): Promise<Application> => {
     try {
-      console.log("=== API: Отправка запроса на завершение черновика ===");
-      console.log("URL:", `/applications/${id}/complete`);
-      console.log("ID черновика:", id);
-      console.log("Данные запроса:", data);
-      
-      const response = await apiClient.put(`/applications/${id}/complete`, { ...data, status: 'completed' });
-      
-      console.log("=== API: Успешное завершение черновика ===");
-      console.log("Статус:", response.status);
-      console.log("Данные ответа:", response.data);
+      console.log('=== API: Отправка запроса на завершение черновика ===');
+      console.log('URL:', `/applications/${id}/complete`);
+      console.log('ID черновика:', id);
+      console.log('Данные запроса:', data);
+
+      const fd = new FormData();
+
+      // Обязательные поля
+      fd.append('status', 'completed');
+      if (data.userId != null) fd.append('userId', String(data.userId));
+      if (data.performer) fd.append('performer', data.performer);
+      if (data.currentLocation) fd.append('currentLocation', data.currentLocation);
+
+      // JSON-часть (без файлов)
+      const requestTrainsJson = (data.requestTrains ?? []).map((t) => ({
+        trainNumber: t.trainNumber,
+        carriages: t.carriages.map((c) => ({
+          carriageNumber: c.carriageNumber,
+          carriageType: c.carriageType,
+          equipments: c.equipments.map((e) => ({
+            equipmentName: e.equipmentName,
+            serialNumber: e.serialNumber ?? undefined,
+            macAddress: e.macAddress ?? undefined,
+            typeWork: e.typeWork,
+          })),
+        })),
+      }));
+      fd.append('requestTrains', JSON.stringify(requestTrainsJson));
+
+      // Файлы
+      (data.requestTrains ?? []).forEach((t, ti) => {
+        t.carriages.forEach((c, ci) => {
+          if (c.carriagePhotos?.carriage) {
+            fd.append(
+              `requestTrains[${ti}][carriages][${ci}][carriagePhotos][carriage]`,
+              c.carriagePhotos.carriage,
+            );
+          }
+          if (c.carriagePhotos?.equipment) {
+            fd.append(
+              `requestTrains[${ti}][carriages][${ci}][carriagePhotos][equipment]`,
+              c.carriagePhotos.equipment,
+            );
+          }
+
+          c.equipments.forEach((e, ei) => {
+            if (e.photos?.equipment) {
+              fd.append(
+                `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][equipment]`,
+                e.photos.equipment,
+              );
+            }
+            if (e.photos?.serial) {
+              fd.append(
+                `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][serial]`,
+                e.photos.serial,
+              );
+            }
+            if (e.photos?.mac) {
+              fd.append(
+                `requestTrains[${ti}][carriages][${ci}][equipments][${ei}][photos][mac]`,
+                e.photos.mac,
+              );
+            }
+          });
+        });
+      });
+
+      console.log([...fd.entries()])
+      const response = await apiClient.put(`/applications/${id}/complete`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log('=== API: Успешное завершение черновика ===');
+      console.log('Статус:', response.status);
+      console.log('Данные ответа:', response.data);
       
       return response.data.data; // Извлекаем данные из структуры { success, message, data }
     } catch (error) {
-      console.error("=== API: Ошибка при завершении черновика ===");
-      console.error("ID черновика:", id);
-      console.error("Тип ошибки:", error?.constructor?.name);
-      console.error("Сообщение:", error?.message);
-      console.error("Статус:", error?.response?.status);
-      console.error("Данные ошибки:", error?.response?.data);
-      console.error("Заголовки ошибки:", error?.response?.headers);
-      console.error("Конфигурация запроса:", error?.config);
-      console.error("Полная ошибка:", error);
+      console.error('=== API: Ошибка при завершении черновика ===');
+      console.error('ID черновика:', id);
+      console.error('Тип ошибки:', error?.constructor?.name);
+      console.error('Сообщение:', error?.message);
+      console.error('Статус:', error?.response?.status);
+      console.error('Данные ошибки:', error?.response?.data);
+      console.error('Заголовки ошибки:', error?.response?.headers);
+      console.error('Конфигурация запроса:', error?.config);
+      console.error('Полная ошибка:', error);
       throw error;
     }
   },
