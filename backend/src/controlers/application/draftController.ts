@@ -25,6 +25,7 @@ interface CarriageWithEquipment {
   type: string;
   train: string; // номер поезда из rt.train.number
   photo: string | null; // первое фото типа 'carriage' (если есть)
+  generalPhotoEquipmentCarriage:string | null;
   equipment: EquipmentDetail[];
 }
 
@@ -66,9 +67,15 @@ function formatApplication(r: any): ApplicationSummary {
   for (const rt of r.requestTrains as any[]) {
     const trainNum = rt.train?.number ?? "—";
     for (const rc of rt.requestCarriages as any[]) {
+      console.log(rc.carriagePhotos);
+
       const firstCarriagePhoto =
         (rc.carriagePhotos ?? []).find(
           (p: any) => p.photoType === CarriagePhotoType.carriage
+        )?.photoPath ?? null;
+      const secondCarriagePhoto =
+        (rc.carriagePhotos ?? []).find(
+          (p: any) => p.photoType === CarriagePhotoType.equipment
         )?.photoPath ?? null;
 
       carriages.push({
@@ -76,6 +83,7 @@ function formatApplication(r: any): ApplicationSummary {
         type: rc.carriage.type,
         train: trainNum,
         photo: firstCarriagePhoto,
+        generalPhotoEquipmentCarriage: secondCarriagePhoto,
         equipment: equipmentByRcId[rc.id] ?? [],
       });
     }
@@ -148,6 +156,7 @@ export const getDrafts = async (req: Request, res: Response) => {
         user: true,
       },
     });
+    console.log(raws);
 
     const data = raws.map(formatApplication);
     return res.status(200).json({ success: true, data });

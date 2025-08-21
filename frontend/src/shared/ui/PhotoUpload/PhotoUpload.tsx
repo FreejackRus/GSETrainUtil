@@ -55,7 +55,9 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
   console.log('inputId', inputId);
 
   const handleButtonClick = () => {
-    const input = document.getElementById(`photo-input-${[label.replace(/\s+/g, '-'), inputId].filter(Boolean).join('-')}`);
+    const input = document.getElementById(
+      `photo-input-${[label.replace(/\s+/g, '-'), inputId].filter(Boolean).join('-')}`,
+    );
     input?.click();
   };
 
@@ -79,7 +81,18 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
       }
     }
   };
+  const getPhotoUrl = (file: File) => {
+    if (file.size > 0) {
+      // реальный загруженный файл
+      return URL.createObjectURL(file);
+    }
+    // файл-заглушка, значит file.name = "carriage/xxx.jpeg"
+    return `${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${file.name}`;
+  };
 
+  const getShortFileName = (file: File) => {
+    return file.name.split('/').pop() || file.name;
+  };
   // Get the current photo for display
   const currentPhoto = isNewInterface(props) ? props.photo : null;
 
@@ -149,7 +162,7 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
             <Box className="photo-upload-image-container">
               <Avatar
                 variant="rounded"
-                src={URL.createObjectURL(currentPhoto)}
+                src={getPhotoUrl(currentPhoto)}
                 alt={label}
                 className={`photo-upload-image ${size}`}
               />
@@ -158,15 +171,17 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
             <Box className="photo-upload-chips">
               <Chip
                 icon={<CameraAlt />}
-                label={currentPhoto.name}
+                label={getShortFileName(currentPhoto)}
                 size="small"
                 className="photo-upload-chip-name"
               />
-              <Chip
-                label={`${Math.round(currentPhoto.size / 1024)} KB`}
-                size="small"
-                className="photo-upload-chip-size"
-              />
+              {currentPhoto.size > 0 && (
+                <Chip
+                  label={`${Math.round(currentPhoto.size / 1024)} KB`}
+                  size="small"
+                  className="photo-upload-chip-size"
+                />
+              )}
             </Box>
           </CardContent>
         </Card>
