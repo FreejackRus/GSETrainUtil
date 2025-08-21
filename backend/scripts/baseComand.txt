@@ -14,3 +14,18 @@ sh saveData.sh cleanup gse_train_util 1m
 sh saveData.sh restore <путь до дампа> <название существующей базы данных,хоть пустой> 
 пример:
 sh saveData.sh restore /var/backups/gse_train_util/20250820-174937/gse_train_util.sql.gz test2
+
+
+
+
+docker compose run --rm backup backup mydb
+docker compose run --rm backup cleanup mydb 7d
+docker compose run --rm backup restore /var/backups/mydb/20250821-153000/mydb.sql.gz mydb
+
+docker compose ps
+docker compose logs -f backend
+
+docker compose --profile setup run --rm migrator
+docker compose --profile setup run --rm import_excel
+docker compose --profile setup run --rm import_photos
+root@gkp-vrn-10:/home/prm.local/vvoronov/Projects/GSETrainUtil/backend# docker-compose run --rm backup bash /backup/saveData.sh backup gse_train_util

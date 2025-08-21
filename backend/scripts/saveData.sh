@@ -1,7 +1,7 @@
 # === Настраиваемые переменные ===
-PG_USER="postgres"
-PG_HOST="localhost"
-PG_PORT="5432"
+PG_USER="${PGUSER:-postgres}"
+PG_HOST="${PGHOST:-localhost}"
+PG_PORT="${PGPORT:-5432}"
 DUMP_DIR="/var/backups"
 
 # === Служебные переменные ===

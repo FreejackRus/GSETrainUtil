@@ -20,9 +20,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
     depends_on:
       - db
-    command: ["npx","prisma","migrate","deploy"]
-    restart: "no"         # ВАЖНО: не перезапускать
-    profiles: ["setup"]   # запускаем только когда явно попросим
+    command: ["npx", "prisma", "migrate", "deploy"]
+    restart: "no" # ВАЖНО: не перезапускать
+    profiles: ["setup"] # запускаем только когда явно попросим
 
   # одноразовый контейнер ИМПОРТА EXCEL (запускается вручную)
   import_excel:
@@ -36,7 +36,7 @@ services:
       EXCEL_FILE_PATH: /app/perechen.xlsx
     depends_on:
       - db
-    command: ["node","dist/prisma/import-excel.js"]
+    command: ["node", "dist/prisma/import-excel.js"]
     restart: "no"
     profiles: ["setup"]
 
@@ -59,7 +59,17 @@ services:
       - uploads_data:/app/var/uploads
       - ./photos.xlsx:/import/photos.xlsx:ro
       - ./GSE:/import/GSE:ro
-    command: ["node","dist/prisma/import-photo.js","--xlsx","/import/photos.xlsx","--src","/import/GSE","--sheet","Лист1"]
+    command:
+      [
+        "node",
+        "dist/prisma/import-photo.js",
+        "--xlsx",
+        "/import/photos.xlsx",
+        "--src",
+        "/import/GSE",
+        "--sheet",
+        "Лист1",
+      ]
     restart: "no"
     profiles: ["setup"]
 
@@ -82,6 +92,23 @@ services:
       - pdf_data:/app/var/pdf
       - uploads_data:/app/var/uploads
     restart: unless-stopped
+  backup:
+    build:
+      context: .
+      dockerfile: Dockerfile.backup
+    env_file:
+      - ./.env
+    environment:
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGHOST: db
+      PGPORT: 5432
+    volumes:
+      - ./backend/scripts:/backup/scripts # чтобы удобно править скрипт локально
+      - ./dumps:/var/backups # папка для хранения дампов
+    depends_on:
+      - db
+    restart: "no"
 
 volumes:
   db_data:

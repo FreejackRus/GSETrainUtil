@@ -1,0 +1,14 @@
+FROM postgres:17
+
+WORKDIR /backup
+
+# Копируем твой скрипт внутрь контейнера
+COPY scripts/saveData.sh /backup/saveData.sh
+
+# Делаем исполняемым
+RUN chmod +x /backup/saveData.sh
+
+# Доп. утилиты (bash + gzip)
+RUN apt-get update && apt-get install -y bash gzip && rm -rf /var/lib/apt/lists/*
+
+CMD ["bash", "/backup/saveData.sh"]
