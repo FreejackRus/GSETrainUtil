@@ -41,6 +41,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { carriageApi } from '../../../entities/carriage/api/carriageApi';
 import './CarriagesPage.css';
+import {type Device, deviceApi} from "../../../entities";
 
 // Локальные типы для компонента
 interface CarriageEquipment {
@@ -62,6 +63,7 @@ interface Carriage {
 export const CarriagesPage = () => {
   const navigate = useNavigate();
   const [carriages, setCarriages] = useState<Carriage[]>([]);
+  const [equipments, setEquipments] = useState<Device[]>([]);
   const [filteredCarriages, setFilteredCarriages] = useState<Carriage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,11 +75,16 @@ export const CarriagesPage = () => {
     const fetchCarriages = async () => {
       try {
         setLoading(true);
-        const response = await carriageApi.getCarriages();
-        console.log('Carriages API response:', response); // Для отладки
-        if (response.success && response.data) {
-          setCarriages(response.data);
-          setFilteredCarriages(response.data);
+        const responseCarriage = await carriageApi.getCarriages();
+        const responseDevices = await deviceApi.getDevices();
+        if (responseCarriage.success && responseCarriage.data) {
+          setCarriages(responseCarriage.data);
+          setFilteredCarriages(responseCarriage.data);
+        } else {
+          setError('Ошибка при загрузке данных о вагонах');
+        }
+        if (responseDevices.data) {
+          setEquipments(responseDevices.data);
         } else {
           setError('Ошибка при загрузке данных о вагонах');
         }
@@ -174,27 +181,6 @@ export const CarriagesPage = () => {
     setFilteredCarriages(filtered);
   }, [carriages, statusFilter, searchTerm, getCarriageStatus]);
 
-  const getEquipmentStatusColor = (status: string) => {
-    if (isEquipmentInstalled(status)) {
-      return 'success'; // Зеленый для установленного
-    } else {
-      return 'error'; // Красный для не установленного
-    }
-  };
-
-  const getEquipmentStatusLabel = (status: string) => {
-    if (isEquipmentInstalled(status)) {
-      return 'Установлено';
-    } else {
-      return 'Не установлено';
-    }
-  };
-
-  // Проверяем, есть ли в вагоне неустановленное оборудование
-  const hasNotInstalledEquipment = (carriage: Carriage): boolean => {
-    return carriage.equipment.some((eq) => !isEquipmentInstalled(eq.status));
-  };
-
   const handleStatusFilterChange = (event: SelectChangeEvent) => {
     setStatusFilter(event.target.value as 'all' | 'installed' | 'not_installed' | 'partial');
   };
@@ -223,17 +209,9 @@ export const CarriagesPage = () => {
     );
   }
 
-  const installedCount = carriages.reduce(
-    (total, carriage) =>
-      total + carriage.equipment.filter((eq) => isEquipmentInstalled(eq.status)).length,
-    0,
-  );
+  const installedCount = carriages.reduce((a, v) => a + v.equipment.length, 0);
 
-  const notInstalledCount = carriages.reduce(
-    (total, carriage) =>
-      total + carriage.equipment.filter((eq) => !isEquipmentInstalled(eq.status)).length,
-    0,
-  );
+  const notInstalledCount = equipments.length - installedCount > 0 ? equipments.length - installedCount : 0;
 
   return (
     <Container maxWidth="xl" className="carriages-page">
@@ -295,7 +273,7 @@ export const CarriagesPage = () => {
                   Всего оборудования
                 </Typography>
                 <Typography variant="h4">
-                  {carriages.reduce((total, carriage) => total + carriage.equipment.length, 0)}
+                  {equipments.length}
                 </Typography>
               </CardContent>
             </Card>
@@ -381,11 +359,9 @@ export const CarriagesPage = () => {
               key={carriage.carriageNumber}
               className="carriages-page__accordion"
               sx={{
-                backgroundColor: hasNotInstalledEquipment(carriage) ? '#ffebee' : 'inherit',
+                backgroundColor: 'inherit',
                 '&:before': {
-                  backgroundColor: hasNotInstalledEquipment(carriage)
-                    ? '#ffcdd2'
-                    : 'rgba(0, 0, 0, 0.12)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.12)',
                 },
               }}
             >
@@ -396,9 +372,7 @@ export const CarriagesPage = () => {
                 <Box display="flex" alignItems="center" gap={2} width="100%">
                   <Avatar
                     sx={{
-                      backgroundColor: hasNotInstalledEquipment(carriage)
-                        ? '#f44336'
-                        : 'primary.main',
+                      backgroundColor: 'primary.main',
                     }}
                   >
                     <TrainIcon />
@@ -411,9 +385,6 @@ export const CarriagesPage = () => {
                   </Box>
                   <Box display="flex" flexWrap={'wrap'} gap={1}>
                     <Chip label={`${carriage.equipment.length} ед.`} color="primary" size="small" />
-                    {hasNotInstalledEquipment(carriage) && (
-                      <Chip label="Требует внимания" color="error" size="small" />
-                    )}
                   </Box>
                 </Box>
               </AccordionSummary>
@@ -442,8 +413,8 @@ export const CarriagesPage = () => {
                           <TableCell>{equipment.mac || 'Не указан'}</TableCell>
                           <TableCell>
                             <Chip
-                              label={getEquipmentStatusLabel(equipment.status)}
-                              color={getEquipmentStatusColor(equipment.status)}
+                              label={'Установлено'}
+                              color={'success'}
                               size="small"
                             />
                           </TableCell>

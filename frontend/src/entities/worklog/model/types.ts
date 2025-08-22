@@ -12,6 +12,7 @@ export interface WorkLogEntry {
   id: number;
   photo: string;
   trainNumbers: string[];
+  status: string;
   carriages: {
     number: string;
     type: string;
