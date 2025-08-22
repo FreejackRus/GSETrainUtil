@@ -112,6 +112,7 @@ export interface CarriageWithEquipment {
   type: string;
   train: string;         // номер поезда
   photo: string | null;  // фото типа "carriage" (если есть)
+  generalPhotoEquipmentCarriage:string | null;
   equipment: EquipmentDetail[];
 }
 

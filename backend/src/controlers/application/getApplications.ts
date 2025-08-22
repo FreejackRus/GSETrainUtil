@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -17,14 +17,15 @@ interface EquipmentDetail {
 interface CarriageWithEquipment {
   number: string;
   type: string;
-  train: string;            // номер поезда из rc.requestTrain.train.number
-  photo: string | null;     // первое фото типа 'carriage' (если есть)
+  train: string; // номер поезда из rc.requestTrain.train.number
+  generalPhotoEquipmentCarriage: string | null;
+  photo: string | null; // первое фото типа 'carriage' (если есть)
   equipment: EquipmentDetail[];
 }
 
 interface ApplicationSummary {
   id: number;
-  photo: string | null;     // в новой схеме нет общего фото заявки — возвращаем null для совместимости
+  photo: string | null; // в новой схеме нет общего фото заявки — возвращаем null для совместимости
   status: string;
   trainNumbers: string[];
   carriages: CarriageWithEquipment[];
@@ -42,12 +43,12 @@ function formatApplication(r: any): ApplicationSummary {
   for (const re of r.requestEquipments as any[]) {
     const rcId = re.requestCarriageId as number;
     const detail: EquipmentDetail = {
-      id:           re.id,
-      name:         re.equipment?.name         ?? '—',
-      typeWork:     re.typeWork?.name          ?? '—',
-      serialNumber: re.equipment?.serialNumber ?? '—',
-      macAddress:   re.equipment?.macAddress   ?? '—',
-      photos:       (re.photos ?? []).map((p: any) => ({
+      id: re.id,
+      name: re.equipment?.name ?? "—",
+      typeWork: re.typeWork?.name ?? "—",
+      serialNumber: re.equipment?.serialNumber ?? "—",
+      macAddress: re.equipment?.macAddress ?? "—",
+      photos: (re.photos ?? []).map((p: any) => ({
         type: p.photoType,
         path: p.photoPath,
       })),
@@ -58,39 +59,42 @@ function formatApplication(r: any): ApplicationSummary {
   // вагоны теперь берем через requestTrains[].requestCarriages[]
   const carriages: CarriageWithEquipment[] = [];
   for (const rt of r.requestTrains as any[]) {
-    const trainNum = rt.train?.number ?? '—';
+    const trainNum = rt.train?.number ?? "—";
     for (const rc of rt.requestCarriages as any[]) {
       const firstCarriagePhoto =
-          (rc.carriagePhotos ?? []).find((p: any) => p.photoType === 'carriage')?.photoPath ??
-          null;
-
+        (rc.carriagePhotos ?? []).find((p: any) => p.photoType === "carriage")
+          ?.photoPath ?? null;
+      const secondCarriagePhoto =
+        (rc.carriagePhotos ?? []).find((p: any) => p.photoType === "equipment")
+          ?.photoPath ?? null;
       carriages.push({
         number: rc.carriage.number,
-        type:   rc.carriage.type,
-        train:  trainNum,
-        photo:  firstCarriagePhoto,
+        type: rc.carriage.type,
+        train: trainNum,
+        photo: firstCarriagePhoto,
+        generalPhotoEquipmentCarriage: secondCarriagePhoto,
         equipment: equipmentByRequestCarriage[rc.id] ?? [],
       });
     }
   }
 
   const trainNumbers: string[] = (r.requestTrains as any[])
-      .map((rt: any) => rt.train?.number)
-      .filter((x: string | undefined): x is string => Boolean(x));
+    .map((rt: any) => rt.train?.number)
+    .filter((x: string | undefined): x is string => Boolean(x));
 
   return {
-    id:           r.id,
-    photo:        null, // общего фото заявки больше нет
-    status:       r.status,
+    id: r.id,
+    photo: null, // общего фото заявки больше нет
+    status: r.status,
     trainNumbers,
     carriages,
     countEquipment: (r.requestEquipments as any[]).length,
-    performer:      r.performer?.name       ?? '—',
-    currentLocation:r.currentLocation?.name ?? '—',
+    performer: r.performer?.name ?? "—",
+    currentLocation: r.currentLocation?.name ?? "—",
     user: {
-      id:   r.userId,
-      name: r.user?.name ?? '—',
-      role: r.user?.role ?? '—',
+      id: r.userId,
+      name: r.user?.name ?? "—",
+      role: r.user?.role ?? "—",
     },
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
@@ -106,7 +110,7 @@ export const getApplications = async (req: Request, res: Response) => {
 
     const raws = await prisma.request.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         requestTrains: {
           include: {
@@ -136,8 +140,8 @@ export const getApplications = async (req: Request, res: Response) => {
     const data = raws.map(formatApplication);
     return res.status(200).json({ success: true, data });
   } catch (e) {
-    console.error('Ошибка при получении заявок:', e);
-    return res.status(500).json({ success: false, message: 'Internal error' });
+    console.error("Ошибка при получении заявок:", e);
+    return res.status(500).json({ success: false, message: "Internal error" });
   }
 };
 
@@ -146,7 +150,7 @@ export const getApplicationById = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid ID' });
+      return res.status(400).json({ success: false, message: "Invalid ID" });
     }
 
     const r = await prisma.request.findUnique({
@@ -177,13 +181,13 @@ export const getApplicationById = async (req: Request, res: Response) => {
     });
 
     if (!r) {
-      return res.status(404).json({ success: false, message: 'Not found' });
+      return res.status(404).json({ success: false, message: "Not found" });
     }
 
     const data = formatApplication(r);
     return res.status(200).json({ success: true, data });
   } catch (e) {
-    console.error('Ошибка при получении заявки:', e);
-    return res.status(500).json({ success: false, message: 'Internal error' });
+    console.error("Ошибка при получении заявки:", e);
+    return res.status(500).json({ success: false, message: "Internal error" });
   }
 };

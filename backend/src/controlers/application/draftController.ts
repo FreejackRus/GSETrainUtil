@@ -25,6 +25,7 @@ interface CarriageWithEquipment {
   type: string;
   train: string; // номер поезда из rt.train.number
   photo: string | null; // первое фото типа 'carriage' (если есть)
+  generalPhotoEquipmentCarriage:string | null;
   equipment: EquipmentDetail[];
 }
 
@@ -70,12 +71,16 @@ function formatApplication(r: any): ApplicationSummary {
         (rc.carriagePhotos ?? []).find(
           (p: any) => p.photoType === CarriagePhotoType.carriage
         )?.photoPath ?? null;
-
+      const secondCarriagePhoto =
+        (rc.carriagePhotos ?? []).find(
+          (p: any) => p.photoType === CarriagePhotoType.equipment
+        )?.photoPath ?? null;
       carriages.push({
         number: rc.carriage.number,
         type: rc.carriage.type,
         train: trainNum,
         photo: firstCarriagePhoto,
+        generalPhotoEquipmentCarriage: secondCarriagePhoto,
         equipment: equipmentByRcId[rc.id] ?? [],
       });
     }
