@@ -718,7 +718,8 @@ import {
   Chip,
   Alert,
   InputAdornment,
-  Stack, Grid,
+  Stack,
+  Grid,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -730,11 +731,7 @@ import {
 import { PhotoUpload } from '../../PhotoUpload';
 import { AutocompleteField } from '../../AutocompleteField';
 import { referenceApi } from '../../../api';
-import type {
-  CarriageFormItem,
-  EquipmentFormItem,
-  TrainFormItem,
-} from '../../../../entities';
+import type { CarriageFormItem, EquipmentFormItem, TrainFormItem } from '../../../../entities';
 
 interface StepCarriagesProps {
   trains: TrainFormItem[];
@@ -743,10 +740,10 @@ interface StepCarriagesProps {
 }
 
 export const StepCarriages: React.FC<StepCarriagesProps> = ({
-                                                              trains,
-                                                              onTrainsChange,
-                                                              onValidationChange,
-                                                            }) => {
+  trains,
+  onTrainsChange,
+  onValidationChange,
+}) => {
   const [trainNumbers, setTrainNumbers] = useState<string[]>([]);
   const [carriageTypes, setCarriageTypes] = useState<string[]>([]);
   const [equipmentTypes, setEquipmentTypes] = useState<string[]>([]);
@@ -756,17 +753,13 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
   useEffect(() => {
     (async () => {
       try {
-        const [
-          carriageTypesData,
-          equipmentTypesData,
-          workTypesData,
-          trainNumbersData,
-        ] = await Promise.all([
-          referenceApi.getCarriageTypes(),
-          referenceApi.getEquipmentTypes(),
-          referenceApi.getWorkTypes(),
-          referenceApi.getTrainNumbers(),
-        ]);
+        const [carriageTypesData, equipmentTypesData, workTypesData, trainNumbersData] =
+          await Promise.all([
+            referenceApi.getCarriageTypes(),
+            referenceApi.getEquipmentTypes(),
+            referenceApi.getWorkTypes(),
+            referenceApi.getTrainNumbers(),
+          ]);
 
         setCarriageTypes(carriageTypesData);
         setEquipmentTypes(equipmentTypesData);
@@ -800,38 +793,39 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
   const validateForm = () => {
     if (trains.length === 0) return false;
 
-    return trains.every((t) =>
+    return trains.every(
+      (t) =>
         t.trainNumber.trim() !== '' &&
         (t.carriages?.length ?? 0) > 0 &&
         t.carriages.every((c) => {
           const carriageOk =
-              c.carriageNumber.trim() !== '' &&
-              c.carriageType.trim() !== '' &&
-              Boolean(c.carriagePhotos?.carriage) &&
-              Boolean(c.carriagePhotos?.equipment);
+            c.carriageNumber.trim() !== '' &&
+            c.carriageType.trim() !== '' &&
+            Boolean(c.carriagePhotos?.carriage) &&
+            Boolean(c.carriagePhotos?.equipment);
 
           const equipOk =
-              (c.equipment?.length ?? 0) > 0 &&
-              c.equipment!.every((e) => {
-                const baseOk =
-                    e.equipmentType.trim() !== '' &&
-                    e.typeWork.trim() !== '' &&
-                    e.serialNumber.trim() !== '' &&
-                    Boolean(e.photos.equipment) &&
-                    Boolean(e.photos.serial);
+            (c.equipment?.length ?? 0) > 0 &&
+            c.equipment!.every((e) => {
+              const baseOk =
+                e.equipmentType.trim() !== '' &&
+                e.typeWork.trim() !== '' &&
+                e.serialNumber.trim() !== '' &&
+                Boolean(e.photos.equipment) &&
+                Boolean(e.photos.serial);
 
-                const needMac = isNetworkEquipment(e.equipmentType);
-                const macOk =
-                    !needMac ||
-                    (e.macAddress.trim() !== '' &&
-                        isValidMacAddress(e.macAddress) &&
-                        Boolean(e.photos.mac));
+              const needMac = isNetworkEquipment(e.equipmentType);
+              const macOk =
+                !needMac ||
+                (e.macAddress.trim() !== '' &&
+                  isValidMacAddress(e.macAddress) &&
+                  Boolean(e.photos.mac));
 
-                return baseOk && macOk;
-              });
+              return baseOk && macOk;
+            });
 
           return carriageOk && equipOk;
-        })
+        }),
     );
   };
 
@@ -840,11 +834,9 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
   }, [trains, onValidationChange]);
 
   // ---------- действия уровня поездов ----------
-  const addTrain = () =>
-      onTrainsChange([...trains, { trainNumber: '', carriages: [] }]);
+  const addTrain = () => onTrainsChange([...trains, { trainNumber: '', carriages: [] }]);
 
-  const removeTrain = (ti: number) =>
-      onTrainsChange(trains.filter((_, i) => i !== ti));
+  const removeTrain = (ti: number) => onTrainsChange(trains.filter((_, i) => i !== ti));
 
   const changeTrain = (ti: number, patch: Partial<TrainFormItem>) => {
     const next = trains.map((t, i) => (i === ti ? { ...t, ...patch } : t));
@@ -861,33 +853,27 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
       equipment: [],
     };
     const next = trains.map((t, i) =>
-        i === ti ? { ...t, carriages: [...(t.carriages || []), newCarriage] } : t
+      i === ti ? { ...t, carriages: [...(t.carriages || []), newCarriage] } : t,
     );
     onTrainsChange(next);
   };
 
   const removeCarriage = (ti: number, ci: number) => {
     const next = trains.map((t, i) =>
-        i !== ti
-            ? t
-            : {
-              ...t,
-              carriages: (t.carriages || []).filter((_, idx) => idx !== ci),
-            }
+      i !== ti
+        ? t
+        : {
+            ...t,
+            carriages: (t.carriages || []).filter((_, idx) => idx !== ci),
+          },
     );
     onTrainsChange(next);
   };
 
-  const changeCarriage = (
-      ti: number,
-      ci: number,
-      patch: Partial<CarriageFormItem>
-  ) => {
+  const changeCarriage = (ti: number, ci: number, patch: Partial<CarriageFormItem>) => {
     const next = trains.map((t, i) => {
       if (i !== ti) return t;
-      const cars = (t.carriages || []).map((c, j) =>
-          j === ci ? { ...c, ...patch } : c
-      );
+      const cars = (t.carriages || []).map((c, j) => (j === ci ? { ...c, ...patch } : c));
       return { ...t, carriages: cars };
     });
     onTrainsChange(next);
@@ -901,7 +887,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
       serialNumber: '',
       macAddress: '',
       quantity: 1,
-      carriageId: (trains[ti].carriages?.[ci]?.id) ?? undefined,
+      carriageId: trains[ti].carriages?.[ci]?.id ?? undefined,
       photos: { equipment: null, serial: null, mac: null },
     };
 
@@ -932,11 +918,11 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
   };
 
   const changeEquipment = (
-      ti: number,
-      ci: number,
-      ei: number,
-      field: keyof EquipmentFormItem,
-      value: any
+    ti: number,
+    ci: number,
+    ei: number,
+    field: keyof EquipmentFormItem,
+    value: any,
   ) => {
     const next = trains.map((t, i) => {
       if (i !== ti) return t;
@@ -945,9 +931,7 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
         const eq = (c.equipment || []).map((e, k) => {
           if (k !== ei) return e;
           const v =
-              field === 'macAddress' && typeof value === 'string'
-                  ? formatMacAddress(value)
-                  : value;
+            field === 'macAddress' && typeof value === 'string' ? formatMacAddress(value) : value;
           return { ...e, [field]: v };
         });
         return { ...c, equipment: eq };
@@ -958,11 +942,11 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
   };
 
   const changeEquipmentPhoto = (
-      ti: number,
-      ci: number,
-      ei: number,
-      photoType: 'equipment' | 'serial' | 'mac',
-      file: File | null
+    ti: number,
+    ci: number,
+    ei: number,
+    photoType: 'equipment' | 'serial' | 'mac',
+    file: File | null,
   ) => {
     const next = trains.map((t, i) => {
       if (i !== ti) return t;
@@ -996,463 +980,411 @@ export const StepCarriages: React.FC<StepCarriagesProps> = ({
 
   // ---------- рендер ----------
   return (
-      <Box>
-        <Typography variant="h6" gutterBottom>
-          Поезда, вагоны и оборудование
-        </Typography>
+    <Box>
+      <Typography variant="h6" gutterBottom>
+        Поезда, вагоны и оборудование
+      </Typography>
 
-        {trains.length === 0 && (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              Добавьте хотя бы один поезд, затем вагоны и оборудование.
-            </Alert>
-        )}
+      {trains.length === 0 && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Добавьте хотя бы один поезд, затем вагоны и оборудование.
+        </Alert>
+      )}
 
-        {trains.map((t, ti) => (
-            <Card key={`train-${ti}`} sx={{ mb: 3 }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                  <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-                    <Typography variant="h6">Поезд {ti + 1}</Typography>
-                    {t.trainNumber && <Chip label={`№ ${t.trainNumber}`} size="small" />}
+      {trains.map((t, ti) => (
+        <Card key={`train-${ti}`} sx={{ mb: 3 }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+              <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+                <Typography variant="h6">Поезд {ti + 1}</Typography>
+                {t.trainNumber && <Chip label={`№ ${t.trainNumber}`} size="small" />}
+              </Box>
+
+              <IconButton color="error" onClick={() => removeTrain(ti)} size="small">
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+
+            <Grid container spacing={2} mb={2}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <AutocompleteField
+                  label="Номер поезда"
+                  value={t.trainNumber}
+                  onChange={(val) => changeTrain(ti, { trainNumber: val })}
+                  options={trainNumbers}
+                  required
+                />
+              </Grid>
+            </Grid>
+
+            {/* ВАГОНЫ */}
+            {(t.carriages || []).map((carriage, ci) => (
+              <Card key={carriage.id || `car-${ti}-${ci}`} sx={{ mb: 2 }}>
+                <CardContent>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                    <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+                      <Typography variant="subtitle1">Вагон {ci + 1}</Typography>
+                      {carriage.carriageNumber && (
+                        <Chip label={`№ ${carriage.carriageNumber}`} size="small" />
+                      )}
+                      {carriage.carriageType && (
+                        <Chip label={carriage.carriageType} size="small" variant="outlined" />
+                      )}
+                    </Box>
+                    <IconButton onClick={() => removeCarriage(ti, ci)} color="error" size="small">
+                      <DeleteIcon />
+                    </IconButton>
                   </Box>
 
-                  <IconButton color="error" onClick={() => removeTrain(ti)} size="small">
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-
-                <Grid container spacing={2} mb={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <AutocompleteField
-                        label="Номер поезда"
-                        value={t.trainNumber}
-                        onChange={(val) => changeTrain(ti, { trainNumber: val })}
-                        options={trainNumbers}
+                  <Grid container spacing={2} mb={2}>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <TextField
+                        fullWidth
+                        label="Номер вагона"
+                        value={carriage.carriageNumber}
+                        onChange={(e) => changeCarriage(ti, ci, { carriageNumber: e.target.value })}
+                        error={!carriage.carriageNumber.trim()}
+                        helperText={!carriage.carriageNumber.trim() ? 'Обязательное поле' : ''}
                         required
-                    />
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <AutocompleteField
+                        label="Тип вагона"
+                        value={carriage.carriageType}
+                        onChange={(val) => changeCarriage(ti, ci, { carriageType: val })}
+                        options={carriageTypes}
+                        error={!carriage.carriageType.trim()}
+                        helperText={!carriage.carriageType.trim() ? 'Обязательное поле' : ''}
+                        required
+                      />
+                    </Grid>
                   </Grid>
-                </Grid>
 
-                {/* ВАГОНЫ */}
-                {(t.carriages || []).map((carriage, ci) => (
-                    <Card key={carriage.id || `car-${ti}-${ci}`} sx={{ mb: 2 }}>
-                      <CardContent>
-                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                          <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-                            <Typography variant="subtitle1">
-                              Вагон {ci + 1}
-                            </Typography>
-                            {carriage.carriageNumber && (
-                                <Chip label={`№ ${carriage.carriageNumber}`} size="small" />
-                            )}
-                            {carriage.carriageType && (
-                                <Chip label={carriage.carriageType} size="small" variant="outlined" />
-                            )}
-                          </Box>
-                          <IconButton
-                              onClick={() => removeCarriage(ti, ci)}
-                              color="error"
-                              size="small"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Box>
-
-                        <Grid container spacing={2} mb={2}>
-                          <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField
-                                fullWidth
-                                label="Номер вагона"
-                                value={carriage.carriageNumber}
-                                onChange={(e) =>
-                                    changeCarriage(ti, ci, { carriageNumber: e.target.value })
-                                }
-                                error={!carriage.carriageNumber.trim()}
-                                helperText={!carriage.carriageNumber.trim() ? 'Обязательное поле' : ''}
-                                required
-                            />
-                          </Grid>
-                          <Grid size={{ xs: 12, md: 6 }}>
-                            <AutocompleteField
-                                label="Тип вагона"
-                                value={carriage.carriageType}
-                                onChange={(val) => changeCarriage(ti, ci, { carriageType: val })}
-                                options={carriageTypes}
-                                error={!carriage.carriageType.trim()}
-                                helperText={!carriage.carriageType.trim() ? 'Обязательное поле' : ''}
-                                required
-                            />
-                          </Grid>
+                  {/* Две фотографии вагона */}
+                  {carriage.carriageNumber && carriage.carriageType && (
+                    <Box mb={2}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        📷 Фотографии вагона
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                          <PhotoUpload
+                            inputId={`t${ti}-c${ci}-carriage`}
+                            label="Фото номера вагона"
+                            photo={carriage.carriagePhotos?.carriage ?? null}
+                            onPhotoChange={(file) =>
+                              changeCarriage(ti, ci, {
+                                carriagePhotos: {
+                                  ...(carriage.carriagePhotos ?? {
+                                    carriage: null,
+                                    equipment: null,
+                                  }),
+                                  carriage: file,
+                                },
+                              })
+                            }
+                            required
+                          />
                         </Grid>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                          <PhotoUpload
+                            inputId={`t${ti}-c${ci}-equip-overview`}
+                            label="Общее фото оборудования в вагоне"
+                            photo={carriage.carriagePhotos?.equipment ?? null}
+                            onPhotoChange={(file) =>
+                              changeCarriage(ti, ci, {
+                                carriagePhotos: {
+                                  ...(carriage.carriagePhotos ?? {
+                                    carriage: null,
+                                    equipment: null,
+                                  }),
+                                  equipment: file,
+                                },
+                              })
+                            }
+                            required
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
 
-                        {/* Две фотографии вагона */}
-                        {carriage.carriageNumber && carriage.carriageType && (
-                            <Box mb={2}>
-                              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                📷 Фотографии вагона
-                              </Typography>
-                              <Grid container spacing={2}>
-                                <Grid size={{ xs: 12, md: 6 }}>
-                                  <PhotoUpload
-                                      inputId={`t${ti}-c${ci}-carriage`}
-                                      label="Фото номера вагона"
-                                      photo={carriage.carriagePhotos?.carriage ?? null}
-                                      onPhotoChange={(file) =>
-                                          changeCarriage(ti, ci, {
-                                            carriagePhotos: {
-                                              ...(carriage.carriagePhotos ?? {
-                                                carriage: null,
-                                                equipment: null,
-                                              }),
-                                              carriage: file,
-                                            },
-                                          })
-                                      }
-                                      required
-                                  />
-                                </Grid>
-                                <Grid size={{ xs: 12, md: 6 }}>
-                                  <PhotoUpload
-                                      inputId={`t${ti}-c${ci}-equip-overview`}
-                                      label="Общее фото оборудования в вагоне"
-                                      photo={carriage.carriagePhotos?.equipment ?? null}
-                                      onPhotoChange={(file) =>
-                                          changeCarriage(ti, ci, {
-                                            carriagePhotos: {
-                                              ...(carriage.carriagePhotos ?? {
-                                                carriage: null,
-                                                equipment: null,
-                                              }),
-                                              equipment: file,
-                                            },
-                                          })
-                                      }
-                                      required
-                                  />
-                                </Grid>
-                              </Grid>
-                            </Box>
-                        )}
+                  {/* ОБОРУДОВАНИЕ */}
+                  {carriage.carriageNumber && carriage.carriageType && (
+                    <Box>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        flexWrap="wrap"
+                        mb={2}
+                      >
+                        <Typography variant="subtitle1">Оборудование</Typography>
+                        <Button
+                          startIcon={<AddIcon />}
+                          onClick={() => addEquipment(ti, ci)}
+                          variant="outlined"
+                          size="small"
+                        >
+                          Добавить оборудование
+                        </Button>
+                      </Box>
 
-                        {/* ОБОРУДОВАНИЕ */}
-                        {carriage.carriageNumber && carriage.carriageType && (
-                            <Box>
+                      {(carriage.equipment || []).map((equipment, ei) => {
+                        const equipmentErrors = getEquipmentErrors(equipment);
+                        const hasErrors = equipmentErrors.length > 0;
+
+                        return (
+                          <Accordion key={`eq-${ti}-${ci}-${ei}`} sx={{ mb: 1 }}>
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                               <Box
-                                  display="flex"
-                                  justifyContent="space-between"
-                                  alignItems="center"
-                                  flexWrap="wrap"
-                                  mb={2}
+                                display="flex"
+                                alignItems="center"
+                                gap={1}
+                                flexWrap="wrap"
+                                width="100%"
                               >
-                                <Typography variant="subtitle1">Оборудование</Typography>
-                                <Button
-                                    startIcon={<AddIcon />}
-                                    onClick={() => addEquipment(ti, ci)}
-                                    variant="outlined"
+                                <Typography fontSize={{ xs: '0.9rem', sm: '1rem' }}>
+                                  Оборудование {ei + 1}
+                                </Typography>
+                                {hasErrors ? (
+                                  <ErrorIcon color="error" fontSize="small" />
+                                ) : (
+                                  <CheckCircleIcon color="success" fontSize="small" />
+                                )}
+                                {equipment.equipmentType && (
+                                  <Chip
+                                    label={equipment.equipmentType}
                                     size="small"
-                                >
-                                  Добавить оборудование
-                                </Button>
+                                    variant="outlined"
+                                  />
+                                )}
+                                {equipment.typeWork && (
+                                  <Chip label={equipment.typeWork} size="small" />
+                                )}
                               </Box>
+                            </AccordionSummary>
 
-                              {(carriage.equipment || []).map((equipment, ei) => {
-                                const equipmentErrors = getEquipmentErrors(equipment);
-                                const hasErrors = equipmentErrors.length > 0;
+                            <AccordionDetails sx={{ p: { xs: 0.5, sm: 2 } }}>
+                              {hasErrors && (
+                                <Alert severity="error" sx={{ mb: 2 }}>
+                                  <ul style={{ margin: 0, paddingLeft: 16 }}>
+                                    {equipmentErrors.map((err, idx) => (
+                                      <li key={idx}>{err}</li>
+                                    ))}
+                                  </ul>
+                                </Alert>
+                              )}
 
-                                return (
-                                    <Accordion key={`eq-${ti}-${ci}-${ei}`} sx={{ mb: 1 }}>
-                                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                        <Box
-                                            display="flex"
-                                            alignItems="center"
-                                            gap={1}
-                                            flexWrap="wrap"
-                                            width="100%"
-                                        >
-                                          <Typography fontSize={{ xs: '0.9rem', sm: '1rem' }}>
-                                            Оборудование {ei + 1}
-                                          </Typography>
-                                          {hasErrors ? (
-                                              <ErrorIcon color="error" fontSize="small" />
-                                          ) : (
-                                              <CheckCircleIcon color="success" fontSize="small" />
-                                          )}
-                                          {equipment.equipmentType && (
-                                              <Chip
-                                                  label={equipment.equipmentType}
-                                                  size="small"
-                                                  variant="outlined"
-                                              />
-                                          )}
-                                          {equipment.typeWork && (
-                                              <Chip label={equipment.typeWork} size="small" />
-                                          )}
-                                        </Box>
-                                      </AccordionSummary>
+                              <Grid container spacing={2} mb={2}>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <AutocompleteField
+                                    label="Наименование оборудования"
+                                    value={equipment.equipmentType}
+                                    onChange={(val) =>
+                                      changeEquipment(ti, ci, ei, 'equipmentType', val)
+                                    }
+                                    options={Array.from(new Set(equipmentTypes))}
+                                    error={!equipment.equipmentType.trim()}
+                                    helperText={
+                                      !equipment.equipmentType.trim() ? 'Обязательное поле' : ''
+                                    }
+                                    required
+                                  />
+                                </Grid>
 
-                                      <AccordionDetails sx={{ p: { xs: 0.5, sm: 2 } }}>
-                                        {hasErrors && (
-                                            <Alert severity="error" sx={{ mb: 2 }}>
-                                              <ul style={{ margin: 0, paddingLeft: 16 }}>
-                                                {equipmentErrors.map((err, idx) => (
-                                                    <li key={idx}>{err}</li>
-                                                ))}
-                                              </ul>
-                                            </Alert>
-                                        )}
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <AutocompleteField
+                                    label="Тип работ"
+                                    value={equipment.typeWork}
+                                    onChange={(val) => changeEquipment(ti, ci, ei, 'typeWork', val)}
+                                    options={workTypes}
+                                    error={!equipment.typeWork.trim()}
+                                    helperText={
+                                      !equipment.typeWork.trim() ? 'Обязательное поле' : ''
+                                    }
+                                    required
+                                  />
+                                </Grid>
 
-                                        <Grid container spacing={2} mb={2}>
-                                          <Grid size={{ xs: 12, md: 6 }}>
-                                            <AutocompleteField
-                                                label="Наименование оборудования"
-                                                value={equipment.equipmentType}
-                                                onChange={(val) =>
-                                                    changeEquipment(ti, ci, ei, 'equipmentType', val)
-                                                }
-                                                options={Array.from(new Set(equipmentTypes))}
-                                                error={!equipment.equipmentType.trim()}
-                                                helperText={
-                                                  !equipment.equipmentType.trim()
-                                                      ? 'Обязательное поле'
-                                                      : ''
-                                                }
-                                                required
-                                            />
-                                          </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <TextField
+                                    fullWidth
+                                    label="Серийный номер"
+                                    value={equipment.serialNumber}
+                                    onChange={(e) =>
+                                      changeEquipment(ti, ci, ei, 'serialNumber', e.target.value)
+                                    }
+                                    error={!equipment.serialNumber.trim()}
+                                    helperText={
+                                      !equipment.serialNumber.trim() ? 'Обязательное поле' : ''
+                                    }
+                                    required
+                                  />
+                                </Grid>
 
-                                          <Grid size={{ xs: 12, md: 6 }}>
-                                            <AutocompleteField
-                                                label="Тип работ"
-                                                value={equipment.typeWork}
-                                                onChange={(val) =>
-                                                    changeEquipment(ti, ci, ei, 'typeWork', val)
-                                                }
-                                                options={workTypes}
-                                                error={!equipment.typeWork.trim()}
-                                                helperText={
-                                                  !equipment.typeWork.trim() ? 'Обязательное поле' : ''
-                                                }
-                                                required
-                                            />
-                                          </Grid>
+                                {isNetworkEquipment(equipment.equipmentType) && (
+                                  <Grid size={{ xs: 12, md: 6 }}>
+                                    <TextField
+                                      fullWidth
+                                      label="MAC-адрес"
+                                      value={equipment.macAddress}
+                                      onChange={(e) =>
+                                        changeEquipment(ti, ci, ei, 'macAddress', e.target.value)
+                                      }
+                                      placeholder="XX:XX:XX:XX:XX:XX"
+                                      error={
+                                        equipment.macAddress.trim() !== '' &&
+                                        !isValidMacAddress(equipment.macAddress)
+                                      }
+                                      helperText={
+                                        equipment.macAddress.trim() === ''
+                                          ? 'Обязательное поле для сетевого оборудования'
+                                          : !isValidMacAddress(equipment.macAddress)
+                                          ? 'Неверный формат MAC-адреса (XX:XX:XX:XX:XX:XX)'
+                                          : 'Формат: XX:XX:XX:XX:XX:XX'
+                                      }
+                                      InputProps={{
+                                        endAdornment: (
+                                          <InputAdornment position="end">
+                                            {equipment.macAddress &&
+                                              isValidMacAddress(equipment.macAddress) && (
+                                                <CheckCircleIcon color="success" fontSize="small" />
+                                              )}
+                                          </InputAdornment>
+                                        ),
+                                      }}
+                                      required
+                                    />
+                                  </Grid>
+                                )}
+                              </Grid>
 
-                                          <Grid size={{ xs: 12, md: 6 }}>
-                                            <TextField
-                                                fullWidth
-                                                label="Серийный номер"
-                                                value={equipment.serialNumber}
-                                                onChange={(e) =>
-                                                    changeEquipment(
-                                                        ti,
-                                                        ci,
-                                                        ei,
-                                                        'serialNumber',
-                                                        e.target.value
-                                                    )
-                                                }
-                                                error={!equipment.serialNumber.trim()}
-                                                helperText={
-                                                  !equipment.serialNumber.trim()
-                                                      ? 'Обязательное поле'
-                                                      : ''
-                                                }
-                                                required
-                                            />
-                                          </Grid>
+                              {/* Фотографии оборудования */}
+                              {equipment.equipmentType && (
+                                <Box>
+                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                    📷 Фотографии оборудования
+                                  </Typography>
+                                  <Grid container spacing={2}>
+                                    <Grid xs={12} md={4}>
+                                      <PhotoUpload
+                                        inputId={`t${ti}-c${ci}-e${ei}-equip`}
+                                        label="Фото оборудования"
+                                        photo={equipment.photos.equipment ?? null}
+                                        onPhotoChange={(file) =>
+                                          changeEquipmentPhoto(ti, ci, ei, 'equipment', file)
+                                        }
+                                        required
+                                      />
+                                    </Grid>
+                                    <Grid size={{ xs: 12, md: 4 }}>
+                                      <PhotoUpload
+                                        inputId={`t${ti}-c${ci}-e${ei}-serial`}
+                                        label="Фото серийного номера"
+                                        photo={equipment.photos.serial ?? null}
+                                        onPhotoChange={(file) =>
+                                          changeEquipmentPhoto(ti, ci, ei, 'serial', file)
+                                        }
+                                        required
+                                      />
+                                    </Grid>
+                                    {isNetworkEquipment(equipment.equipmentType) && (
+                                      <Grid size={{ xs: 12, md: 4 }}>
+                                        <PhotoUpload
+                                          inputId={`t${ti}-c${ci}-e${ei}-mac`}
+                                          label="Фото MAC-адреса"
+                                          photo={equipment.photos.mac ?? null}
+                                          onPhotoChange={(file) =>
+                                            changeEquipmentPhoto(ti, ci, ei, 'mac', file)
+                                          }
+                                          required
+                                        />
+                                      </Grid>
+                                    )}
+                                  </Grid>
+                                </Box>
+                              )}
 
-                                          {isNetworkEquipment(equipment.equipmentType) && (
-                                              <Grid size={{ xs: 12, md: 6 }}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="MAC-адрес"
-                                                    value={equipment.macAddress}
-                                                    onChange={(e) =>
-                                                        changeEquipment(
-                                                            ti,
-                                                            ci,
-                                                            ei,
-                                                            'macAddress',
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    placeholder="XX:XX:XX:XX:XX:XX"
-                                                    error={
-                                                        equipment.macAddress.trim() !== '' &&
-                                                        !isValidMacAddress(equipment.macAddress)
-                                                    }
-                                                    helperText={
-                                                      equipment.macAddress.trim() === ''
-                                                          ? 'Обязательное поле для сетевого оборудования'
-                                                          : !isValidMacAddress(equipment.macAddress)
-                                                              ? 'Неверный формат MAC-адреса (XX:XX:XX:XX:XX:XX)'
-                                                              : 'Формат: XX:XX:XX:XX:XX:XX'
-                                                    }
-                                                    InputProps={{
-                                                      endAdornment: (
-                                                          <InputAdornment position="end">
-                                                            {equipment.macAddress &&
-                                                                isValidMacAddress(equipment.macAddress) && (
-                                                                    <CheckCircleIcon
-                                                                        color="success"
-                                                                        fontSize="small"
-                                                                    />
-                                                                )}
-                                                          </InputAdornment>
-                                                      ),
-                                                    }}
-                                                    required
-                                                />
-                                              </Grid>
-                                          )}
-                                        </Grid>
-
-                                        {/* Фотографии оборудования */}
-                                        {equipment.equipmentType && (
-                                            <Box>
-                                              <Typography
-                                                  variant="body2"
-                                                  color="text.secondary"
-                                                  sx={{ mb: 1 }}
-                                              >
-                                                📷 Фотографии оборудования
-                                              </Typography>
-                                              <Grid container spacing={2}>
-                                                <Grid xs={12} md={4}>
-                                                  <PhotoUpload
-                                                      inputId={`t${ti}-c${ci}-e${ei}-equip`}
-                                                      label="Фото оборудования"
-                                                      photo={equipment.photos.equipment ?? null}
-                                                      onPhotoChange={(file) =>
-                                                          changeEquipmentPhoto(
-                                                              ti,
-                                                              ci,
-                                                              ei,
-                                                              'equipment',
-                                                              file
-                                                          )
-                                                      }
-                                                      required
-                                                  />
-                                                </Grid>
-                                                <Grid size={{ xs: 12, md: 4 }}>
-                                                  <PhotoUpload
-                                                      inputId={`t${ti}-c${ci}-e${ei}-serial`}
-                                                      label="Фото серийного номера"
-                                                      photo={equipment.photos.serial ?? null}
-                                                      onPhotoChange={(file) =>
-                                                          changeEquipmentPhoto(
-                                                              ti,
-                                                              ci,
-                                                              ei,
-                                                              'serial',
-                                                              file
-                                                          )
-                                                      }
-                                                      required
-                                                  />
-                                                </Grid>
-                                                {isNetworkEquipment(equipment.equipmentType) && (
-                                                    <Grid size={{ xs: 12, md: 4 }}>
-                                                      <PhotoUpload
-                                                          inputId={`t${ti}-c${ci}-e${ei}-mac`}
-                                                          label="Фото MAC-адреса"
-                                                          photo={equipment.photos.mac ?? null}
-                                                          onPhotoChange={(file) =>
-                                                              changeEquipmentPhoto(
-                                                                  ti,
-                                                                  ci,
-                                                                  ei,
-                                                                  'mac',
-                                                                  file
-                                                              )
-                                                          }
-                                                          required
-                                                      />
-                                                    </Grid>
-                                                )}
-                                              </Grid>
-                                            </Box>
-                                        )}
-
-                                        <Stack
-                                            direction={{ xs: 'column', sm: 'row' }}
-                                            spacing={1}
-                                            justifyContent={{ sm: 'space-between' }}
-                                            alignItems={{ xs: 'stretch', sm: 'center' }}
-                                            mt={2}
-                                        >
-                                          <Button
-                                              startIcon={<DeleteIcon />}
-                                              onClick={() => removeEquipment(ti, ci, ei)}
-                                              color="error"
-                                              size="small"
-                                              sx={{ width: { xs: '100%', sm: 'auto' } }}
-                                          >
-                                            Удалить оборудование
-                                          </Button>
-
-                                          <Button
-                                              startIcon={<AddIcon />}
-                                              onClick={() => addEquipment(ti, ci)}
-                                              variant="text"
-                                              size="small"
-                                              sx={{ width: { xs: '100%', sm: 'auto' } }}
-                                          >
-                                            Добавить ещё
-                                          </Button>
-                                        </Stack>
-                                      </AccordionDetails>
-                                    </Accordion>
-                                );
-                              })}
-
-                              <Box
-                                  sx={{
-                                    mt: 1.5,
-                                    pt: 1,
-                                    borderTop: '1px dashed',
-                                    borderColor: 'divider',
-                                  }}
+                              <Stack
+                                direction={{ xs: 'column', sm: 'row' }}
+                                spacing={1}
+                                justifyContent={{ sm: 'space-between' }}
+                                alignItems={{ xs: 'stretch', sm: 'center' }}
+                                mt={2}
                               >
                                 <Button
-                                    startIcon={<AddIcon />}
-                                    onClick={() => addEquipment(ti, ci)}
-                                    variant="contained"
-                                    fullWidth
-                                    size="medium"
+                                  startIcon={<DeleteIcon />}
+                                  onClick={() => removeEquipment(ti, ci, ei)}
+                                  color="error"
+                                  size="small"
+                                  sx={{ width: { xs: '100%', sm: 'auto' } }}
                                 >
-                                  Добавить оборудование
+                                  Удалить оборудование
                                 </Button>
-                              </Box>
-                            </Box>
-                        )}
-                      </CardContent>
-                    </Card>
-                ))}
 
-                <Button
-                    startIcon={<AddIcon />}
-                    onClick={() => addCarriage(ti)}
-                    variant="contained"
-                    fullWidth
-                    sx={{ mt: 1 }}
-                >
-                  Добавить вагон
-                </Button>
-              </CardContent>
-            </Card>
-        ))}
+                                <Button
+                                  startIcon={<AddIcon />}
+                                  onClick={() => addEquipment(ti, ci)}
+                                  variant="text"
+                                  size="small"
+                                  sx={{ width: { xs: '100%', sm: 'auto' } }}
+                                >
+                                  Добавить ещё
+                                </Button>
+                              </Stack>
+                            </AccordionDetails>
+                          </Accordion>
+                        );
+                      })}
 
-        <Button
-            startIcon={<AddIcon />}
-            onClick={addTrain}
-            variant="contained"
-            fullWidth
-            sx={{ mt: 2 }}
-        >
-          Добавить поезд
-        </Button>
-      </Box>
+                      <Box
+                        sx={{
+                          mt: 1.5,
+                          pt: 1,
+                          borderTop: '1px dashed',
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <Button
+                          startIcon={<AddIcon />}
+                          onClick={() => addEquipment(ti, ci)}
+                          variant="contained"
+                          fullWidth
+                          size="medium"
+                        >
+                          Добавить оборудование
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+
+            <Button
+              startIcon={<AddIcon />}
+              onClick={() => addCarriage(ti)}
+              variant="contained"
+              fullWidth
+              sx={{ mt: 1 }}
+            >
+              Добавить вагон
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+
+      <Button
+        startIcon={<AddIcon />}
+        onClick={addTrain}
+        variant="contained"
+        fullWidth
+        sx={{ mt: 2 }}
+      >
+        Добавить поезд
+      </Button>
+    </Box>
   );
 };
-

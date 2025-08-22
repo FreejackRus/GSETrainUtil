@@ -199,7 +199,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                 <Box display="flex" alignItems="center" gap={1} mb={2}>
                   <TrainIcon fontSize="small" color="action" />
                   <Typography variant="body2">
-                    Номер поездов: <strong>{application.trainNumbers.join(", ") || '-'}</strong>
+                    Номер поездов: <strong>{application.trainNumbers.join(', ') || '-'}</strong>
                   </Typography>
                 </Box>
 
@@ -329,27 +329,57 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                           </Grid>
                         ),
                     )}
-
                   {application.carriages
-                      .map((item) => item.equipment)
-                      .map((item1, index1) => (
-                          item1.map((item2, index2) => (
-                            item2.photos.map((item3) => (
-                                <Grid size={{ xs: 12, sm: 4 }}>
-                                  <Box>
-                                    <Typography variant="body2" gutterBottom>
-                                      Фото {item3.type === 'serial' ? 'серийного номера оборудования' : item3.type === 'mac' ? 'mac адреса оборудования' : 'оборудования'} №{index2 + 1} вагона №{index1 + 1}
-                                    </Typography>
-                                    <img
-                                        src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${item3.path}`}
-                                        alt={`Фото ${item3.type === 'serial' ? 'серийного номера оборудования' : item3.type === 'mac' ? 'mac адреса оборудования' : 'оборудования'} №${index2 + 1} вагона №${index1 + 1}`}
-                                        className={styles.photoImage}
-                                    />
-                                  </Box>
-                                </Grid>
-                            ))
-                          ))
-                      ))}
+                    .map((item) => item.generalPhotoEquipmentCarriage)
+                    .map(
+                      (item, index) =>
+                        item && (
+                          <Grid size={{ xs: 12, sm: 4 }}>
+                            <Box>
+                              <Typography variant="body2" gutterBottom>
+                               Общее фото оборудования в вагоне № {index + 1}
+                              </Typography>
+                              <img
+                                src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${item}`}
+                                alt={`Общее фото оборудования в вагоне №${index + 1}`}
+                                className={styles.photoImage}
+                              />
+                            </Box>
+                          </Grid>
+                        ),
+                    )}
+                  {application.carriages
+                    .map((item) => item.equipment)
+                    .map((item1, index1) =>
+                      item1.map((item2, index2) =>
+                        item2.photos.map((item3) => (
+                          <Grid size={{ xs: 12, sm: 4 }}>
+                            <Box>
+                              <Typography variant="body2" gutterBottom>
+                                Фото{' '}
+                                {item3.type === 'serial'
+                                  ? 'серийного номера оборудования'
+                                  : item3.type === 'mac'
+                                  ? 'mac адреса оборудования'
+                                  : 'оборудования'}{' '}
+                                №{index2 + 1} вагона №{index1 + 1}
+                              </Typography>
+                              <img
+                                src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${item3.path}`}
+                                alt={`Фото ${
+                                  item3.type === 'serial'
+                                    ? 'серийного номера оборудования'
+                                    : item3.type === 'mac'
+                                    ? 'mac адреса оборудования'
+                                    : 'оборудования'
+                                } №${index2 + 1} вагона №${index1 + 1}`}
+                                className={styles.photoImage}
+                              />
+                            </Box>
+                          </Grid>
+                        )),
+                      ),
+                    )}
 
                   {application.photo && (
                     <Grid size={{ xs: 12, sm: 4 }}>

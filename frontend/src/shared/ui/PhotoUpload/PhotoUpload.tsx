@@ -55,7 +55,9 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
   console.log('inputId', inputId);
 
   const handleButtonClick = () => {
-    const input = document.getElementById(`photo-input-${[label.replace(/\s+/g, '-'), inputId].filter(Boolean).join('-')}`);
+    const input = document.getElementById(
+      `photo-input-${[label.replace(/\s+/g, '-'), inputId].filter(Boolean).join('-')}`,
+    );
     input?.click();
   };
 
@@ -78,6 +80,10 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
         props.onPhotoUploaded(filePath);
       }
     }
+  };
+
+  const getShortFileName = (file: File) => {
+    return file.name.split('/').pop() || file.name;
   };
 
   // Get the current photo for display
@@ -158,7 +164,7 @@ export const PhotoUpload = (props: PhotoUploadProps) => {
             <Box className="photo-upload-chips">
               <Chip
                 icon={<CameraAlt />}
-                label={currentPhoto.name}
+                label={getShortFileName(currentPhoto)}
                 size="small"
                 className="photo-upload-chip-name"
               />
