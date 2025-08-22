@@ -108,6 +108,7 @@ export interface EquipmentDetail {
 }
 
 export interface CarriageWithEquipment {
+  generalPhotoEquipmentCarriage: string | null;
   number: string;
   type: string;
   train: string;         // номер поезда
@@ -185,9 +186,9 @@ export interface EquipmentFormItem {
   quantity: number;
   carriageId?: string;
   photos: {
-    equipment?: File | null;
-    serial?: File | null;
-    mac?: File | null;
+    equipment?: File | null|string;
+    serial?: File | null|string;
+    mac?: File | null|string;
   };
 }
 
@@ -211,7 +212,7 @@ export interface ApplicationFormData {
   trains: TrainFormItem[];
   workCompleted: string;
   location: string;
-  // photo?: File | null;
+  photo?: File | null;
   status?: 'draft' | 'completed';
 }
 
