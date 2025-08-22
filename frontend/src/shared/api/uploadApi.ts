@@ -75,16 +75,22 @@ export const uploadMultiplePhotos = async (
   return response.json();
 };
 
-export const getFile = async (filename: string): Promise<File> => {
-  const res = await axios.get(`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${filename}`, {
-    responseType: 'blob',
-  });
+export const getFile = async (filename: string|null): Promise<File|null> => {
+  try {
+    if (!filename) return null;
+    const res = await axios.get(`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${filename}`, {
+      responseType: 'blob',
+    });
 
-  // res.data — это Blob
-  const blob: Blob = res.data;
+    // res.data — это Blob
+    const blob: Blob = res.data;
 
-  // создаём File из Blob
-  const file = new File([blob], filename, { type: blob.type || 'application/octet-stream' });
+    // создаём File из Blob
+    const file = new File([blob], filename, { type: blob.type || 'application/octet-stream' });
 
-  return file;
+    return file;
+  } catch (error) {
+    console.error('Ошибка при загрузке файла:', error);
+    return null; // безопасный fallback
+  }
 };
