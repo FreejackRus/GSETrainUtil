@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -15,8 +15,6 @@ import {
 import {
   Dashboard as DashboardIcon,
   DevicesOther as DevicesIcon,
-  TrendingUp as TrendingUpIcon,
-  Security as SecurityIcon,
   Refresh as RefreshIcon,
   People as PeopleIcon,
   Train as TrainIcon,
@@ -24,7 +22,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
-import { deviceApi } from '../../../entities/device';
+import { deviceApi } from '../../../entities';
 import './HomePage.css';
 
 export const HomePage = () => {
@@ -119,49 +117,8 @@ export const HomePage = () => {
 
           {/* Статистические карточки */}
           <Grid container spacing={{ xs: 2, md: 3 }} className="home-page__stats">
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <Card elevation={4} className="home-page__stat-card home-page__stat-card--analytics">
-                <CardContent className="home-page__stat-content">
-                  <Avatar className="home-page__stat-avatar home-page__stat-avatar--analytics">
-                    <TrendingUpIcon sx={{ fontSize: 28 }} />
-                  </Avatar>
-                  <Box className="home-page__stat-info">
-                    <Typography variant="h6" className="home-page__stat-title">
-                      Аналитика
-                    </Typography>
-                    <Typography variant="body2" className="home-page__stat-description">
-                      Статистика и отчеты
-                    </Typography>
-                    <Typography variant="h4" className="home-page__stat-number">
-                      24
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <Card elevation={4} className="home-page__stat-card home-page__stat-card--settings">
-                <CardContent className="home-page__stat-content">
-                  <Avatar className="home-page__stat-avatar home-page__stat-avatar--settings">
-                    <SecurityIcon sx={{ fontSize: 28 }} />
-                  </Avatar>
-                  <Box className="home-page__stat-info">
-                    <Typography variant="h6" className="home-page__stat-title">
-                      Безопасность
-                    </Typography>
-                    <Typography variant="body2" className="home-page__stat-description">
-                      Конфигурация системы
-                    </Typography>
-                    <Typography variant="h4" className="home-page__stat-number">
-                      98%
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 12, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 12, md: 12 }}>
               <Card elevation={4} className="home-page__stat-card home-page__stat-card--monitoring" onClick={handleEquipmentLog}>
                 <CardContent className="home-page__stat-content">
                   <Avatar className="home-page__stat-avatar home-page__stat-avatar--monitoring">
