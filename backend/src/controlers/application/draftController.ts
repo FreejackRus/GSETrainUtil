@@ -118,7 +118,7 @@ export const getDrafts = async (req: Request, res: Response) => {
     // TODO: брать userId/userRole из JWT
     const userId = req.query.userId ? Number(req.query.userId) : undefined;
     const userRole = (req.query.userRole as string) || "engineer";
-
+ 
     if (userRole === "admin") {
       // текущая бизнес-логика: админ не видит черновики
       return res.status(200).json({ success: true, data: [] });
