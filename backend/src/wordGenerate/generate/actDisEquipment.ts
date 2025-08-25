@@ -211,7 +211,9 @@ export const createWordActDisEquipment = async (
                   }),
                 ],
               }),
-              ...resultJson.equipment.map(
+              ...resultJson.equipment
+              .filter((item)=>!item.name.includes("Mikrotik"))
+              .map(
                 (item, index) =>
                   new TableRow({
                     children: [

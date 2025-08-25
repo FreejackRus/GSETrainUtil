@@ -42,7 +42,7 @@ function generateBodyRows(data: TWagonDocx): TableRow[] {
     "Дополнительные работы по монтажу оборудования",
   ];
 
-  // Общие работы
+  // --- Общие работы ---
   commonWorks.forEach((work) => {
     rows.push(
       new TableRow({
@@ -59,10 +59,16 @@ function generateBodyRows(data: TWagonDocx): TableRow[] {
     );
   });
 
-  // Вагоны
+
+  // --- Вагоны ---
   data.wagons.forEach((wagon, index) => {
-    // Монтаж оборудования
-    wagon.arrEquipment.forEach((eq, i) => {
+    // фильтруем только нужное оборудование
+    const filteredEquipment = wagon.arrEquipment.filter(
+      (eq) => eq.typeWork === "Монтаж" && !eq.equipment.includes("Mikrotik")
+    );
+
+    // если в вагоне есть подходящее оборудование
+    filteredEquipment.forEach((eq, i) => {
       rows.push(
         new TableRow({
           children: [
@@ -80,36 +86,35 @@ function generateBodyRows(data: TWagonDocx): TableRow[] {
               children: [new Paragraph(i === 0 ? wagon.workPlace : "")],
             }),
             new TableCell({
-              children: [new Paragraph(`${eq.typeWork} ${eq.equipment}`)],
+              children: [new Paragraph(`Монтаж ${eq.equipment}`)],
             }),
-            new TableCell({ children: [new Paragraph("")] }),
-            new TableCell({ children: [new Paragraph("")] }),
-            new TableCell({ children: [new Paragraph("")] }),
-            new TableCell({ children: [new Paragraph("")] }),
+            ...Array(4)
+              .fill(null)
+              .map(() => new TableCell({ children: [new Paragraph("")] })),
           ],
         })
       );
     });
 
-    // Проверка кабельных трасс
-    rows.push(
-      new TableRow({
-        children: [
-          ...Array(4)
-            .fill(null)
-            .map(() => new TableCell({ children: [new Paragraph("")] })),
-          new TableCell({
-            children: [new Paragraph("Проверка кабельных трасс")],
-          }),
-          ...Array(4)
-            .fill(null)
-            .map(() => new TableCell({ children: [new Paragraph("")] })),
-        ],
-      })
-    );
+    // Проверка кабельных трасс (только один раз, после первого вагона с оборудованием)
+      rows.push(
+        new TableRow({
+          children: [
+            ...Array(4)
+              .fill(null)
+              .map(() => new TableCell({ children: [new Paragraph("")] })),
+            new TableCell({
+              children: [new Paragraph("Проверка кабельных трасс")],
+            }),
+            ...Array(4)
+              .fill(null)
+              .map(() => new TableCell({ children: [new Paragraph("")] })),
+          ],
+        })
+      );
 
-    // Перечень оборудования
-    wagon.arrEquipment.forEach((eq) => {
+    // --- Перечень оборудования ---
+    filteredEquipment.forEach((eq) => {
       rows.push(
         new TableRow({
           children: [
@@ -133,7 +138,6 @@ export const createWordAppWork = async (
   json: ResponseJson,
   outputDir: string
 ) => {
-  
   const wagons: Wagon[] = (json.carriageNumbers || []).map((carriage) => {
     const eqs =
       (json.equipmentDetails || [])
@@ -141,7 +145,7 @@ export const createWordAppWork = async (
         .map((e) => ({
           equipment: e.name ?? "-",
           equipmentCount: "",
-          typeWork: e.typeWork
+          typeWork: e.typeWork,
         })) ?? [];
 
     return {
