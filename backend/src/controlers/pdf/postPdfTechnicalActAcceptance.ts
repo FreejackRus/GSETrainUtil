@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import { createTechnicalActAcceptance } from "../../pdfGenerate/generate/technicalActAcceptance";
-import { testJsonTechnicalActAcceptance } from "../../pdfGenerate/utils/testJson/testJsonTechnicalActAcceptance";
-import { formatRussianDate } from "../../pdfGenerate/utils/stringConvertDate";
 import path from "path";
 import fs from "fs";
 import {resolvePdfDir} from "../../config/pdf";

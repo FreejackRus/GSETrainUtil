@@ -15,7 +15,7 @@ import {
 import * as fs from "fs/promises";
 import path from "path";
 import { equipmentDetails, ResponseJson } from "../../types/types";
-import { formatRussianDate } from "../../pdfGenerate/utils/stringConvertDate";
+import { formatRussianDate, formatRussianDateDocument } from "../../utils/stringConvertDate";
 
 interface arrEquipment {
   carriageNumber: string;
@@ -596,7 +596,7 @@ export const createWordTechnicalActAcceptance = async (
 
   await fs.mkdir(outputDir, { recursive: true });
   const fileName = `${safeName(json.trainNumber)} от ${safeName(
-    formatRussianDate(json.applicationDate)
+    formatRussianDateDocument(json.applicationDate)
   )}docx`;
   const filePath = path.resolve(outputDir, fileName);
 

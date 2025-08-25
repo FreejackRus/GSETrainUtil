@@ -1,5 +1,0 @@
-admin
-$2b$04$IHV1MNZ4W9C049FonGqvaOxHCsPh3I8gLvX0gSE5NO2aGHg0R1JHm
-
-engineer
-$2b$04$qBd2e5t6s0sj21RwwtYhLuvFd.NuozMY3cRlLgwL6d3u3AZUNJh42

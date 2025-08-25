@@ -27,7 +27,7 @@ interface InstallationingActData {
   equipment: equipmentDetails[];
 }
 
-export const createWordActInstEquipment = async (
+export const createWordActDisEquipment = async (
   json: ResponseJson,
   outputDir: string
 ) => {
@@ -85,7 +85,7 @@ export const createWordActInstEquipment = async (
             alignment: AlignmentType.CENTER,
             children: [
               new TextRun({
-                text: "АКТ монтажа оборудования",
+                text: "АКТ демонтажа оборудования",
                 bold: true,
                 size: 24,
                 font: "Times New Roman",
@@ -116,7 +116,7 @@ export const createWordActInstEquipment = async (
             spacing: { before: 200 },
             children: [
               new TextRun({
-                text: `1. Подрядчик выполнил монтаж оборудования Заказчику в соответствии с Заявкой № ${resultJson.applicationNumber} и условиями Договора № ${resultJson.contractNumber} от ${resultJson.contractDate}, а именно:`,
+                text: `1. Подрядчик выполнил демонтаж оборудования Заказчику в соответствии с Заявкой № ${resultJson.applicationNumber} и условиями Договора № ${resultJson.contractNumber} от ${resultJson.contractDate}, а именно:`,
                 font: "Times New Roman",
                 size: 24,
               }),

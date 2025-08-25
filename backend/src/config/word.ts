@@ -10,5 +10,5 @@ export function resolveWordDir(): string {
 export function makeWordFilename(applicationNumber: string | number) {
     const num = String(applicationNumber ?? "").trim();
     // Фолбэк, если номер пустой
-    return `Заявка_№${num || "unknown"}.word`;
+    return `Заявка_№${num || "unknown"}.docx`;
 }

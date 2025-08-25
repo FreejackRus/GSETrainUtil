@@ -51,7 +51,10 @@ import { workLogApi } from '../../../entities/worklog';
 // import type { WorkLogEntry } from '../../../entities/application/model/types';
 import './WorkLogPage.css';
 import { apiClient } from '../../../shared';
-import { formatRussianDate } from '../../../shared/transformation/stringTransform';
+import {
+  formatRussianDate,
+  formatRussianDateDocument,
+} from '../../../shared/transformation/stringTransform';
 import type { WorkLogEntry } from '../../../entities/worklog/model/types';
 
 type SortField = keyof WorkLogEntry | 'none';
@@ -460,7 +463,7 @@ export const WorkLogPage = () => {
   //   }
   // };
 
-const handleDownloadWord = async (entry: WorkLogEntry, typePdf: string) => {
+  const handleDownloadWord = async (entry: WorkLogEntry, typePdf: string) => {
     console.log(entry);
     let response;
     console.log(typePdf);
@@ -499,7 +502,7 @@ const handleDownloadWord = async (entry: WorkLogEntry, typePdf: string) => {
         console.log(response);
       } else if (typePdf === 'Акт демонтажа') {
         response = await apiClient.post(
-          '/pdfActDisEquipment',
+          '/wordActDisEquipment',
           {
             // Если typeWork и applicationNumber есть в equipmentDetails[0], можно взять оттуда
             // applicationNumber: entry.id.toString(), // или замени на корректное поле, если нужно
@@ -515,13 +518,13 @@ const handleDownloadWord = async (entry: WorkLogEntry, typePdf: string) => {
           },
         );
         const blob = new Blob([response?.data], {
-          type: 'application/pdf',
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         });
         const url = window.URL.createObjectURL(blob);
 
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Акт демонтажа №${entry.id.toString()}.pdf`;
+        link.download = `Акт демонтажа №${entry.id.toString()}.docx`;
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -550,7 +553,9 @@ const handleDownloadWord = async (entry: WorkLogEntry, typePdf: string) => {
 
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${entry.trainNumbers?.[0]} от ${formatRussianDate(entry.createdAt)}docx`;
+        link.download = `${entry.trainNumbers?.[0]} от ${formatRussianDateDocument(
+          entry.createdAt,
+        )}docx`;
 
         document.body.appendChild(link);
         link.click();
@@ -559,7 +564,7 @@ const handleDownloadWord = async (entry: WorkLogEntry, typePdf: string) => {
         console.log(response);
       } else if (typePdf === 'Заявка') {
         response = await apiClient.post(
-          '/pdfAppWork',
+          '/wordAppWork',
           {
             // applicationNumber: entry.id.toString(),
             applicationNumber: '__',
@@ -572,13 +577,13 @@ const handleDownloadWord = async (entry: WorkLogEntry, typePdf: string) => {
           },
         );
         const blob = new Blob([response?.data], {
-          type: 'application/pdf',
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         });
         const url = window.URL.createObjectURL(blob);
 
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Заявка_№${entry.id.toString()}.pdf`;
+        link.download = `Заявка_№${entry.id.toString()}.docx`;
 
         document.body.appendChild(link);
         link.click();
@@ -817,7 +822,6 @@ const handleDownloadWord = async (entry: WorkLogEntry, typePdf: string) => {
             <Button
               size="small"
               variant="outlined"
-              
               onClick={() => navigate(`/work-log/${entry.id}`)}
             >
               Подробнее
@@ -830,16 +834,16 @@ const handleDownloadWord = async (entry: WorkLogEntry, typePdf: string) => {
             >
               <MenuItem value="Скачать">Скачать</MenuItem>
               {/* {console.log()} */}
-              {(entry.equipmentTypes.some((item) => item === 'Демонтаж')) && (
+              {entry.equipmentTypes.some((item) => item === 'Демонтаж') && (
                 <MenuItem value="Акт демонтажа">Акт демонтажа</MenuItem>
               )}
-              {(entry.equipmentTypes.some((item) => item === 'Монтаж')) && (
-               <MenuItem value="Акт монтажа">Акт монтажа</MenuItem>
+              {entry.equipmentTypes.some((item) => item === 'Монтаж') && (
+                <MenuItem value="Акт монтажа">Акт монтажа</MenuItem>
               )}
               <MenuItem value="Заявка">Заявка</MenuItem>
               <MenuItem value="Технический акт">Технический акт</MenuItem>
             </Select>
-          </Box> 
+          </Box>
         </CardActions>
       </Card>
     </Grid>
