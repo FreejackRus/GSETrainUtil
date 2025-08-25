@@ -494,50 +494,17 @@ export const WorkLogPage = () => {
     url: string;
   }
 
-  // function collectPhotos(entry: WorkLogEntry): PhotoItem[] {
-  //   const items: PhotoItem[] = [];
-  //
-  //   // 1) Общее фото заявки
-  //   if (entry.photo) {
-  //     items.push({ label: 'Фото заявки', url: `${process.env.VITE_API_STORAGE_PHOTOS_URL}/${entry.photo}` });
-  //   }
-  //
-  //   // 2) Фото вагонов
-  //   entry.carriages.forEach((c) => {
-  //     if (c.photo) {
-  //       items.push({ label: 'Фото вагона', url: `uploads/${c.photo}` });
-  //     }
-  //   });
-  //
-  //   // 3) Фото оборудования
-  //   entry.equipmentPhotos.forEach((url) => {
-  //     items.push({ label: 'Фото оборудования', url: `uploads/${url}` });
-  //   });
-  //
-  //   // 4) Фото серийников
-  //   entry.serialPhotos.forEach((url) => {
-  //     items.push({ label: 'Фото серийного номера', url: `uploads/${url}` });
-  //   });
-  //
-  //   // 5) Фото MAC-адресов
-  //   entry.macPhotos.forEach((url) => {
-  //     items.push({ label: 'Фото MAC-адреса', url: `uploads/${url}` });
-  //   });
-  //
-  //   return items;
-  // }
-
   function collectPhotos(entry: WorkLogEntry): PhotoItem[] {
     const items: PhotoItem[] = [];
     const baseUrl = import.meta.env.VITE_API_STORAGE_PHOTOS_URL;
 
     // 1) Общее фото заявки
-    if (entry.photo) {
-      items.push({
-        label: 'Фото заявки',
-        url: `${baseUrl}/${entry.photo}`,
-      });
-    }
+    // if (entry.photo) {
+    //   items.push({
+    //     label: 'Фото заявки',
+    //     url: `${baseUrl}/${entry.photo}`,
+    //   });
+    // }
 
     // 2) Фото вагонов
     entry.carriages.forEach((c) => {
@@ -548,7 +515,14 @@ export const WorkLogPage = () => {
         });
       }
     });
-
+   entry.carriages.forEach((c) => {
+      if (c.photo) {
+        items.push({
+          label: 'Фото оборудования в вагоне',
+          url: `${baseUrl}/${c.generalPhotoEquipmentCarriage}`,
+        });
+      }
+    });
     // 3) Фото оборудования
     entry.equipmentPhotos.forEach((p) => {
       items.push({
@@ -600,24 +574,12 @@ export const WorkLogPage = () => {
                 size="small"
                 sx={{ fontWeight: 'bold' }}
               />
-              {/* <Chip
-                sx={{ ml: 2 }}
-                // label={entry.typeWork}
-                // color={getWorkTypeColor(entry.typeWork)}
-                size="small"
-                variant="outlined"
-              /> */}
             </Box>
 
             <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
               <MoreVertIcon />
             </IconButton>
           </Box>
-
-          {/* <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-            {entry.typeWork}
-          </Typography> */}
-
           <Box display="flex" alignItems="center" mb={1}>
             <TrainIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
             <Typography variant="body2" color="text.secondary">
@@ -653,14 +615,6 @@ export const WorkLogPage = () => {
               sx={{ height: 8, borderRadius: 4 }}
             />
           </Box>
-
-          {/*{entry.equipmentDetails && (*/}
-          {/*  <Typography variant="body2" color="text.secondary" mb={1}>*/}
-          {/*    <strong>Оборудования:</strong>{' '}*/}
-          {/*    {entry.equipmentDetails.map((item) => item.name).join(', ')}*/}
-          {/*  </Typography>*/}
-          {/*)}*/}
-
           {entry.completedJob && (
             <Box display="flex" alignItems="center">
               <PersonIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
@@ -679,7 +633,6 @@ export const WorkLogPage = () => {
               onClick={() => handleViewPhotos(entry)}
               // disabled={!Object.values(entry.photo).some((photo) => photo)}
             >
-              {/*Фото ({Object.values(entry.photo).filter((photo) => photo).length})*/}
               Фото
             </Button>
             <Button
@@ -697,7 +650,6 @@ export const WorkLogPage = () => {
               onChange={(e) => handleDownloadPdf(entry, e.target.value as string)}
             >
               <MenuItem value="Скачать">Скачать</MenuItem>
-              {/* {console.log()} */}
               {(entry.equipmentTypes.some((item) => item === 'Демонтаж')) && (
                 <MenuItem value="Акт демонтажа">Акт демонтажа</MenuItem>
               )}
@@ -1127,32 +1079,6 @@ export const WorkLogPage = () => {
         <Dialog open={photoDialogOpen} onClose={handleClosePhotoDialog} maxWidth="md" fullWidth>
           <DialogTitle>Фотографии заявки #{selectedEntry?.id}</DialogTitle>
           <DialogContent>
-            {/*{selectedEntry && (*/}
-            {/*  <Grid container spacing={2}>*/}
-            {/*    {getPhotoEntries(selectedEntry.photo).map((photo, index) => (*/}
-            {/*      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`photo-${photo.url}-${index}`}>*/}
-            {/*        <Card>*/}
-            {/*          <CardContent>*/}
-            {/*            <Typography variant="subtitle2" gutterBottom>*/}
-            {/*              {photo.label}*/}
-            {/*            </Typography>*/}
-            {/*            <Box*/}
-            {/*              component="img"*/}
-            {/*              src={photo.url}*/}
-            {/*              alt={photo.label}*/}
-            {/*              sx={{*/}
-            {/*                width: '100%',*/}
-            {/*                height: 200,*/}
-            {/*                objectFit: 'cover',*/}
-            {/*                borderRadius: 1,*/}
-            {/*              }}*/}
-            {/*            />*/}
-            {/*          </CardContent>*/}
-            {/*        </Card>*/}
-            {/*      </Grid>*/}
-            {/*    ))}*/}
-            {/*  </Grid>*/}
-            {/*)}*/}
             {selectedEntry && (
               <Grid container spacing={2}>
                 {collectPhotos(selectedEntry).map((ph, idx) => (
