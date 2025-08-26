@@ -15,7 +15,7 @@ import {
 } from "../utils/config";
 import path from "path";
 import { equipmentDetails, ResponseJson } from "../../types/types";
-import { formatRussianDate } from "../utils/stringConvertDate";
+import { formatRussianDate } from "../../utils/stringConvertDate";
 
 interface WagonData {
   number: string;
