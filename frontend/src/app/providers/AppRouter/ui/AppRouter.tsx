@@ -3,7 +3,6 @@ import { Box } from '@mui/material';
 import { Home, Login, AdminPanel, CarriagesPage, WorkLogPage, CreateApplicationPage, MyApplicationsPage, ArchiveManagementPage } from '../../../../pages';
 import { WorkLogDetailPage } from '../../../../pages/WorkLogDetailPage';
 import { Header } from '../../../../shared/ui';
-import { CreateApplicationButton } from '../../../../features/application-management';
 import { EquipmentLog } from '../../../../pages/EquipmentLog';
 
 interface AppRouterProps {

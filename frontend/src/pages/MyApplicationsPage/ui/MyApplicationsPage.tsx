@@ -408,7 +408,7 @@ export const MyApplicationsPage: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {application.trainNumbers.join(", ") || '-'}
+                              {application.trainNumbers.join(', ') || '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>
@@ -418,7 +418,13 @@ export const MyApplicationsPage: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {application.carriages[0]?.equipment[0]?.typeWork || '-'}
+                              {[
+                                ...new Set(
+                                  application.carriages.flatMap((carriage) =>
+                                    carriage.equipment.map((eq) => eq.typeWork),
+                                  ),
+                                ),
+                              ].join(', ') || '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>

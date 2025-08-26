@@ -149,6 +149,9 @@ export const CarriagesPage = () => {
         ) {
           return true;
         }
+        if (carriage.trainNumber && carriage.trainNumber.toLowerCase().includes(searchLower)) {
+          return true;
+        }
 
         // Поиск по оборудованию
         return (
@@ -384,7 +387,8 @@ export const CarriagesPage = () => {
                   <Box flex={1}>
                     <Typography variant="h6">Вагон № {carriage.carriageNumber}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Тип: {carriage.carriageType} • Оборудования: {carriage.equipment.length}
+                      Поезд: {carriage.trainNumber} • Тип: {carriage.carriageType} • Оборудования:{' '}
+                      {carriage.equipment.length}
                     </Typography>
                   </Box>
                   <Box display="flex" flexWrap={'wrap'} gap={1}>
