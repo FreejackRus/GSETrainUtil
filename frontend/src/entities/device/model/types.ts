@@ -9,6 +9,7 @@ export interface Device {
   carriageType: string;
   carriageNumber: string;
   trainNumber: string;
+  trainNumbers: string[]
 }
 
 export interface DeviceResponse {
