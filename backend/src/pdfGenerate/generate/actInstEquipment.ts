@@ -13,7 +13,7 @@ import {
 } from "../utils/config";
 import logoBase64 from "../utils/logoBase64";
 import path from "path";
-import { formatRussianDate } from "../utils/stringConvertDate";
+import { formatRussianDate } from "../../utils/stringConvertDate";
 import { equipmentDetails, ResponseJson } from "../../types/types";
 
 interface InstallationingActData {

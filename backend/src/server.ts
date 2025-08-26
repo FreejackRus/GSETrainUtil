@@ -9,6 +9,7 @@ import { routerPdfGenerate } from "./router/routerPdfGenerate";
 import archiveRoutes from "./routes/archiveRoutes";
 import multer from "multer";
 import {UPLOADS_DIR} from "./config/uploads";
+import { routerWordGenerate } from "./router/routerWordGenerate";
 
 const app = express();
 const upload = multer();
@@ -60,6 +61,7 @@ app.use("/api/v1", routerDevice);
 app.use("/api/v1", routerCarriage);
 app.use("/api/v1", routerWorkLog);
 app.use("/api/v1", routerPdfGenerate);
+app.use("/api/v1", routerWordGenerate);
 app.use("/api/v1/archive", archiveRoutes);
 
 // Middleware для декодирования URL и обслуживания статических файлов (изображений)

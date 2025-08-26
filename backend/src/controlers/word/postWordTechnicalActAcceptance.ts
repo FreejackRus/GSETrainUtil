@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { createTechnicalActAcceptance } from "../../pdfGenerate/generate/technicalActAcceptance";
 import path from "path";
 import fs from "fs";
-import {resolvePdfDir} from "../../config/pdf";
+import { createWordTechnicalActAcceptance } from "../../wordGenerate/generate/technicalActAcceptance";
+import { resolveWordDir } from "../../config/word";
 
-export const postPdfTechnicalActAcceptance = async (
+export const postWordTechnicalActAcceptance = async (
   req: Request,
   res: Response
 ) => {
@@ -14,9 +14,11 @@ export const postPdfTechnicalActAcceptance = async (
       return res.status(400).send("trainNumber и applicationDate обязательны");
     }
 
-    const pdfDir = resolvePdfDir();
+    const wordDir = resolveWordDir();
+    console.log(wordDir);
+    
     // генератор создаёт и возвращает полный путь к файлу
-    const filePath = await createTechnicalActAcceptance(req.body, pdfDir);
+    const filePath = await createWordTechnicalActAcceptance(req.body, wordDir);
     const fileName = path.basename(filePath);
     console.log(filePath);
 
@@ -26,7 +28,7 @@ export const postPdfTechnicalActAcceptance = async (
     }
 
     const encoded = encodeURIComponent(fileName);
-    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
     res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${encoded}`);
 
     // Отправка файла клиенту
