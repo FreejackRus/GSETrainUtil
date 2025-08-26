@@ -114,9 +114,9 @@ export const WorkLogDetailPage: React.FC = () => {
       items.push({
         label: 'Фото оборудования',
         url: `${base}/${p}`,
-        name: entry.equipmentDetails[index].name,
-        typeWork: entry.equipmentDetails[index].typeWork,
-        carriageNumber: entry.equipmentDetails[index].carriageNumber,
+        name: entry.equipmentDetails[index]?.name ?? '-',
+        typeWork: entry.equipmentDetails[index]?.typeWork ?? '-',
+        carriageNumber: entry.equipmentDetails[index]?.carriageNumber ?? '-',
       });
     });
 
@@ -125,9 +125,9 @@ export const WorkLogDetailPage: React.FC = () => {
       items.push({
         label: 'Фото серийного номера',
         url: `${base}/${p}`,
-        name: entry.equipmentDetails[index].name,
-        typeWork: entry.equipmentDetails[index].typeWork,
-        carriageNumber: entry.equipmentDetails[index].carriageNumber,
+        name: entry.equipmentDetails[index]?.name ?? '-',
+        typeWork: entry.equipmentDetails[index]?.typeWork ?? '-',
+        carriageNumber: entry.equipmentDetails[index]?.carriageNumber ?? '-',
       });
     });
 
@@ -136,9 +136,9 @@ export const WorkLogDetailPage: React.FC = () => {
       items.push({
         label: 'Фото MAC-адреса',
         url: `${base}/${p}`,
-        name: entry.equipmentDetails[index].name,
-        typeWork: entry.equipmentDetails[index].typeWork,
-        carriageNumber: entry.equipmentDetails[index].carriageNumber,
+        name: entry.equipmentDetails[index]?.name ?? '-',
+        typeWork: entry.equipmentDetails[index]?.typeWork ?? '-',
+        carriageNumber: entry.equipmentDetails[index]?.carriageNumber ?? '-',
       });
     });
 
@@ -227,7 +227,7 @@ export const WorkLogDetailPage: React.FC = () => {
   };
 
   const getStatusText = (entry: WorkLogEntry) => {
-    if (entry.completedJob && entry.completedJob.trim() !== '') {
+    if (entry.status && entry.status.trim() !== '') {
       return 'Выполнено';
     }
     return 'В работе';
@@ -788,8 +788,8 @@ export const WorkLogDetailPage: React.FC = () => {
                 Статус
               </Typography>
               <Chip
-                label={workLog.completedJob ? 'Выполнено' : 'В работе'}
-                color={workLog.completedJob ? 'success' : 'warning'}
+                label={workLog.status ? 'Выполнено' : 'В работе'}
+                color={workLog.status ? 'success' : 'warning'}
                 size="small"
               />
             </Box>

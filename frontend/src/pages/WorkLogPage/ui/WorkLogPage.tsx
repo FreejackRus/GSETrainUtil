@@ -850,107 +850,124 @@ export const WorkLogPage = () => {
   );
 
   const renderWorkLogList = (entry: WorkLogEntry) => (
-    <Paper
-      key={entry.id}
-      elevation={2}
-      sx={{
-        mb: 2,
-        p: 2,
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          boxShadow: 4,
-          transform: 'translateX(4px)',
-        },
-      }}
-    >
-      <Grid container spacing={2} alignItems="center">
-        <Grid size={{ xs: 12, sm: 2, md: 2 }}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Chip label={`#${entry.id}`} color="primary" size="small" sx={{ fontWeight: 'bold' }} />
+      <Paper
+          key={entry.id}
+          elevation={2}
+          sx={{
+            mb: 2,
+            p: 2,
+            overflow: 'hidden',
+            transition: 'all 0.3s ease',
+            '&:hover': { boxShadow: 4, transform: 'translateX(4px)' },
+          }}
+      >
+        <Box
+            sx={{
+              display: 'grid',
+              // одна строка на md+, аккуратные колонки; на xs — стопка
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: '1fr 1fr',
+                md: '120px 1.6fr 1.2fr 1.6fr 1.2fr auto',
+              },
+              columnGap: 2,
+              rowGap: { xs: 1, sm: 1, md: 0 },
+              alignItems: 'center',
+            }}
+        >
+          {/* # и статус */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+            <Chip label={`#${entry.id}`} color="primary" size="small" sx={{ fontWeight: 700 }} />
             <Chip label={getStatusText(entry)} color={getStatusColor(entry)} size="small" />
           </Box>
-        </Grid>
 
-        <Grid size={{ xs: 12, sm: 3, md: 3 }} sx={{ ml: { xs: 0, sm: 4 } }}>
-          {/* <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            {entry.typeWork}
-          </Typography> */}
-          <Typography variant="body2" color="text.secondary">
-            Поезд {entry.trainNumbers[0]}, Вагоны{' '}
-            {entry.carriages.map((item) => item.number).join(', ')}
-          </Typography>
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 2 }}>
-          <Typography variant="body2" color="text.secondary">
-            <LocationOnIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-            {entry.currentLocation || 'Не указано'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            <CalendarTodayIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-            {formatDate(entry.createdAt)}
-          </Typography>
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 2 }}>
-          {entry.equipmentDetails && (
-            <Typography variant="body2" color="text.secondary" noWrap>
-              <BuildIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-              {entry.equipmentDetails.map((item) => item.name).join(', ')}
+          {/* Поезд и вагоны */}
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+                variant="body2"
+                color="text.secondary"
+                noWrap
+                title={`Поезд ${entry.trainNumbers[0]}, Вагоны ${entry.carriages.map(c => c.number).join(', ')}`}
+            >
+              Поезд {entry.trainNumbers[0]}, Вагоны {entry.carriages.map(c => c.number).join(', ')}
             </Typography>
-          )}
-          {entry.completedJob && (
-            <Typography variant="body2" color="text.secondary" noWrap>
-              <PersonIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-              {entry.completedJob}
-            </Typography>
-          )}
-        </Grid>
+          </Box>
 
-        <Grid size={{ xs: 12, sm: 2 }}>
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
+          {/* Локация и дата */}
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="body2" color="text.secondary" noWrap title={entry.currentLocation || 'Не указано'}>
+              <LocationOnIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+              {entry.currentLocation || 'Не указано'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" noWrap title={formatDate(entry.createdAt)}>
+              <CalendarTodayIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+              {formatDate(entry.createdAt)}
+            </Typography>
+          </Box>
+
+          {/* Оборудование / исполнитель */}
+          <Box sx={{ minWidth: 0 }}>
+            {!!entry.equipmentDetails?.length && (
+                <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    noWrap
+                    title={entry.equipmentDetails.map(i => i.name).join(', ')}
+                >
+                  <BuildIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+                  {entry.equipmentDetails.map(i => i.name).join(', ')}
+                </Typography>
+            )}
+            {entry.completedJob && (
+                <Typography variant="body2" color="text.secondary" noWrap title={entry.completedJob}>
+                  <PersonIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+                  {entry.completedJob}
+                </Typography>
+            )}
+          </Box>
+
+          {/* Прогресс */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
             <LinearProgress
-              variant="determinate"
-              value={getProgressValue(entry)}
-              sx={{ flexGrow: 1, height: 6, borderRadius: 3 }}
+                variant="determinate"
+                value={getProgressValue(entry)}
+                sx={{ flexGrow: 1, height: 6, borderRadius: 3, minWidth: 80 }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
               {getProgressValue(entry)}%
             </Typography>
           </Box>
-          <Typography variant="caption" color="text.secondary">
-            {/*Фото: {Object.values(entry.photo).filter((photo) => photo).length}*/}
-            Фото
-          </Typography>
-        </Grid>
 
-        <Grid size={{ xs: 12, sm: 1 }}>
-          <Box display="flex" gap={0.5} width={'100%'}>
-            <IconButton
-              size="small"
-              onClick={() => handleViewPhotos(entry)}
-              // disabled={!Object.values(entry.photo).some((photo) => photo)}
-            >
-              <PhotoIcon />
+          {/* Действия */}
+          <Box sx={{ display: 'flex', justifySelf: { md: 'end' }, gap: 1, flexWrap: 'nowrap' }}>
+            <Tooltip title="Фото">
+          <span>
+            <IconButton size="small" onClick={() => handleViewPhotos(entry)}>
+              <PhotoIcon fontSize="small" />
             </IconButton>
-            <IconButton size="small" onClick={() => navigate(`/work-log/${entry.id}`)}>
-              <ArrowBackIcon sx={{ transform: 'rotate(180deg)' }} />
-            </IconButton>
+          </span>
+            </Tooltip>
+
+            <Button size="small" variant="outlined" onClick={() => navigate(`/work-log/${entry.id}`)}>
+              Подробнее
+            </Button>
+
             <Select
               value="Скачать"
               onChange={(e) => handleDownloadWord(entry, e.target.value as string)}
+              size="small"
+              sx={{ minWidth: 160 }}
             >
-              <MenuItem value="Скачать">Скачать</MenuItem>
               <MenuItem value="Заявка">Заявка</MenuItem>
               <MenuItem value="Акт демонтажа">Акт демонтажа</MenuItem>
               <MenuItem value="Акт монтажа">Акт монтажа</MenuItem>
               <MenuItem value="Технический акт">Технический акт</MenuItem>
             </Select>
           </Box>
-        </Grid>
-      </Grid>
-    </Paper>
+        </Box>
+      </Paper>
   );
+
 
   if (loading) {
     return (
