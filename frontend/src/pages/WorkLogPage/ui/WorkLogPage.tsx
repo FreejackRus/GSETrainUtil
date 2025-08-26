@@ -90,8 +90,8 @@ export const WorkLogPage = () => {
         setLoading(true);
         const response = await workLogApi.getWorkLog();
         if (response.success) {
-          setWorkLogEntries(response.data as unknown as WorkLogEntry[]);
-          setFilteredEntries(response.data as unknown as WorkLogEntry[]);
+          setWorkLogEntries(response.data.filter(item => item.status === 'completed') as unknown as WorkLogEntry[]);
+          setFilteredEntries(response.data.filter(item => item.status === 'completed') as unknown as WorkLogEntry[]);
         } else {
           setError('Ошибка при загрузке журнала работ');
         }

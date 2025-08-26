@@ -236,14 +236,14 @@ export const WorkLogDetailPage: React.FC = () => {
   };
 
   const getStatusText = (entry: WorkLogEntry) => {
-    if (entry.status && entry.status.trim() !== '') {
+    if (entry.status && entry.status.trim() !== '' && entry.status === 'completed') {
       return 'Выполнено';
     }
     return 'В работе';
   };
 
   const getStatusColor = (entry: WorkLogEntry) => {
-    if (entry.status && entry.status.trim() !== '') {
+    if (entry.status && entry.status.trim() !== '' && entry.status === 'completed') {
       return 'success';
     }
     return 'warning';
