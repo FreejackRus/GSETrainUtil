@@ -36,6 +36,7 @@ export const getCarriages = async (_req: Request, res: Response) => {
           snNumber: equipment.serialNumber ?? "—",
           mac: equipment.macAddress ?? "—",
           lastService: equipment.lastService ?? null, // можно .toISOString() если нужен строковый формат
+          name:equipment.name
         })),
       };
     });

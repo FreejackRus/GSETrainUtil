@@ -1,4 +1,4 @@
-import { DeviceResponse, CreateDeviceData } from "../model/types";
+import type { DeviceResponse, CreateDeviceData } from "../model/types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

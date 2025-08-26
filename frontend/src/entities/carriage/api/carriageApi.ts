@@ -2,16 +2,17 @@ import { apiClient } from '../../../shared/api';
 
 interface CarriageEquipment {
   id: number;
-  type: string;
   snNumber?: string;
   mac?: string;
   lastService: string;
+  name: string;
 }
 
 interface Carriage {
   carriageNumber: string;
   carriageType: string;
   trainNumber: string;
+  trainNumbers:string[]
   equipment: CarriageEquipment[];
 }
 

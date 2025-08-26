@@ -18,6 +18,7 @@ export interface WorkLogEntry {
     type: string;
     train: string;
     photo: string;
+    generalPhotoEquipmentCarriage:string
   }[];
   equipmentDetails: EquipmentDetail[];
   countEquipment: number;

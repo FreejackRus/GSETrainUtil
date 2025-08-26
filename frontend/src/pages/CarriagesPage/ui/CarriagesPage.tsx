@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-
+import { useState, useEffect, useCallback } from 'react';
 // Add DevicesIcon import at the top of the file
 import { Devices as DevicesIcon } from '@mui/icons-material';
 import {
@@ -41,22 +40,22 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { carriageApi } from '../../../entities/carriage/api/carriageApi';
 import './CarriagesPage.css';
-import {type Device, deviceApi} from "../../../entities";
+import { type Device, deviceApi } from '../../../entities';
 
 // Локальные типы для компонента
 interface CarriageEquipment {
   id: number;
-  type: string;
-  status: string;
   snNumber?: string;
   mac?: string;
   lastService: string;
-  photo?: string;
+  name: string;
 }
 
 interface Carriage {
   carriageNumber: string;
   carriageType: string;
+  trainNumber: string;
+  trainNumbers: string[];
   equipment: CarriageEquipment[];
 }
 
@@ -113,7 +112,8 @@ export const CarriagesPage = () => {
         return 'not_installed';
       }
 
-      const installedEquipment = carriage.equipment.filter((eq) => isEquipmentInstalled(eq.status));
+      // const installedEquipment = carriage.equipment.filter((eq) => isEquipmentInstalled(eq.status));
+      const installedEquipment: string[] = [];
 
       if (installedEquipment.length === 0) {
         return 'not_installed';
@@ -158,19 +158,24 @@ export const CarriagesPage = () => {
             if (equipment.snNumber && equipment.snNumber.toLowerCase().includes(searchLower)) {
               return true;
             }
-
-            // Поиск по MAC-адресу только для точек доступа и маршрутизаторов
-            if (
-              equipment.mac &&
-              equipment.type &&
-              (equipment.type.toLowerCase().includes('точка доступа') ||
-                equipment.type.toLowerCase().includes('маршрутизатор') ||
-                equipment.type.toLowerCase().includes('router') ||
-                equipment.type.toLowerCase().includes('access point')) &&
-              equipment.mac.toLowerCase().includes(searchLower)
-            ) {
+            if (equipment.name && equipment.name.toLowerCase().includes(searchLower)) {
               return true;
             }
+            if (equipment.mac && equipment.mac.toLowerCase().includes(searchLower)) {
+              return true;
+            }
+            // Поиск по MAC-адресу только для точек доступа и маршрутизаторов
+            // if (
+            //   equipment.mac &&
+            //   equipment.type &&
+            //   (equipment.type.toLowerCase().includes('точка доступа') ||
+            //     equipment.type.toLowerCase().includes('маршрутизатор') ||
+            //     equipment.type.toLowerCase().includes('router') ||
+            //     equipment.type.toLowerCase().includes('access point')) &&
+            //   equipment.mac.toLowerCase().includes(searchLower)
+            // ) {
+            //   return true;
+            // }
 
             return false;
           })
@@ -211,7 +216,8 @@ export const CarriagesPage = () => {
 
   const installedCount = carriages.reduce((a, v) => a + v.equipment.length, 0);
 
-  const notInstalledCount = equipments.length - installedCount > 0 ? equipments.length - installedCount : 0;
+  const notInstalledCount =
+    equipments.length - installedCount > 0 ? equipments.length - installedCount : 0;
 
   return (
     <Container maxWidth="xl" className="carriages-page">
@@ -272,9 +278,7 @@ export const CarriagesPage = () => {
                 <Typography variant="h6" color="primary">
                   Всего оборудования
                 </Typography>
-                <Typography variant="h4">
-                  {equipments.length}
-                </Typography>
+                <Typography variant="h4">{equipments.length}</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -393,7 +397,7 @@ export const CarriagesPage = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>Тип оборудования</TableCell>
+                        <TableCell>Наименование оборудования</TableCell>
                         <TableCell>Серийный номер</TableCell>
                         <TableCell>MAC адрес</TableCell>
                         <TableCell>Статус установки</TableCell>
@@ -406,17 +410,13 @@ export const CarriagesPage = () => {
                           <TableCell>
                             <Box display="flex" alignItems="center" gap={1}>
                               <DevicesIcon color="primary" />
-                              {equipment.type}
+                              {equipment.name}
                             </Box>
                           </TableCell>
                           <TableCell>{equipment.snNumber || 'Не указан'}</TableCell>
                           <TableCell>{equipment.mac || 'Не указан'}</TableCell>
                           <TableCell>
-                            <Chip
-                              label={'Установлено'}
-                              color={'success'}
-                              size="small"
-                            />
+                            <Chip label={'Установлено'} color={'success'} size="small" />
                           </TableCell>
                           <TableCell>{formatDate(equipment.lastService)}</TableCell>
                         </TableRow>

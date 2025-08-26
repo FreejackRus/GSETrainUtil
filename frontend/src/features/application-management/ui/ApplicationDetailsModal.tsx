@@ -1,4 +1,5 @@
 import React from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Dialog,
   DialogTitle,
@@ -14,6 +15,9 @@ import {
   Divider,
   Avatar,
   IconButton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -156,22 +160,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                       Дата создания: <strong>{formatDate(application.createdAt)}</strong>
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Тип работ:{' '}
-                      <strong>
-                        {Array.from(
-                          new Set(
-                            application.carriages
-                              .flatMap((item) => item.equipment)
-                              .map((item) => item.typeWork),
-                          ),
-                        )
-                          .filter(Boolean)
-                          .join(', ') || '-'}
-                      </strong>
-                    </Typography>
-                  </Grid>
+
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Исполнитель: <strong>{application.performer || '-'}</strong>
@@ -182,235 +171,127 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
             </Card>
           </Grid>
 
-          {/* Информация о поезде и вагоне */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card elevation={2} sx={{ borderRadius: 2, height: '100%' }}>
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+          <Grid size={{ xs: 12, sm: 12 }}>
+            {application.trainNumbers.map((train) => (
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel1-content"
+                  id="panel1-header"
                 >
-                  <TrainIcon color="primary" />
-                  Поезд и вагон
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-
-                <Box display="flex" alignItems="center" gap={1} mb={2}>
-                  <TrainIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    Номер поездов: <strong>{application.trainNumbers.join(', ') || '-'}</strong>
-                  </Typography>
-                </Box>
-
-                <Box display="flex" alignItems="center" gap={1} mb={2}>
-                  <CarIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    Тип вагонов:{' '}
-                    <strong>
-                      {application.carriages.map((item) => item.type).join(', ') || '-'}
-                    </strong>
-                  </Typography>
-                </Box>
-
-                <Box display="flex" alignItems="center" gap={1} mb={2}>
-                  <CarIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    Номера вагонов:{' '}
-                    <strong>
-                      {application.carriages.map((item) => item.number).join(', ') || '-'}
-                    </strong>
-                  </Typography>
-                </Box>
-
-                <Box display="flex" alignItems="center" gap={1}>
-                  <LocationIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    Местоположение: <strong>{application.currentLocation || '-'}</strong>
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Выполненные работы */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card elevation={2} sx={{ borderRadius: 2, height: '100%' }}>
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                >
-                  <BuildIcon color="primary" />
-                  Выполненные работы
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-
-                <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                  {'Информация о выполненных работах не указана'}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Оборудование */}
-          {application.carriages.flatMap((item) => item.equipment) && (
-            <Grid size={{ xs: 12 }}>
-              <Card elevation={2} sx={{ borderRadius: 2 }}>
-                <CardContent>
-                  <Typography
-                    variant="h6"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                  >
-                    <MemoryIcon color="primary" />
-                    Оборудование ({application.carriages.flatMap((item) => item.equipment).length})
-                  </Typography>
-                  <Divider sx={{ mb: 2 }} />
-
-                  <Grid container spacing={2}>
-                    {application.carriages
-                      .flatMap((item) => item.equipment)
-                      .map((item, index) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
-                          <Card variant="outlined" sx={{ borderRadius: 2 }}>
-                            <CardContent sx={{ p: 2 }}>
-                              <Typography variant="subtitle2" gutterBottom>
-                                {item.name}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary" gutterBottom>
-                                Серийный номер: {item.serialNumber || '-'}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary" gutterBottom>
-                                MAC-адрес: {item.macAddress || '-'}
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      ))}
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
-          )}
-
-          {/* Фотографии */}
-          <Grid size={{ xs: 12 }}>
-            <Card elevation={2} sx={{ borderRadius: 2 }}>
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                >
-                  <PhotoIcon color="primary" />
-                  Фотографии
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-
-                <Grid container spacing={2}>
-                  {application.carriages
-                    .map((item) => item.photo)
-                    .map(
-                      (item, index) =>
-                        item && (
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <Box>
-                              <Typography variant="body2" gutterBottom>
-                                Фото вагона №{index + 1}
-                              </Typography>
-                              <img
-                                src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${item}`}
-                                alt={`Фото вагона №${index + 1}`}
-                                className={styles.photoImage}
-                              />
-                            </Box>
+                  <Typography component="span">Поезд: {train} </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {application.carriages.map((carriage, index) =>
+                    carriage.train === train ? (
+                      <Accordion>
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls="panel1-content"
+                          id="panel1-header"
+                        >
+                          <Typography component="span">
+                            Вагон: {carriage.number}, тип вагона: {carriage.type}
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Typography variant="subtitle2" color="textSecondary" mb={2}>
+                            Фотографии:
+                          </Typography>
+                          <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                              <Box>
+                                <Typography variant="body2" gutterBottom>
+                                  Фото вагона №{carriage.number}
+                                </Typography>
+                                <img
+                                  src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${
+                                    carriage.photo
+                                  }`}
+                                  alt={`Фото фагона${carriage.number}`}
+                                  className={styles.photoImage}
+                                />
+                              </Box>
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                              <Box>
+                                <Typography variant="body2" gutterBottom>
+                                  Общее фото оборудования в вагоне №{carriage.number}
+                                </Typography>
+                                <img
+                                  src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${
+                                    carriage.generalPhotoEquipmentCarriage
+                                  }`}
+                                  alt={`Общее фото оборудования в вагоне №${carriage.number}`}
+                                  className={styles.photoImage}
+                                />
+                              </Box>
+                            </Grid>
                           </Grid>
-                        ),
-                    )}
-                  {application.carriages
-                    .map((item) => item.generalPhotoEquipmentCarriage)
-                    .map(
-                      (item, index) =>
-                        item && (
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <Box>
-                              <Typography variant="body2" gutterBottom>
-                               Общее фото оборудования в вагоне № {index + 1}
-                              </Typography>
-                              <img
-                                src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${item}`}
-                                alt={`Общее фото оборудования в вагоне №${index + 1}`}
-                                className={styles.photoImage}
-                              />
-                            </Box>
-                          </Grid>
-                        ),
-                    )}
-                  {application.carriages
-                    .map((item) => item.equipment)
-                    .map((item1, index1) =>
-                      item1.map((item2, index2) =>
-                        item2.photos.map((item3) => (
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <Box>
-                              <Typography variant="body2" gutterBottom>
-                                Фото{' '}
-                                {item3.type === 'serial'
-                                  ? 'серийного номера оборудования'
-                                  : item3.type === 'mac'
-                                  ? 'mac адреса оборудования'
-                                  : 'оборудования'}{' '}
-                                №{index2 + 1} вагона №{index1 + 1}
-                              </Typography>
-                              <img
-                                src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${item3.path}`}
-                                alt={`Фото ${
-                                  item3.type === 'serial'
-                                    ? 'серийного номера оборудования'
-                                    : item3.type === 'mac'
-                                    ? 'mac адреса оборудования'
-                                    : 'оборудования'
-                                } №${index2 + 1} вагона №${index1 + 1}`}
-                                className={styles.photoImage}
-                              />
-                            </Box>
-                          </Grid>
-                        )),
-                      ),
-                    )}
 
-                  {application.photo && (
-                    <Grid size={{ xs: 12, sm: 4 }}>
-                      <Box>
-                        <Typography variant="body2" gutterBottom>
-                          Общее фото
-                        </Typography>
-                        <img
-                          src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${
-                            application.photo
-                          }`}
-                          alt="Общее фото"
-                          className={styles.photoImage}
-                        />
-                      </Box>
-                    </Grid>
+                          <Typography variant="subtitle2" color="textSecondary" mb={2}>
+                            Названия оборудования
+                          </Typography>
+                          {carriage.equipment.map((equipment) => (
+                            <Accordion>
+                              <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1-content"
+                                id="panel1-header"
+                              >
+                                <Typography variant="subtitle2" fontWeight={400}>
+                                  {equipment.name}
+                                </Typography>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                <Typography variant="subtitle2" fontWeight={400}>
+                                  Серийный номер: {equipment.serialNumber}
+                                </Typography>
+                                <Typography variant="subtitle2" fontWeight={400}>
+                                  MAC-адрес: {equipment.macAddress}
+                                </Typography>
+                                <Typography variant="subtitle2" fontWeight={400} mb={2}>
+                                  Тип работы: {equipment.typeWork}
+                                </Typography>
+                                <Typography variant="subtitle2" fontWeight={400}>
+                                  Фотографии:
+                                </Typography>
+                                <Grid container spacing={2}>
+                                  {equipment.photos.map((photo) => (
+                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                      <Box>
+                                        <Typography variant="body2" gutterBottom>
+                                          {photo.type === 'equipment'
+                                            ? 'Фото оборудования'
+                                            : photo.type === 'serial'
+                                            ? 'Фото серийнного номера'
+                                            : photo.type === 'mac'
+                                            ? 'Фото mac адреса'
+                                            : ''}
+                                        </Typography>
+                                        <img
+                                          src={`${import.meta.env.VITE_API_STORAGE_PHOTOS_URL}/${
+                                            photo.path
+                                          }`}
+                                          alt={`Фото фагона${carriage.number}`}
+                                          className={styles.photoImage}
+                                        />
+                                      </Box>
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              </AccordionDetails>
+                            </Accordion>
+                          ))}
+                        </AccordionDetails>
+                      </Accordion>
+                    ) : (
+                      <></>
+                    ),
                   )}
-                </Grid>
-
-                {!application.carriages.map((item) => item.photo).filter(Boolean).length &&
-                  !application.photo && (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ textAlign: 'center', py: 2 }}
-                    >
-                      Фотографии не прикреплены
-                    </Typography>
-                  )}
-              </CardContent>
-            </Card>
+                </AccordionDetails>
+              </Accordion>
+            ))}
           </Grid>
         </Grid>
       </DialogContent>

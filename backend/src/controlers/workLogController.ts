@@ -92,10 +92,10 @@ function pickCoverPhoto(r: any): string | null {
   const firstRc = firstRt?.requestCarriages?.[0];
   if (firstRc?.carriagePhotos?.length) {
     const pCar = firstRc.carriagePhotos.find(
-        (p: any) => p.photoType === CarriagePhotoType.carriage
+      (p: any) => p.photoType === CarriagePhotoType.carriage
     )?.photoPath;
     const pEq = firstRc.carriagePhotos.find(
-        (p: any) => p.photoType === CarriagePhotoType.equipment
+      (p: any) => p.photoType === CarriagePhotoType.equipment
     )?.photoPath;
     if (pCar || pEq) return pCar || pEq || null;
   }
@@ -104,10 +104,10 @@ function pickCoverPhoto(r: any): string | null {
   for (const rt of r.requestTrains || []) {
     for (const rc of rt.requestCarriages || []) {
       const pCar = rc.carriagePhotos?.find(
-          (p: any) => p.photoType === CarriagePhotoType.carriage
+        (p: any) => p.photoType === CarriagePhotoType.carriage
       )?.photoPath;
       const pEq = rc.carriagePhotos?.find(
-          (p: any) => p.photoType === CarriagePhotoType.equipment
+        (p: any) => p.photoType === CarriagePhotoType.equipment
       )?.photoPath;
       if (pCar || pEq) return pCar || pEq || null;
     }
@@ -117,26 +117,28 @@ function pickCoverPhoto(r: any): string | null {
 
 /** ВСПОМОГАТЕЛЬНОЕ ФОРМАТИРОВАНИЕ */
 function formatRequest(r: any) {
-  const trainNumbers: string[] = r.requestTrains.map((rt: any) => rt.train.number);
+  const trainNumbers: string[] = r.requestTrains.map(
+    (rt: any) => rt.train.number
+  );
 
   const carriages = r.requestTrains.flatMap((rt: any) =>
-      rt.requestCarriages.map((rc: any) => {
-        const photo =
-            rc.carriagePhotos.find(
-                (p: any) => p.photoType === CarriagePhotoType.carriage
-            )?.photoPath ??
-            rc.carriagePhotos.find(
-                (p: any) => p.photoType === CarriagePhotoType.equipment
-            )?.photoPath ??
-            null;
-
-        return {
-          number: rc.carriage.number,
-          type: rc.carriage.type,
-          train: rt.train.number,
-          photo,
-        };
-      })
+    rt.requestCarriages.map((rc: any) => {
+      const firstCarriagePhoto =
+        (rc.carriagePhotos ?? []).find(
+          (p: any) => p.photoType === CarriagePhotoType.carriage
+        )?.photoPath ?? null;
+      const secondCarriagePhoto =
+        (rc.carriagePhotos ?? []).find(
+          (p: any) => p.photoType === CarriagePhotoType.equipment
+        )?.photoPath ?? null;
+      return {
+        number: rc.carriage.number,
+        type: rc.carriage.type,
+        train: rt.train.number,
+        photo: firstCarriagePhoto,
+        generalPhotoEquipmentCarriage: secondCarriagePhoto,
+      };
+    })
   );
 
   const equipmentDetails = r.requestEquipments.map((re: any) => ({
@@ -146,9 +148,9 @@ function formatRequest(r: any) {
     serialNumber: re.equipment?.serialNumber ?? "—",
     macAddress: re.equipment?.macAddress ?? "—",
     carriageNumber:
-        re.requestCarriage?.carriage?.number ??
-        re.equipment?.carriage?.number ??
-        "—",
+      re.requestCarriage?.carriage?.number ??
+      re.equipment?.carriage?.number ??
+      "—",
     photos: re.photos.map((p: any) => ({
       type: p.photoType as EquipmentPhotoType,
       path: p.photoPath,
@@ -157,7 +159,7 @@ function formatRequest(r: any) {
 
   const allPhotos = equipmentDetails.flatMap((d: any) => d.photos);
   const getByType = (type: EquipmentPhotoType) =>
-      allPhotos.filter((p: any) => p.type === type).map((p: any) => p.path);
+    allPhotos.filter((p: any) => p.type === type).map((p: any) => p.path);
 
   return {
     id: r.id,
@@ -333,11 +335,13 @@ export const updateWorkLogById = async (req: Request, res: Response) => {
   try {
     const [loc, perf] = await Promise.all([
       currentLocation
-          ? prisma.currentLocation.findUnique({ where: { name: currentLocation } })
-          : Promise.resolve(null),
+        ? prisma.currentLocation.findUnique({
+            where: { name: currentLocation },
+          })
+        : Promise.resolve(null),
       performer
-          ? prisma.performer.findUnique({ where: { name: performer } })
-          : Promise.resolve(null),
+        ? prisma.performer.findUnique({ where: { name: performer } })
+        : Promise.resolve(null),
     ]);
 
     const updated = await prisma.request.update({

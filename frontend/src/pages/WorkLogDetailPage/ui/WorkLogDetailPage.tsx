@@ -94,9 +94,9 @@ export const WorkLogDetailPage: React.FC = () => {
     const items: PhotoItem[] = [];
 
     // 1) Общее фото заявки
-    if (entry.photo) {
-      items.push({ label: 'Фото заявки', url: `${base}/${entry.photo}` });
-    }
+    // if (entry.photo) {
+    //   items.push({ label: 'Фото заявки', url: `${base}/${entry.photo}` });
+    // }
 
     // 2) Фото вагонов
     entry.carriages.forEach((c, index) => {
@@ -104,6 +104,15 @@ export const WorkLogDetailPage: React.FC = () => {
         items.push({
           label: 'Фото вагона',
           url: `${base}/${c.photo}`,
+          carriageNumber: entry.carriages[index].number,
+        });
+      }
+    });
+    entry.carriages.forEach((c, index) => {
+      if (c.photo) {
+        items.push({
+          label: 'Фото оборудования в вагоне',
+          url: `${base}/${c.generalPhotoEquipmentCarriage}`,
           carriageNumber: entry.carriages[index].number,
         });
       }
@@ -200,7 +209,7 @@ export const WorkLogDetailPage: React.FC = () => {
 
     try {
       const response = await workLogApi.updateWorkLogById(parseInt(id), editedWorkLog);
-
+      
       if (response.success) {
         setWorkLog(response.data);
         setEditedWorkLog(response.data);
@@ -220,7 +229,7 @@ export const WorkLogDetailPage: React.FC = () => {
   };
 
   const getStatusIcon = (entry: WorkLogEntry) => {
-    if (entry.completedJob && entry.completedJob.trim() !== '') {
+    if (entry.status && entry.status.trim() !== '') {
       return <CheckCircleIcon sx={{ color: '#4caf50' }} />;
     }
     return <AccessTimeIcon sx={{ color: '#ff9800' }} />;
@@ -234,7 +243,7 @@ export const WorkLogDetailPage: React.FC = () => {
   };
 
   const getStatusColor = (entry: WorkLogEntry) => {
-    if (entry.completedJob && entry.completedJob.trim() !== '') {
+    if (entry.status && entry.status.trim() !== '') {
       return 'success';
     }
     return 'warning';
@@ -527,8 +536,9 @@ export const WorkLogDetailPage: React.FC = () => {
                               <Typography variant="subtitle2" color="textSecondary" mb={2}>
                                 Фотографии:
                               </Typography>
+
                               {photos.map(({ label, url, carriageNumber }, index) =>
-                                item.number === carriageNumber && label === 'Фото вагона' ? (
+                                (item.number === carriageNumber && (label === 'Фото вагона' || label === "Фото оборудования в вагоне") )? (
                                   <Grid size={{ xs: 12, sm: 12, md: 6 }} key={index}>
                                     <Card
                                       className="photo-card"
@@ -658,44 +668,7 @@ export const WorkLogDetailPage: React.FC = () => {
                   Общее количество оборудования: {workLog.countEquipment} ед.
                 </Typography>
               </Box>
-              <Box>
-                <Typography variant="subtitle2" color="textSecondary" mb={2}>
-                  Фото заявки:
-                </Typography>
-
-                {photos.map(({ label, url }, index) =>
-                  label === 'Фото заявки' ? (
-                    <Grid size={{ xs: 12, sm: 12, md: 6 }} sx={{mb:4}} key={index}>
-                      <Card
-                        className="photo-card"
-                        onClick={() =>
-                          handlePhotoClick(
-                            typeof url === 'string'
-                              ? getFullPhotoUrl(url)
-                              : getFullPhotoUrl(url[0]),
-                          )
-                        }
-                        sx={{ cursor: 'pointer' }}
-                      >
-                        <CardMedia
-                          component="img"
-                          height="120"
-                          image={getFullPhotoUrl(Array.isArray(url) ? url[0] : url)}
-                          alt={label}
-                          sx={{ objectFit: 'cover' }}
-                        />
-                        <CardContent sx={{ p: 1 }}>
-                          <Typography variant="caption" color="textSecondary">
-                            {label}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ) : (
-                    <></>
-                  ),
-                )}
-              </Box>
+             
               <Grid size={{ xs: 12 }}>
                 <Box className="info-item">
                   <Typography variant="subtitle2" color="textSecondary">
