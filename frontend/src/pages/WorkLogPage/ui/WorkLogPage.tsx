@@ -90,8 +90,16 @@ export const WorkLogPage = () => {
         setLoading(true);
         const response = await workLogApi.getWorkLog();
         if (response.success) {
-          setWorkLogEntries(response.data.filter(item => item.status === 'completed') as unknown as WorkLogEntry[]);
-          setFilteredEntries(response.data.filter(item => item.status === 'completed') as unknown as WorkLogEntry[]);
+          setWorkLogEntries(
+            response.data.filter(
+              (item) => item.status === 'completed',
+            ) as unknown as WorkLogEntry[],
+          );
+          setFilteredEntries(
+            response.data.filter(
+              (item) => item.status === 'completed',
+            ) as unknown as WorkLogEntry[],
+          );
         } else {
           setError('Ошибка при загрузке журнала работ');
         }
@@ -652,7 +660,7 @@ export const WorkLogPage = () => {
         });
       }
     });
-   entry.carriages.forEach((c) => {
+    entry.carriages.forEach((c) => {
       if (c.photo) {
         items.push({
           label: 'Фото оборудования в вагоне',
@@ -720,8 +728,17 @@ export const WorkLogPage = () => {
           <Box display="flex" alignItems="center" mb={1}>
             <TrainIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
             <Typography variant="body2" color="text.secondary">
-              Поезд {entry.trainNumbers[0]}, Вагоны{' '}
-              {entry.carriages.map((item) => item.number).join(', ')}
+              Поезд{entry.trainNumbers.length > 1 ? 'a' : ''}{' '}
+              {entry.trainNumbers.length > 2
+                ? entry.trainNumbers.slice(0, 2).join(', ') + '...'
+                : entry.trainNumbers.join(', ')}
+              , Вагон{entry.carriages.length > 1 ? 'ы' : ''}{' '}
+              {entry.carriages.length > 3
+                ? entry.carriages
+                    .map((item) => item.number)
+                    .slice(0, 3)
+                    .join(', ') + '...'
+                : entry.carriages.map((item) => item.number)}
             </Typography>
           </Box>
 
@@ -786,7 +803,7 @@ export const WorkLogPage = () => {
               onChange={(e) => handleDownloadWord(entry, e.target.value as string)}
             >
               <MenuItem value="Скачать">Скачать</MenuItem>
-              {(entry.equipmentTypes.some((item) => item === 'Демонтаж')) && (
+              {entry.equipmentTypes.some((item) => item === 'Демонтаж') && (
                 <MenuItem value="Акт демонтажа">Акт демонтажа</MenuItem>
               )}
               {entry.equipmentTypes.some((item) => item === 'Монтаж') && (
@@ -802,124 +819,135 @@ export const WorkLogPage = () => {
   );
 
   const renderWorkLogList = (entry: WorkLogEntry) => (
-      <Paper
-          key={entry.id}
-          elevation={2}
-          sx={{
-            mb: 2,
-            p: 2,
-            overflow: 'hidden',
-            transition: 'all 0.3s ease',
-            '&:hover': { boxShadow: 4, transform: 'translateX(4px)' },
-          }}
+    <Paper
+      key={entry.id}
+      elevation={2}
+      sx={{
+        mb: 2,
+        p: 2,
+        overflow: 'hidden',
+        transition: 'all 0.3s ease',
+        '&:hover': { boxShadow: 4, transform: 'translateX(4px)' },
+      }}
+    >
+      <Box
+        sx={{
+          display: 'grid',
+          // одна строка на md+, аккуратные колонки; на xs — стопка
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: '1fr 1fr',
+            md: '120px 1.6fr 1.2fr 1.6fr 1.2fr auto',
+          },
+          columnGap: 2,
+          rowGap: { xs: 1, sm: 1, md: 0 },
+          alignItems: 'center',
+        }}
       >
-        <Box
-            sx={{
-              display: 'grid',
-              // одна строка на md+, аккуратные колонки; на xs — стопка
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: '1fr 1fr',
-                md: '120px 1.6fr 1.2fr 1.6fr 1.2fr auto',
-              },
-              columnGap: 2,
-              rowGap: { xs: 1, sm: 1, md: 0 },
-              alignItems: 'center',
-            }}
-        >
-          {/* # и статус */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-            <Chip label={`#${entry.id}`} color="primary" size="small" sx={{ fontWeight: 700 }} />
-            <Chip label={getStatusText(entry)} color={getStatusColor(entry)} size="small" />
-          </Box>
-
-          {/* Поезд и вагоны */}
-          <Box sx={{ minWidth: 0 }}>
-            <Typography
-                variant="body2"
-                color="text.secondary"
-                noWrap
-                title={`Поезд ${entry.trainNumbers[0]}, Вагоны ${entry.carriages.map(c => c.number).join(', ')}`}
-            >
-              Поезд {entry.trainNumbers[0]}, Вагоны {entry.carriages.map(c => c.number).join(', ')}
-            </Typography>
-          </Box>
-
-          {/* Локация и дата */}
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="body2" color="text.secondary" noWrap title={entry.currentLocation || 'Не указано'}>
-              <LocationOnIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-              {entry.currentLocation || 'Не указано'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap title={formatDate(entry.createdAt)}>
-              <CalendarTodayIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-              {formatDate(entry.createdAt)}
-            </Typography>
-          </Box>
-
-          {/* Оборудование / исполнитель */}
-          <Box sx={{ minWidth: 0 }}>
-            {!!entry.equipmentDetails?.length && (
-                <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    noWrap
-                    title={entry.equipmentDetails.map(i => i.name).join(', ')}
-                >
-                  <BuildIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-                  {entry.equipmentDetails.map(i => i.name).join(', ')}
-                </Typography>
-            )}
-            {entry.completedJob && (
-                <Typography variant="body2" color="text.secondary" noWrap title={entry.completedJob}>
-                  <PersonIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-                  {entry.completedJob}
-                </Typography>
-            )}
-          </Box>
-
-          {/* Прогресс */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-            <LinearProgress
-                variant="determinate"
-                value={getProgressValue(entry)}
-                sx={{ flexGrow: 1, height: 6, borderRadius: 3, minWidth: 80 }}
-            />
-            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
-              {getProgressValue(entry)}%
-            </Typography>
-          </Box>
-
-          {/* Действия */}
-          <Box sx={{ display: 'flex', justifySelf: { md: 'end' }, gap: 1, flexWrap: 'nowrap' }}>
-            <Tooltip title="Фото">
-          <span>
-            <IconButton size="small" onClick={() => handleViewPhotos(entry)}>
-              <PhotoIcon fontSize="small" />
-            </IconButton>
-          </span>
-            </Tooltip>
-
-            <Button size="small" variant="outlined" onClick={() => navigate(`/work-log/${entry.id}`)}>
-              Подробнее
-            </Button>
-
-            <Select
-              value="Скачать"
-              onChange={(e) => handleDownloadWord(entry, e.target.value as string)}
-              size="small"
-              sx={{ minWidth: 160 }}
-            >
-              <MenuItem value="Заявка">Заявка</MenuItem>
-              <MenuItem value="Акт демонтажа">Акт демонтажа</MenuItem>
-              <MenuItem value="Акт монтажа">Акт монтажа</MenuItem>
-              <MenuItem value="Технический акт">Технический акт</MenuItem>
-            </Select>
-          </Box>
+        {/* # и статус */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+          <Chip label={`#${entry.id}`} color="primary" size="small" sx={{ fontWeight: 700 }} />
+          <Chip label={getStatusText(entry)} color={getStatusColor(entry)} size="small" />
         </Box>
-      </Paper>
-  );
 
+        {/* Поезд и вагоны */}
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            noWrap
+            title={`Поезд ${entry.trainNumbers[0]}, Вагоны ${entry.carriages
+              .map((c) => c.number)
+              .join(', ')}`}
+          >
+            Поезд {entry.trainNumbers[0]}, Вагоны {entry.carriages.map((c) => c.number).join(', ')}
+          </Typography>
+        </Box>
+
+        {/* Локация и дата */}
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            noWrap
+            title={entry.currentLocation || 'Не указано'}
+          >
+            <LocationOnIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+            {entry.currentLocation || 'Не указано'}
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            noWrap
+            title={formatDate(entry.createdAt)}
+          >
+            <CalendarTodayIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+            {formatDate(entry.createdAt)}
+          </Typography>
+        </Box>
+
+        {/* Оборудование / исполнитель */}
+        <Box sx={{ minWidth: 0 }}>
+          {!!entry.equipmentDetails?.length && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              noWrap
+              title={entry.equipmentDetails.map((i) => i.name).join(', ')}
+            >
+              <BuildIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+              {entry.equipmentDetails.map((i) => i.name).join(', ')}
+            </Typography>
+          )}
+          {entry.completedJob && (
+            <Typography variant="body2" color="text.secondary" noWrap title={entry.completedJob}>
+              <PersonIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+              {entry.completedJob}
+            </Typography>
+          )}
+        </Box>
+
+        {/* Прогресс */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+          <LinearProgress
+            variant="determinate"
+            value={getProgressValue(entry)}
+            sx={{ flexGrow: 1, height: 6, borderRadius: 3, minWidth: 80 }}
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+            {getProgressValue(entry)}%
+          </Typography>
+        </Box>
+
+        {/* Действия */}
+        <Box sx={{ display: 'flex', justifySelf: { md: 'end' }, gap: 1, flexWrap: 'nowrap' }}>
+          <Tooltip title="Фото">
+            <span>
+              <IconButton size="small" onClick={() => handleViewPhotos(entry)}>
+                <PhotoIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Button size="small" variant="outlined" onClick={() => navigate(`/work-log/${entry.id}`)}>
+            Подробнее
+          </Button>
+
+          <Select
+            value="Скачать"
+            onChange={(e) => handleDownloadWord(entry, e.target.value as string)}
+            size="small"
+            sx={{ minWidth: 160 }}
+          >
+            <MenuItem value="Заявка">Заявка</MenuItem>
+            <MenuItem value="Акт демонтажа">Акт демонтажа</MenuItem>
+            <MenuItem value="Акт монтажа">Акт монтажа</MenuItem>
+            <MenuItem value="Технический акт">Технический акт</MenuItem>
+          </Select>
+        </Box>
+      </Box>
+    </Paper>
+  );
 
   if (loading) {
     return (
@@ -970,7 +998,7 @@ export const WorkLogPage = () => {
               },
             }}
           >
-            <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={0}>
               <Box display="flex" alignItems="center">
                 <Button
                   startIcon={<ArrowBackIcon />}
@@ -1067,50 +1095,6 @@ export const WorkLogPage = () => {
                 </Tooltip>
               </Box>
             </Box>
-
-            {/* Статистические карточки */}
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 3, sm: 3 }}>
-                <Box textAlign="center">
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {stats.total}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                    Всего заявок
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid size={{ xs: 3, sm: 3 }}>
-                <Box textAlign="center">
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#4caf50' }}>
-                    {stats.completed}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                    Завершено
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid size={{ xs: 3, sm: 3 }}>
-                <Box textAlign="center">
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#ff9800' }}>
-                    {stats.inProgress}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                    В работе
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid size={{ xs: 3, sm: 3 }}>
-                <Box textAlign="center">
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#2196f3' }}>
-                    {stats.started}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                    Начато
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
           </Box>
         </Paper>
 
