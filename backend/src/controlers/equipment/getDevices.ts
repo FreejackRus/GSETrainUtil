@@ -6,13 +6,23 @@ const prisma = new PrismaClient();
 export const getDevices = async (_req: Request, res: Response) => {
   try {
     const equipments = await prisma.equipment.findMany({
+      where: {
+        requestEquipments: {
+          some: {
+            request: { status: "completed" },
+          },
+        },
+      },
       include: {
-        carriage: {
+        carriage: true,
+        requestEquipments: {
           include: {
-            // Carriage -> RequestCarriage -> RequestTrain -> Train
-            requestCarriages: {
+            request: true,
+            requestCarriage: {
               include: {
-                requestTrain: { include: { train: true, request: true } },
+                requestTrain: {
+                  include: { train: true },
+                },
               },
             },
           },
@@ -20,36 +30,31 @@ export const getDevices = async (_req: Request, res: Response) => {
       },
     });
 
-    const devices = equipments
-      .map((e) => {
-        const completedRC =
-          e.carriage?.requestCarriages.filter(
-            (rc) => rc.requestTrain.request.status === "completed"
-          ) ?? [];
+    const devices = equipments.map((e) => {
+      // берём только заявки completed
+      const completedRE = e.requestEquipments.filter(
+        (re) => re.request.status === "completed"
+      );
 
-        if (completedRC.length === 0) return null;
+      const trainNums = completedRE
+        .map((re) => re.requestCarriage?.requestTrain?.train?.number)
+        .filter((n): n is string => Boolean(n));
+      const trainNumbers = Array.from(new Set(trainNums));
 
-        const trainNums =
-          completedRC
-            .map((rc) => rc.requestTrain?.train?.number)
-            .filter((n): n is string => Boolean(n)) ?? [];
-        const trainNumbers = Array.from(new Set(trainNums));
-
-        return {
-          id: e.id,
-          name: e.name,
-          snNumber: e.serialNumber ?? null,
-          mac: e.macAddress ?? null,
-          lastService: e.lastService ? e.lastService.toISOString() : null,
-          isActive: e.carriageId != null,
-          carriageType: e.carriage?.type ?? null,
-          carriageNumber: e.carriage?.number ?? null,
-          // для обратной совместимости
-          trainNumber: trainNumbers[0] ?? null,
-          trainNumbers,
-        };
-      })
-      .filter((d): d is NonNullable<typeof d> => d !== null);
+      return {
+        id: e.id,
+        name: e.name,
+        snNumber: e.serialNumber ?? null,
+        mac: e.macAddress ?? null,
+        lastService: e.lastService ? e.lastService.toISOString() : null,
+        isActive: e.carriageId != null,
+        carriageType: e.carriage?.type ?? null,
+        carriageNumber: e.carriage?.number ?? null,
+        // для обратной совместимости
+        trainNumber: trainNumbers[0] ?? null,
+        trainNumbers,
+      };
+    });
 
     return res.status(200).json({ success: true, data: devices });
   } catch (error) {

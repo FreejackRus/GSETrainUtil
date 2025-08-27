@@ -355,7 +355,8 @@ export const createApplication = async (req: Request, res: Response) => {
           const isDraft = request.status === "draft";
 
           // Флаг: нужно ли привязывать оборудование к вагону
-          const shouldLinkCarriage = !isDraft && e.typeWork === "Монтаж";
+          const shouldLinkCarriage =
+            !isDraft && (e.typeWork === "Монтаж" || e.typeWork === "монтаж");
 
           if (!eqRec) {
             // создаём новую запись
@@ -377,7 +378,9 @@ export const createApplication = async (req: Request, res: Response) => {
                 serialNumber: e.serialNumber,
                 macAddress: e.macAddress,
                 lastService: new Date(),
-                carriageId: shouldLinkCarriage ? carriage.id : null,
+                ...(isDraft
+                  ? {}
+                  : { carriageId: shouldLinkCarriage ? carriage.id : null }),
               },
             });
           }
