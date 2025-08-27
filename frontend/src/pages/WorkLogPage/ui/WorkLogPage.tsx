@@ -51,10 +51,7 @@ import { workLogApi } from '../../../entities/worklog';
 // import type { WorkLogEntry } from '../../../entities/application/model/types';
 import './WorkLogPage.css';
 import { apiClient } from '../../../shared';
-import {
-  formatRussianDate,
-  formatRussianDateDocument,
-} from '../../../shared/transformation/stringTransform';
+import { formatRussianDateDocument } from '../../../shared/transformation/stringTransform';
 import type { WorkLogEntry } from '../../../entities/worklog/model/types';
 
 type SortField = keyof WorkLogEntry | 'none';
@@ -727,18 +724,21 @@ export const WorkLogPage = () => {
           </Box>
           <Box display="flex" alignItems="center" mb={1}>
             <TrainIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-            <Typography variant="body2" color="text.secondary">
-              Поезд{entry.trainNumbers.length > 1 ? 'a' : ''}{' '}
-              {entry.trainNumbers.length > 2
-                ? entry.trainNumbers.slice(0, 2).join(', ') + '...'
-                : entry.trainNumbers.join(', ')}
-              , Вагон{entry.carriages.length > 1 ? 'ы' : ''}{' '}
-              {entry.carriages.length > 3
-                ? entry.carriages
-                    .map((item) => item.number)
-                    .slice(0, 3)
-                    .join(', ') + '...'
-                : entry.carriages.map((item) => item.number)}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 1,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              Поезд{entry.trainNumbers.length > 1 ? 'a' : ''}: {entry.trainNumbers.join(', ')},
+              Вагон
+              {entry.carriages.length > 1 ? 'ы' : ''}:{' '}
+              {entry.carriages.map((item) => item.number).join(', ')}
             </Typography>
           </Box>
 

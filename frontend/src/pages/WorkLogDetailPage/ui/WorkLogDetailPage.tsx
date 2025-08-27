@@ -335,23 +335,21 @@ export const WorkLogDetailPage: React.FC = () => {
                   fontSize: {
                     xs: '0.8rem',
                     sm: '1rem',
+                    display: '-webkit-box',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                   },
                 }}
               >
                 {/* {workLog.typeWork} • {workLog.trainNumber} • Вагон {workLog.carriageNumber} */}
                 {/* Поезда{' '} • {workLog.trainNumbers.join(', ')} • Вагон{' '}
                 {workLog.carriages.map((item) => item.number).join(', ')} */}
-                Поезд{workLog.trainNumbers.length > 1 ? 'a' : ''}{' '}
-                {workLog.trainNumbers.length > 2
-                  ? workLog.trainNumbers.slice(0, 2).join(', ') + '...'
-                  : workLog.trainNumbers.join(', ')}
-                , Вагон{workLog.carriages.length > 1 ? 'ы' : ''}{' '}
-                {workLog.carriages.length > 3
-                  ? workLog.carriages
-                      .map((item) => item.number)
-                      .slice(0, 3)
-                      .join(', ') + '...'
-                  : workLog.carriages.map((item) => item.number)}
+                Поезд{workLog.trainNumbers.length > 1 ? 'a' : ''}: {workLog.trainNumbers.join(', ')}
+                , Вагон
+                {workLog.carriages.length > 1 ? 'ы' : ''}:{' '}
+                {workLog.carriages.map((item) => item.number).join(', ')}
               </Typography>
             </Box>
           </Box>
