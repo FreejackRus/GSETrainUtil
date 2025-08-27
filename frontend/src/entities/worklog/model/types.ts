@@ -41,7 +41,7 @@ export interface WorkLogEntry {
   createdAt: string;
   updatedAt: string;
   // applicationNumber: number;
-  // applicationDate: string;
+  applicationDate: string;
   // typeWork: string;
   // trainNumber: string;
   // carriageType: string;

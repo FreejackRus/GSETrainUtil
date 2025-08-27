@@ -209,7 +209,7 @@ export const WorkLogDetailPage: React.FC = () => {
 
     try {
       const response = await workLogApi.updateWorkLogById(parseInt(id), editedWorkLog);
-      
+
       if (response.success) {
         setWorkLog(response.data);
         setEditedWorkLog(response.data);
@@ -335,11 +335,20 @@ export const WorkLogDetailPage: React.FC = () => {
                   fontSize: {
                     xs: '0.8rem',
                     sm: '1rem',
+                    display: '-webkit-box',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                   },
                 }}
               >
                 {/* {workLog.typeWork} • {workLog.trainNumber} • Вагон {workLog.carriageNumber} */}
-                {workLog.trainNumbers.join(', ')} • Вагон{' '}
+                {/* Поезда{' '} • {workLog.trainNumbers.join(', ')} • Вагон{' '}
+                {workLog.carriages.map((item) => item.number).join(', ')} */}
+                Поезд{workLog.trainNumbers.length > 1 ? 'a' : ''}: {workLog.trainNumbers.join(', ')}
+                , Вагон
+                {workLog.carriages.length > 1 ? 'ы' : ''}:{' '}
                 {workLog.carriages.map((item) => item.number).join(', ')}
               </Typography>
             </Box>
@@ -538,7 +547,9 @@ export const WorkLogDetailPage: React.FC = () => {
                               </Typography>
 
                               {photos.map(({ label, url, carriageNumber }, index) =>
-                                (item.number === carriageNumber && (label === 'Фото вагона' || label === "Фото оборудования в вагоне") )? (
+                                item.number === carriageNumber &&
+                                (label === 'Фото вагона' ||
+                                  label === 'Фото оборудования в вагоне') ? (
                                   <Grid size={{ xs: 12, sm: 12, md: 6 }} key={index}>
                                     <Card
                                       className="photo-card"
@@ -658,7 +669,7 @@ export const WorkLogDetailPage: React.FC = () => {
               <Box
                 sx={{
                   mt: 2,
-                  mb: 4,
+                  mb: 0,
                   p: 2,
                   bgcolor: '#f5f5f5',
                   borderRadius: 1,
@@ -668,8 +679,8 @@ export const WorkLogDetailPage: React.FC = () => {
                   Общее количество оборудования: {workLog.countEquipment} ед.
                 </Typography>
               </Box>
-             
-              <Grid size={{ xs: 12 }}>
+
+              {/* <Grid size={{ xs: 12 }}>
                 <Box className="info-item">
                   <Typography variant="subtitle2" color="textSecondary">
                     Выполненная работа
@@ -693,7 +704,7 @@ export const WorkLogDetailPage: React.FC = () => {
                     </Typography>
                   )}
                 </Box>
-              </Grid>
+              </Grid> */}
             </Box>
           </Paper>
         </Grid>
