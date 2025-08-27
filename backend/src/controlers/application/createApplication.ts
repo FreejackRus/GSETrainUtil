@@ -352,11 +352,11 @@ export const createApplication = async (req: Request, res: Response) => {
               where: { macAddress: e.macAddress },
             });
           }
-          const isDraft = request.status === "draft";
+          const isDraft = request.status === RequestStatus.draft;
 
           // Флаг: нужно ли привязывать оборудование к вагону
           const shouldLinkCarriage =
-            !isDraft && (e.typeWork === "Монтаж" || e.typeWork === "монтаж");
+            !isDraft && e.typeWork.toLowerCase() === "монтаж";
 
           if (!eqRec) {
             // создаём новую запись
@@ -371,18 +371,26 @@ export const createApplication = async (req: Request, res: Response) => {
             });
           } else {
             // обновляем существующую запись
-            eqRec = await prisma.equipment.update({
-              where: { id: eqRec.id },
-              data: {
-                name: e.equipmentName,
-                serialNumber: e.serialNumber,
-                macAddress: e.macAddress,
-                lastService: new Date(),
-                ...(isDraft
-                  ? {}
-                  : { carriageId: shouldLinkCarriage ? carriage.id : null }),
-              },
-            });
+            if (
+              eqRec.name !== e.equipmentName ||
+              eqRec.serialNumber !== e.serialNumber ||
+              eqRec.macAddress !== e.macAddress
+            ) {
+              eqRec = await prisma.equipment.update({
+                where: { id: eqRec.id },
+                data: {
+                  name: e.equipmentName,
+                  serialNumber: e.serialNumber,
+                  macAddress: e.macAddress,
+                  ...(isDraft
+                    ? {}
+                    : {
+                        carriageId: shouldLinkCarriage ? carriage.id : null,
+                        lastService: new Date(),
+                      }),
+                },
+              });
+            }
           }
 
           const reqEq = await prisma.requestEquipment.create({

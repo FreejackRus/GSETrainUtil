@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, RequestStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export const getCarriages = async (_req: Request, res: Response) => {
+  const { needAll = false } = _req.body;
+
   try {
     const carriagesData = await prisma.carriage.findMany({
       include: {
@@ -20,9 +22,11 @@ export const getCarriages = async (_req: Request, res: Response) => {
 
     const carriages = carriagesData
       .map((carriage) => {
-        const completedRC = carriage.requestCarriages.filter(
-          (rc) => rc.requestTrain.request.status === "completed"
-        );
+        const completedRC = needAll
+          ? carriage.requestCarriages
+          : carriage.requestCarriages.filter(
+              (rc) => rc.requestTrain.request.status === RequestStatus.completed
+            );
 
         if (completedRC.length === 0) return null;
 

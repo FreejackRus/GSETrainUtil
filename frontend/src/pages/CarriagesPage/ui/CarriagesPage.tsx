@@ -212,16 +212,17 @@ export const CarriagesPage = () => {
     return new Date(dateString).toLocaleDateString('ru-RU');
   };
 
-  const getCarriageChip = (carriages: Carriage) => {
-    const status = getCarriageStatus(carriages);
-    if (status === 'installed') {
-      return <Chip label="Полностью установлено" color="success" size="small" />;
-    } else if (status === 'partial') {
-      return <Chip label="Частично установлено" color="warning" size="small" />;
-    } else if (status === 'not_installed') {
-      return <Chip label="Не установлено" color="error" size="small" />;
-    } else {
-      return null;
+  const getCarriageChip = (carriage: Carriage) => {
+    const status = getCarriageStatus(carriage);
+    switch (status) {
+      case 'installed':
+        return <Chip label="Полностью установлено" color="success" size="small" />;
+      case 'partial':
+        return <Chip label="Частично установлено" color="warning" size="small" />;
+      case 'not_installed':
+        return <Chip label="Не установлено" color="error" size="small" />;
+      default:
+        return null;
     }
   };
 

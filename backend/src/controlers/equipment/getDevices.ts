@@ -4,6 +4,8 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getDevices = async (_req: Request, res: Response) => {
+  const { needAll = false } = _req.body;
+
   try {
     const equipments = await prisma.equipment.findMany({
       where: {
@@ -32,9 +34,9 @@ export const getDevices = async (_req: Request, res: Response) => {
 
     const devices = equipments.map((e) => {
       // берём только заявки completed
-      const completedRE = e.requestEquipments.filter(
-        (re) => re.request.status === "completed"
-      );
+      const completedRE = needAll
+        ? e.requestEquipments
+        : e.requestEquipments.filter((re) => re.request.status === "completed");
 
       const trainNums = completedRE
         .map((re) => re.requestCarriage?.requestTrain?.train?.number)
