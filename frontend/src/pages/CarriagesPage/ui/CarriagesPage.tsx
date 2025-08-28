@@ -60,6 +60,7 @@ interface Carriage {
 }
 
 export const CarriagesPage = () => {
+  const amountEquipDeterminesMountСarriage = 6
   const navigate = useNavigate();
   const [carriages, setCarriages] = useState<Carriage[]>([]);
   const [equipments, setEquipments] = useState<Device[]>([]);
@@ -98,32 +99,47 @@ export const CarriagesPage = () => {
     fetchCarriages();
   }, []);
 
-  // Вспомогательные функции (объявляем до useEffect)
-  const isEquipmentInstalled = useCallback((status: string): boolean => {
-    if (!status) return false;
-    const installedStatuses = ['installed', 'установлено', 'active', 'активен', 'ok'];
-    return installedStatuses.includes(status.toLowerCase());
-  }, []);
+  // // Вспомогательные функции (объявляем до useEffect)
+  // const isEquipmentInstalled = useCallback((status: string): boolean => {
+  //   if (!status) return false;
+  //   const installedStatuses = ['installed', 'установлено', 'active', 'активен', 'ok'];
+  //   return installedStatuses.includes(status.toLowerCase());
+  // }, []);
 
+  // // Получаем статус вагона на основе статуса оборудования
+  // const getCarriageStatus = useCallback(
+  //   (carriage: Carriage): 'installed' | 'not_installed' | 'partial' => {
+  //     if (!carriage.equipment || carriage.equipment.length === 0) {
+  //       return 'not_installed';
+  //     }
+
+  //     // const installedEquipment = carriage.equipment.filter((eq) => isEquipmentInstalled(eq.status));
+  //     const installedEquipment: string[] = [];
+
+  //     if (installedEquipment.length === 0) {
+  //       return 'not_installed';
+  //     } else if (installedEquipment.length === carriage.equipment.length) {
+  //       return 'installed';
+  //     } else {
+  //       return 'partial';
+  //     }
+  //   },
+  //   [isEquipmentInstalled],
+  // );
   // Получаем статус вагона на основе статуса оборудования
   const getCarriageStatus = useCallback(
     (carriage: Carriage): 'installed' | 'not_installed' | 'partial' => {
-      if (!carriage.equipment || carriage.equipment.length === 0) {
-        return 'not_installed';
-      }
+      const count = carriage.equipment.length;
 
-      // const installedEquipment = carriage.equipment.filter((eq) => isEquipmentInstalled(eq.status));
-      const installedEquipment: string[] = [];
-
-      if (installedEquipment.length === 0) {
+      if (count === 0) {
         return 'not_installed';
-      } else if (installedEquipment.length === carriage.equipment.length) {
+      } else if (count >= amountEquipDeterminesMountСarriage) {
         return 'installed';
       } else {
         return 'partial';
       }
     },
-    [isEquipmentInstalled],
+    [],
   );
 
   // Фильтрация и поиск
@@ -147,6 +163,9 @@ export const CarriagesPage = () => {
           carriage.carriageNumber &&
           carriage.carriageNumber.toLowerCase().includes(searchLower)
         ) {
+          return true;
+        }
+        if (carriage.trainNumber && carriage.trainNumber.toLowerCase().includes(searchLower)) {
           return true;
         }
 
@@ -192,6 +211,20 @@ export const CarriagesPage = () => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU');
+  };
+
+  const getCarriageChip = (carriage: Carriage) => {
+    const status = getCarriageStatus(carriage);
+    switch (status) {
+      case 'installed':
+        return <Chip label="Полностью установлено" color="success" size="small" />;
+      case 'partial':
+        return <Chip label="Частично установлено" color="warning" size="small" />;
+      case 'not_installed':
+        return <Chip label="Не установлено" color="error" size="small" />;
+      default:
+        return null;
+    }
   };
 
   if (loading) {
@@ -373,19 +406,32 @@ export const CarriagesPage = () => {
                 expandIcon={<ExpandMoreIcon />}
                 className="carriages-page__accordion-summary"
               >
-                <Box display="flex" alignItems="center" gap={2} width="100%">
-                  <Avatar
-                    sx={{
-                      backgroundColor: 'primary.main',
-                    }}
-                  >
-                    <TrainIcon />
-                  </Avatar>
-                  <Box flex={1}>
-                    <Typography variant="h6">Вагон № {carriage.carriageNumber}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Тип: {carriage.carriageType} • Оборудования: {carriage.equipment.length}
-                    </Typography>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent={'space-between'}
+                  gap={2}
+                  width="100%"
+                >
+                  <Box display="flex" flexDirection={'column'} gap={2}>
+                    <Box>{getCarriageChip(carriage)}</Box>
+                    <Box display="flex" gap={2}>
+                      <Avatar
+                        sx={{
+                          backgroundColor: 'primary.main',
+                        }}
+                      >
+                        <TrainIcon />
+                      </Avatar>
+
+                      <Box flex={1}>
+                        <Typography variant="h6">Вагон № {carriage.carriageNumber}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Поезд: {carriage.trainNumber} • Тип: {carriage.carriageType} •
+                          Оборудования: {carriage.equipment.length}
+                        </Typography>
+                      </Box>
+                    </Box>
                   </Box>
                   <Box display="flex" flexWrap={'wrap'} gap={1}>
                     <Chip label={`${carriage.equipment.length} ед.`} color="primary" size="small" />

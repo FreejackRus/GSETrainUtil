@@ -119,8 +119,14 @@ export const createApplication = async (req: Request, res: Response) => {
     };
 
     // 3) Разбор файлов (пишем в каталоги из config/uploads)
-    const carriagePhotosMap: Record<string, Partial<Record<"carriage" | "equipment", string>>> = {};
-    const equipmentPhotosMap: Record<string, Partial<Record<EquipmentPhotoType, string>>> = {};
+    const carriagePhotosMap: Record<
+      string,
+      Partial<Record<"carriage" | "equipment", string>>
+    > = {};
+    const equipmentPhotosMap: Record<
+      string,
+      Partial<Record<EquipmentPhotoType, string>>
+    > = {};
 
     const files = (req.files as Express.Multer.File[]) || [];
     for (const file of files) {
@@ -128,7 +134,7 @@ export const createApplication = async (req: Request, res: Response) => {
 
       // --- фото вагонов ---
       const mCar = file.fieldname.match(
-          /^(requestTrains|trains)\[(\d+)\]\[carriages\]\[(\d+)\]\[carriagePhotos\]\[(carriage|equipment)\]$/
+        /^(requestTrains|trains)\[(\d+)\]\[carriages\]\[(\d+)\]\[carriagePhotos\]\[(carriage|equipment)\]$/
       );
       if (mCar) {
         const t = Number(mCar[2]);
@@ -138,7 +144,11 @@ export const createApplication = async (req: Request, res: Response) => {
         const absDir = safeJoinUpload(CARRIAGE_DIR, kind);
         await fs.mkdir(absDir, { recursive: true });
 
-        const { fullPath, relPath } = await generateUniqueFilename(absDir, ext, "carriage");
+        const { fullPath, relPath } = await generateUniqueFilename(
+          absDir,
+          ext,
+          "carriage"
+        );
         await fs.writeFile(fullPath, file.buffer);
         cleanupPaths.push(fullPath);
 
@@ -150,7 +160,7 @@ export const createApplication = async (req: Request, res: Response) => {
 
       // --- фото оборудования ---
       const mEq = file.fieldname.match(
-          /^(requestTrains|trains)\[(\d+)\]\[carriages\]\[(\d+)\]\[equipments\]\[(\d+)\]\[photos\]\[(\w+)\]$/
+        /^(requestTrains|trains)\[(\d+)\]\[carriages\]\[(\d+)\]\[equipments\]\[(\d+)\]\[photos\]\[(\w+)\]$/
       );
       if (mEq) {
         const t = Number(mEq[2]);
@@ -168,7 +178,11 @@ export const createApplication = async (req: Request, res: Response) => {
         const absDir = safeJoinUpload(EQUIP_DIR, rawKey);
         await fs.mkdir(absDir, { recursive: true });
 
-        const { fullPath, relPath } = await generateUniqueFilename(absDir, ext, "equipment");
+        const { fullPath, relPath } = await generateUniqueFilename(
+          absDir,
+          ext,
+          "equipment"
+        );
         await fs.writeFile(fullPath, file.buffer);
         cleanupPaths.push(fullPath);
 
@@ -327,6 +341,7 @@ export const createApplication = async (req: Request, res: Response) => {
           });
 
           let eqRec = null;
+
           if (e.serialNumber) {
             eqRec = await prisma.equipment.findUnique({
               where: { serialNumber: e.serialNumber },
@@ -337,12 +352,38 @@ export const createApplication = async (req: Request, res: Response) => {
               where: { macAddress: e.macAddress },
             });
           }
+
+          const isDraft = request.status === RequestStatus.draft;
+
+          // Флаг: нужно ли привязывать оборудование к вагону
+          const shouldLinkCarriage =
+            !isDraft && e.typeWork.toLowerCase() === "монтаж";
+
           if (!eqRec) {
+            // создаём новую запись
             eqRec = await prisma.equipment.create({
               data: {
                 name: e.equipmentName,
                 serialNumber: e.serialNumber,
                 macAddress: e.macAddress,
+                carriageId: shouldLinkCarriage ? carriage.id : null,
+                lastService: new Date(),
+              },
+            });
+          } else {
+            // обновляем существующую запись
+            eqRec = await prisma.equipment.update({
+              where: { id: eqRec.id },
+              data: {
+                name: e.equipmentName,
+                serialNumber: e.serialNumber,
+                macAddress: e.macAddress,
+                ...(isDraft
+                  ? {}
+                  : {
+                      carriageId: shouldLinkCarriage ? carriage.id : null,
+                      lastService: new Date(),
+                    }),
               },
             });
           }

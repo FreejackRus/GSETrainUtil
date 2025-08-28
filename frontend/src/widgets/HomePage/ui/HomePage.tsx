@@ -64,9 +64,9 @@ export const HomePage = () => {
     navigate('/work-log');
   };
 
-  const handleEquipmentLog = () =>{
+  const handleEquipmentLog = () => {
     navigate('/equipment-log');
-  }
+  };
   const handleRefresh = async () => {
     try {
       const response = await deviceApi.getDevices();
@@ -117,9 +117,12 @@ export const HomePage = () => {
 
           {/* Статистические карточки */}
           <Grid container spacing={{ xs: 2, md: 3 }} className="home-page__stats">
-
             <Grid size={{ xs: 12, sm: 12, md: 12 }}>
-              <Card elevation={4} className="home-page__stat-card home-page__stat-card--monitoring" onClick={handleEquipmentLog}>
+              <Card
+                elevation={4}
+                className="home-page__stat-card home-page__stat-card--monitoring"
+                onClick={handleEquipmentLog}
+              >
                 <CardContent className="home-page__stat-content">
                   <Avatar className="home-page__stat-avatar home-page__stat-avatar--monitoring">
                     <DevicesIcon sx={{ fontSize: 28 }} />
@@ -139,7 +142,11 @@ export const HomePage = () => {
               </Card>
             </Grid>
           </Grid>
+          <Grid container spacing={{ xs: 2, md: 3 }} className="home-page__stats">
 
+      
+
+          </Grid>
           {/* Основной контент */}
           <Paper elevation={4} className="home-page__content">
             <Box className="home-page__content-header">

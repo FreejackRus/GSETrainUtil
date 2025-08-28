@@ -1,18 +1,30 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, RequestStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export const getDevices = async (_req: Request, res: Response) => {
+  const { needAll = false } = _req.body || {};
+
   try {
     const equipments = await prisma.equipment.findMany({
+      where: {
+        requestEquipments: {
+          some: {
+            request: { status: RequestStatus.completed},
+          },
+        },
+      },
       include: {
-        carriage: {
+        carriage: true,
+        requestEquipments: {
           include: {
-            // Carriage -> RequestCarriage -> RequestTrain -> Train
-            requestCarriages: {
+            request: true,
+            requestCarriage: {
               include: {
-                requestTrain: { include: { train: true } },
+                requestTrain: {
+                  include: { train: true },
+                },
               },
             },
           },
@@ -21,10 +33,14 @@ export const getDevices = async (_req: Request, res: Response) => {
     });
 
     const devices = equipments.map((e) => {
-      const trainNums =
-          e.carriage?.requestCarriages
-              .map((rc) => rc.requestTrain?.train?.number)
-              .filter((n): n is string => Boolean(n)) ?? [];
+      // берём только заявки completed
+      const completedRE = needAll
+        ? e.requestEquipments
+        : e.requestEquipments.filter((re) => re.request.status === RequestStatus.completed);
+
+      const trainNums = completedRE
+        .map((re) => re.requestCarriage?.requestTrain?.train?.number)
+        .filter((n): n is string => Boolean(n));
       const trainNumbers = Array.from(new Set(trainNums));
 
       return {
