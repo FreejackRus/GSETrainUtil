@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getDevices = async (_req: Request, res: Response) => {
-  const { needAll = false } = _req.body;
+  const { needAll = false } = _req.body || {};
 
   try {
     const equipments = await prisma.equipment.findMany({

@@ -352,6 +352,7 @@ export const createApplication = async (req: Request, res: Response) => {
               where: { macAddress: e.macAddress },
             });
           }
+
           const isDraft = request.status === RequestStatus.draft;
 
           // Флаг: нужно ли привязывать оборудование к вагону
@@ -371,26 +372,20 @@ export const createApplication = async (req: Request, res: Response) => {
             });
           } else {
             // обновляем существующую запись
-            if (
-              eqRec.name !== e.equipmentName ||
-              eqRec.serialNumber !== e.serialNumber ||
-              eqRec.macAddress !== e.macAddress
-            ) {
-              eqRec = await prisma.equipment.update({
-                where: { id: eqRec.id },
-                data: {
-                  name: e.equipmentName,
-                  serialNumber: e.serialNumber,
-                  macAddress: e.macAddress,
-                  ...(isDraft
-                    ? {}
-                    : {
-                        carriageId: shouldLinkCarriage ? carriage.id : null,
-                        lastService: new Date(),
-                      }),
-                },
-              });
-            }
+            eqRec = await prisma.equipment.update({
+              where: { id: eqRec.id },
+              data: {
+                name: e.equipmentName,
+                serialNumber: e.serialNumber,
+                macAddress: e.macAddress,
+                ...(isDraft
+                  ? {}
+                  : {
+                      carriageId: shouldLinkCarriage ? carriage.id : null,
+                      lastService: new Date(),
+                    }),
+              },
+            });
           }
 
           const reqEq = await prisma.requestEquipment.create({

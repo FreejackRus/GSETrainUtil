@@ -25,7 +25,7 @@ interface CarriageWithEquipment {
   type: string;
   train: string; // номер поезда из rt.train.number
   photo: string | null; // первое фото типа 'carriage' (если есть)
-  generalPhotoEquipmentCarriage:string | null;
+  generalPhotoEquipmentCarriage: string | null;
   equipment: EquipmentDetail[];
 }
 
@@ -418,26 +418,49 @@ export const deleteDraft = async (req: Request, res: Response) => {
   }
 
   try {
-    const existing = await prisma.request.findUnique({ where: { id } });
+    const existing = await prisma.request.findUnique({
+      where: { id },
+      include: { requestEquipments: true }, // чтобы сразу получить список оборудования
+    });
+
     if (!existing) {
       return res
         .status(404)
         .json({ success: false, message: "Черновик не найден" });
     }
-    if (existing.status !== "draft") {
+    if (existing.status !== RequestStatus.draft) {
       return res
         .status(400)
         .json({ success: false, message: "Можно удалить только черновики" });
     }
 
-    // порядок важен: сначала equipment (ссылается на requestId), потом trains (каскадом удалит carriages и их фото), затем сама заявка
-    await prisma.requestEquipment.deleteMany({ where: { requestId: id } });
-    await prisma.requestTrain.deleteMany({ where: { requestId: id } });
+    // IDs оборудования, которое было в этом черновике
+    const equipmentIds = existing.requestEquipments.map((e) => e.equipmentId);
+
     await prisma.request.delete({ where: { id } });
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Черновик успешно удалён" });
+    if (equipmentIds.length > 0) {
+      const stillLinked = await prisma.requestEquipment.findMany({
+        where: { equipmentId: { in: equipmentIds } },
+        select: { equipmentId: true },
+      });
+
+      const stillLinkedIds = new Set(stillLinked.map((e) => e.equipmentId));
+      const toDelete = equipmentIds.filter((id) => !stillLinkedIds.has(id));
+
+      if (toDelete.length > 0) {
+        const deleted = await prisma.equipment.deleteMany({
+          where: {
+            id: { in: toDelete },
+          },
+        });
+        console.log(`Удалено оборудования: ${deleted.count} шт.`);
+      }
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Черновик и неиспользуемое оборудование удалены",
+    });
   } catch (e) {
     console.error("Ошибка при удалении черновика:", e);
     return res

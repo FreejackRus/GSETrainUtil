@@ -4,23 +4,40 @@ const prisma = new PrismaClient();
 
 async function resetCarriageId() {
   try {
-    // 1. Получаем список equipmentId с typeWorkId != 3
-    const equipmentsToReset = await prisma.requestEquipment.findMany({
+    const typeWordInstId = await prisma.typeWork.findMany({
       where: {
-        typeWorkId: { not: 3 },
+        name: {
+          startsWith: "Монтаж",
+          mode: "insensitive",
+        },
       },
-      select: { equipmentId: true },
+      select: {
+        id: true,
+      },
     });
+    
+    const arrTypeWordInstId = typeWordInstId.map((item) => item.id);
 
-    const ids = equipmentsToReset.map((e) => e.equipmentId);
+    for (const id of arrTypeWordInstId) {
+      const equipmentsToReset = await prisma.requestEquipment.findMany({
+        where: {
+          typeWorkId: { not: id },
+        },
+        select: { equipmentId: true },
+      });
 
-    // 2. Обновляем carriageId у этих equipment
-    const updated = await prisma.equipment.updateMany({
-      where: { id: { in: ids } },
-      data: { carriageId: null },
-    });
+      const ids = equipmentsToReset.map((e) => e.equipmentId);
 
-    console.log("Обновлено записей:", updated.count);
+      if (ids.length > 0) {
+        const updated = await prisma.equipment.updateMany({
+          where: { id: { in: ids } },
+          data: { carriageId: null },
+        });
+        console.log("Обновлено записей:", updated.count);
+      } else {
+        console.log("Нет записей для обновления для typeWorkId =", id);
+      }
+    }
   } catch (err) {
     console.error(err);
   } finally {

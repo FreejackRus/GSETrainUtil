@@ -4,7 +4,7 @@ import { PrismaClient, RequestStatus } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getCarriages = async (_req: Request, res: Response) => {
-  const { needAll = false } = _req.body;
+  const { needAll = false } = _req.body || {};
 
   try {
     const carriagesData = await prisma.carriage.findMany({
