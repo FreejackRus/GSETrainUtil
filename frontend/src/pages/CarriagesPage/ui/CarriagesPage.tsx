@@ -60,6 +60,7 @@ interface Carriage {
 }
 
 export const CarriagesPage = () => {
+  const amountEquipDeterminesMountСarriage = 6
   const navigate = useNavigate();
   const [carriages, setCarriages] = useState<Carriage[]>([]);
   const [equipments, setEquipments] = useState<Device[]>([]);
@@ -132,7 +133,7 @@ export const CarriagesPage = () => {
 
       if (count === 0) {
         return 'not_installed';
-      } else if (count >= 6) {
+      } else if (count >= amountEquipDeterminesMountСarriage) {
         return 'installed';
       } else {
         return 'partial';
@@ -436,28 +437,6 @@ export const CarriagesPage = () => {
                     <Chip label={`${carriage.equipment.length} ед.`} color="primary" size="small" />
                   </Box>
                 </Box>
-                {/* <Box display="flex" alignItems="center" gap={2} width="100%">
-                  <Avatar
-                    sx={{
-                      backgroundColor: 'primary.main',
-                    }}
-                  >
-                    <TrainIcon />
-                  </Avatar>
-                
-                  <Box flex={1}>
-                    {getCarriageChip(carriage)}
-                    <Typography variant="h6">Вагон № {carriage.carriageNumber}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Поезд: {carriage.trainNumber} • Тип: {carriage.carriageType} • Оборудования:{' '}
-                      {carriage.equipment.length}
-                    </Typography>
-                  </Box>
-
-                  <Box display="flex" flexWrap={'wrap'} gap={1}>
-                    <Chip label={`${carriage.equipment.length} ед.`} color="primary" size="small" />
-                  </Box>
-                </Box> */}
               </AccordionSummary>
               <AccordionDetails>
                 <TableContainer>

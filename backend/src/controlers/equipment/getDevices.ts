@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, RequestStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -11,7 +11,7 @@ export const getDevices = async (_req: Request, res: Response) => {
       where: {
         requestEquipments: {
           some: {
-            request: { status: "completed" },
+            request: { status: RequestStatus.completed},
           },
         },
       },
@@ -36,7 +36,7 @@ export const getDevices = async (_req: Request, res: Response) => {
       // берём только заявки completed
       const completedRE = needAll
         ? e.requestEquipments
-        : e.requestEquipments.filter((re) => re.request.status === "completed");
+        : e.requestEquipments.filter((re) => re.request.status === RequestStatus.completed);
 
       const trainNums = completedRE
         .map((re) => re.requestCarriage?.requestTrain?.train?.number)
