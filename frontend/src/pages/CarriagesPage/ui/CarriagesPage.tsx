@@ -60,7 +60,7 @@ interface Carriage {
 }
 
 export const CarriagesPage = () => {
-  const amountEquipDeterminesMountСarriage = 6
+  const amountEquipDeterminesMountСarriage = 6;
   const navigate = useNavigate();
   const [carriages, setCarriages] = useState<Carriage[]>([]);
   const [equipments, setEquipments] = useState<Device[]>([]);
@@ -252,6 +252,36 @@ export const CarriagesPage = () => {
   const notInstalledCount =
     equipments.length - installedCount > 0 ? equipments.length - installedCount : 0;
 
+  const installedCountCarriages = carriages.filter(
+    (item) => item.equipment.length > amountEquipDeterminesMountСarriage,
+  ).length;
+
+  const notInstalledCountCarriages =
+    carriages.length - installedCountCarriages > 0 ? carriages.length - installedCountCarriages : 0;
+
+  const totalTrains = new Set(carriages.flatMap((c) => c.trainNumbers)).size;
+
+  const trainsMap = new Map<string, typeof carriages>();
+
+  for (const carriage of carriages) {
+    for (const trainNum of carriage.trainNumbers) {
+      if (!trainsMap.has(trainNum)) {
+        trainsMap.set(trainNum, []);
+      }
+      trainsMap.get(trainNum)!.push(carriage);
+    }
+  }
+  
+  const mountedTrains = Array.from(trainsMap.entries())
+    .filter(([trainNum, carriages]) =>
+      carriages.every((c) => c.equipment.length > amountEquipDeterminesMountСarriage),
+    )
+    .map(([trainNum]) => trainNum);
+
+  const installedCountTrains = mountedTrains.length;
+
+  const notInstalledCountTrains = totalTrains - installedCountTrains;
+
   return (
     <Container maxWidth="xl" className="carriages-page">
       <Box>
@@ -292,51 +322,86 @@ export const CarriagesPage = () => {
             </Box>
           </Box>
         </Paper>
-
-        {/* Статистика */}
-        <Grid container spacing={3} className="carriages-page__stats">
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Card elevation={4}>
-              <CardContent>
-                <Typography variant="h6" color="primary">
-                  Всего вагонов
-                </Typography>
-                <Typography variant="h4">{carriages.length}</Typography>
-              </CardContent>
-            </Card>
+        
+        <Box>
+          <Grid container spacing={3} className="carriages-page__stats">
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Card elevation={4}>
+                <CardContent>
+                  <Typography variant="h5">Оборудования</Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="h6" color="primary">
+                    Всего оборудования
+                  </Typography>
+                  <Typography variant="h4">{equipments.length}</Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="h6" color="success.main">
+                    Установлено
+                  </Typography>
+                  <Typography variant="h4">{installedCount}</Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="h6" color="error.main">
+                    Не установлено
+                  </Typography>
+                  <Typography variant="h4">{notInstalledCount}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Card elevation={4}>
+                <CardContent>
+                  <Typography variant="h5">Поезда</Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="h6" color="primary">
+                    Всего поездов
+                  </Typography>
+                  <Typography variant="h4">{totalTrains}</Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="h6" color="success.main">
+                    Смонтированных
+                  </Typography>
+                  <Typography variant="h4">{installedCountTrains}</Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="h6" color="error.main">
+                    Не смонтированных
+                  </Typography>
+                  <Typography variant="h4">{notInstalledCountTrains}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 12, md: 4 }}>
+              <Card elevation={4}>
+                <CardContent>
+                  <Typography variant="h5">Вагоны</Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="h6" color="primary">
+                    Всего вагонов
+                  </Typography>
+                  <Typography variant="h4">{carriages.length}</Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="h6" color="success.main">
+                    Смонтированных
+                  </Typography>
+                  <Typography variant="h4">{installedCountCarriages}</Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="h6" color="error.main">
+                    Не смонтированных
+                  </Typography>
+                  <Typography variant="h4">{notInstalledCountCarriages}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Card elevation={4}>
-              <CardContent>
-                <Typography variant="h6" color="primary">
-                  Всего оборудования
-                </Typography>
-                <Typography variant="h4">{equipments.length}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Card elevation={4}>
-              <CardContent>
-                <Typography variant="h6" color="success.main">
-                  Установлено
-                </Typography>
-                <Typography variant="h4">{installedCount}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Card elevation={4}>
-              <CardContent>
-                <Typography variant="h6" color="error.main">
-                  Не установлено
-                </Typography>
-                <Typography variant="h4">{notInstalledCount}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
+        </Box>
         {/* Панель управления */}
         <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
           <Grid container spacing={3} alignItems="center">
